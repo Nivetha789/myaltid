@@ -1,6 +1,13 @@
-// ignore_for_file: prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_typing_uninitialized_variables, unrelated_type_equality_checks, use_build_context_synchronously, non_constant_identifier_names
 
+import 'dart:async';
+
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:myaltid/data/api.dart';
+import 'package:myaltid/widget/sharedpreference.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
@@ -12,8 +19,8 @@ import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
 
 class SendOTPScreen extends StatefulWidget {
-  final phonenumber;
-  const SendOTPScreen({super.key, this.phonenumber});
+  final phonenumber, name;
+  const SendOTPScreen({super.key, this.phonenumber, this.name});
 
   @override
   State<SendOTPScreen> createState() => _SendOTPScreenState();
@@ -21,11 +28,207 @@ class SendOTPScreen extends StatefulWidget {
 
 class _SendOTPScreenState extends State<SendOTPScreen> {
   OtpFieldController otpController = OtpFieldController();
+  TextEditingController textEditingController = TextEditingController();
+  @override
+  void initState() {
+    startTimeout();
+    SendOTP();
+    super.initState();
+  }
+
+  final interval = const Duration(seconds: 2);
+
+  final int timerMaxSeconds = 120;
+
+  int currentSeconds = 0;
+
+  String get timerText =>
+      '${((timerMaxSeconds - currentSeconds) ~/ 120).toString().padLeft(2, '0')}:${((timerMaxSeconds - currentSeconds) % 120).toString().padLeft(2, '0')}';
+
+  startTimeout([int? milliseconds]) {
+    var duration = interval;
+    Timer.periodic(duration, (timer) {
+      setState(() {
+        currentSeconds = timer.tick;
+        if (timer.tick >= timerMaxSeconds) timer.cancel();
+      });
+    });
+  }
+
+  SendOTP() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"c_Name": widget.name, "n_Mobile": widget.phonenumber};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.sendotp,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data["data"][0]}");
+
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        textEditingController.text = response.data["data"][0].toString();
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Oh Hey!',
+            message: 'Your OTP is ! ${response.data["data"][0]}',
+            contentType: ContentType.success,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e as String?);
+    }
+  }
+
+  VerifyOTP() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": widget.phonenumber, "n_Otp": otp};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.verifyotp,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        if (response.data["status"] == 1) {
+          await SharedPreference().setphonenumber(widget.phonenumber!);
+
+          await SharedPreference().setuserName(widget.name!);
+
+          // SharedPreferences.setPrefix(prefix)
+          //   await _prefs.setString('action', 'Start');
+          // await prefs.setString('action', 'Start');
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const ServiceApp()),
+          );
+        } else {
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: 'Please enter valid otp!',
+              contentType: ContentType.failure,
+            ),
+          );
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+        }
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e as String?);
+    }
+  }
+
+  ResendOTP() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": widget.phonenumber};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.resendotp,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        textEditingController.text = response.data["data"][0].toString();
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Oh Hey!',
+            message: 'Your OTP is ! ${response.data["data"][0]}',
+            contentType: ContentType.success,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e as String?);
+    }
+  }
 
   bool isChecked = false,
       confirmotp = false,
       otpfield = false,
       errorfield = false;
+  var otp;
   @override
   Widget build(BuildContext context) {
     return Backgroundscreen(
@@ -65,6 +268,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
               Column(
                 children: [
                   OTPTextField(
+                    controller: otpController,
                     length: 4,
                     width: MediaQuery.of(context).size.width,
                     fieldWidth: 50,
@@ -78,8 +282,9 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                     onCompleted: (pin) {
                       setState(() {
                         otpfield = true;
+                        otp = pin;
                       });
-                      // debugPrint("Completed: " + pin);
+                      debugPrint("Completed: $pin");
                     },
                     otpFieldStyle: OtpFieldStyle(
                       borderColor: const Color(0xff1C1C1E),
@@ -123,22 +328,36 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                               color: buttoncolor),
                         ),
                       ),
-                    const  Row(
-                        children:  [
-                          Text(
-                            'Retry after',
-                            style: TextStyle(color: whitecolor),
-                          ),
-                          Text(
-                            ' 180',
-                            style: TextStyle(color: buttoncolor),
-                          ),
-                          Text(
-                            ' sec',
-                            style: TextStyle(color: whitecolor),
-                          ),
-                        ],
-                      ),
+                      timerText == "00:00"
+                          ? InkWell(
+                              onTap: () {
+                                ResendOTP();
+                              },
+                              child: const Row(
+                                children: [
+                                  Text(
+                                    'Retry Now ',
+                                    style: TextStyle(color: buttoncolor),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Row(
+                              children: [
+                                const Text(
+                                  'Retry after ',
+                                  style: TextStyle(color: whitecolor),
+                                ),
+                                Text(
+                                  timerText,
+                                  style: const TextStyle(color: buttoncolor),
+                                ),
+                                const Text(
+                                  ' sec',
+                                  style: TextStyle(color: whitecolor),
+                                ),
+                              ],
+                            ),
                       //           Countdown(
                       //                 animation: StepTween(
                       //                   begin: 2 * 60,
@@ -169,7 +388,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                         onChanged: (value) {
                           isChecked = !isChecked;
                           setState(() {
-                            //   debugPrint("DFDDGDFGDFGFD $isChecked");
+                            debugPrint("DFDDGDFGDFGFD $isChecked");
                           });
                         },
                       ),
@@ -197,10 +416,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                       ? InkWell(
                           onTap: () {
                             debugPrint("PAVITHRA");
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) => const ServiceApp()),
-                            );
+                            VerifyOTP();
                           },
                           child: const ButtonScreen(
                             buttontext: "Confirm",

@@ -20,6 +20,7 @@ class _SignupAppState extends State<SignupApp> {
   TextEditingController namecontroller = TextEditingController();
   bool texterror = false, numbererror = false;
   final formKey = GlobalKey<FormState>();
+  late String oldvalue;
   @override
   Widget build(BuildContext context) {
     return Backgroundscreen(
@@ -62,8 +63,10 @@ class _SignupAppState extends State<SignupApp> {
                   controller: namecontroller,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(
-                      RegExp("[a-zA-Z]"),
+                      RegExp(r"[a-zA-Z]+|\s"),
                     ),
+                    // singleNameInputFormatter()
+                    // SingleSpaceFormatter()
                   ],
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   style: const TextStyle(
@@ -75,11 +78,29 @@ class _SignupAppState extends State<SignupApp> {
                     if (value!.isEmpty) {
                       return 'Please a Enter your Name';
                     }
-                    if (!RegExp(r'^[a-z A-Z]+$').hasMatch(value)) {
+                    // final words = value.split(' ');
+                    // if (words.length < 2) {
+                    //   return 'Invalid spacing pattern';
+                    // }
+
+                    if (!RegExp(r'^[a-zA-Z ]').hasMatch(value)) {
                       return 'Please a valid Name';
                     }
                     return null;
                   },
+                  // onChanged: (value) {
+                  //   final List l = value.split(' ');
+                  //   if (l.length == 2) {
+                  //     setState(() {
+                  //       oldvalue = value;
+                  //     });
+                  //   }
+                  //   if (l.length == 3) {
+                  //     setState(() {
+                  //       namecontroller.text = oldvalue;
+                  //     });
+                  //   }
+                  // },
                   decoration: buildInputDecoration("Name"),
                 ),
                 const SizedBox(
@@ -89,7 +110,6 @@ class _SignupAppState extends State<SignupApp> {
                   controller: phonenumber,
                   inputFormatters: [MobileNumberInputFormatter()],
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-
                   style: const TextStyle(
                       color: Color(0xffEBEBF5),
                       fontFamily: "Helvatica",
@@ -98,32 +118,16 @@ class _SignupAppState extends State<SignupApp> {
                   maxLength: 10,
                   keyboardType: TextInputType.number,
                   decoration: buildInputDecoration("Mobile Number"),
-
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Please a Enter your Phone number';
                     }
-                    if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-                      return 'Please a valid Number';
+                    if (!RegExp(r'^[0-9]{10}$').hasMatch(value) ||
+                        !RegExp(r'^(9|8|7|6)').hasMatch(value)) {
+                      return 'Phone number should start with 9, 8, 7, or 6';
                     }
                     return null;
                   },
-                  // validator: (value) {
-                  //   if (value!.isEmpty ||
-                  //       !RegExp(r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$')
-                  //           .hasMatch(value)) {
-                  //     setState(() {
-                  //       numbererror = true;
-                  //     });
-                  //     //  r'^[0-9]{10}$' pattern plain match number with length 10
-                  //     return "Enter Correct Phone Number";
-                  //   } else {
-                  //     setState(() {
-                  //       numbererror = false;
-                  //     });
-                  //     return null;
-                  //   }
-                  // },
                 ),
                 const SizedBox(
                   height: 30,
@@ -147,8 +151,10 @@ class _SignupAppState extends State<SignupApp> {
                     if (formKey.currentState!.validate()) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) =>
-                                SendOTPScreen(phonenumber: phonenumber.text)),
+                          builder: (context) => SendOTPScreen(
+                              phonenumber: phonenumber.text,
+                              name: namecontroller.text),
+                        ),
                       );
                       //check if form data are valid,
                       // your process task ahed if all data are valid

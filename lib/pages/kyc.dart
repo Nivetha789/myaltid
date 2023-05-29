@@ -4,7 +4,11 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/congratulation.dart';
+import 'package:myaltid/widget/mobilenumberformator.dart';
+import 'package:myaltid/widget/pannumber.dart';
+import 'package:myaltid/widget/sharedpreference.dart';
 import '../reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
@@ -113,9 +117,10 @@ class _KycScreenState extends State<KycScreen> {
   }
 
   var requestid;
+  var dob;
 
   OTPcheck() async {
-    debugPrint("pavithra $requestid");
+    debugPrint("pavithra12343 $requestid");
 
     try {
       Dio dio = Dio();
@@ -132,21 +137,99 @@ class _KycScreenState extends State<KycScreen> {
       debugPrint("pavithra ${response.data}");
 
       if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const Congratulations()),
-        );
+      } else if (response.data["status"] == 200) {
+        setState(() {
+          dob = response.data["data"]["dob"];
+          print("dob $dob");
+        });
+        UserRegister();
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
       } else {
         final snackBar = SnackBar(
-          /// need to set following properties for best effect of awesome_snackbar_content
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
           content: AwesomeSnackbarContent(
             title: 'On Snap!',
             message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
 
-            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e as String?);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  UserRegister() async {
+    try {
+      Dio dio = Dio();
+
+      var userid = await SharedPreference().getUserId();
+      var parameters = {
+        "c_UserId": userid,
+        "c_Pan": pannumber.text,
+        "c_Email": username.text,
+        "n_Aadhar": aadharnumber.text.toString()
+      };
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.updatekyc,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        if (response.data["status"] == 1) {
+          // await SharedPreference().setplanid(widget.cid);
+
+          // await SharedPreference().setplanid(selectedOption!.id);
+
+          // await SharedPreference().setUserId(response.data["data"]["_id"]);
+
+          // await SharedPreference()
+          //     .setUserId(response.data["data"]["c_ActivePlan"]);
+
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const Congratulations()),
+          );
+        } else {
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: response.data["error"],
+              contentType: ContentType.failure,
+            ),
+          );
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+        }
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["message"],
             contentType: ContentType.failure,
           ),
         );
@@ -169,10 +252,7 @@ class _KycScreenState extends State<KycScreen> {
           padding: const EdgeInsets.all(20),
           child: Form(
             key: formKey,
-            autovalidateMode: AutovalidateMode.always
-            
-            
-            ,
+            // autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -216,6 +296,12 @@ class _KycScreenState extends State<KycScreen> {
                 TextFormField(
                   controller: username,
                   style: const TextStyle(color: whitecolor, fontSize: 16),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  // inputFormatters: [
+                  //   FilteringTextInputFormatter.allow(
+                  //     RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]"),
+                  //   ),
+                  // ],
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Please a Enter Your Email';
@@ -248,7 +334,7 @@ class _KycScreenState extends State<KycScreen> {
                   height: 10,
                 ),
                 const Text(
-                  "Enter PAN Num",
+                  "Enter PAN Number",
                   style: TextStyle(
                     fontFamily: "Helvatica",
                     color: whitecolor,
@@ -265,7 +351,14 @@ class _KycScreenState extends State<KycScreen> {
                   controller: pannumber,
                   textCapitalization: TextCapitalization.characters,
                   maxLength: 10,
-                  inputFormatters: [UpperCaseTextFormatter()],
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  inputFormatters: [
+                    UpperCaseTextFormatter(),
+                    // FilteringTextInputFormatter.allow(
+                    //   RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'),
+                    // ),
+                  ],
+                  // inputFormatters: [UpperCaseTextFormatter()],
                   style: const TextStyle(color: whitecolor, fontSize: 16),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -278,7 +371,7 @@ class _KycScreenState extends State<KycScreen> {
                     return null;
                   },
                   decoration: const InputDecoration(
-                    hintText: "PAN Num",
+                    hintText: "PAN Number",
                     hintStyle: TextStyle(color: whitecolor, fontSize: 14),
                     fillColor: Color(0xff1C1C1E),
                     filled: true,
@@ -299,7 +392,7 @@ class _KycScreenState extends State<KycScreen> {
                   height: 10,
                 ),
                 const Text(
-                  "Enter Aadhar Num",
+                  "Enter Aadhar Number",
                   style: TextStyle(
                     fontFamily: "Helvatica",
                     color: whitecolor,
@@ -315,13 +408,15 @@ class _KycScreenState extends State<KycScreen> {
                 TextFormField(
                   controller: aadharnumber,
                   style: const TextStyle(color: whitecolor, fontSize: 16),
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(12),
-                  ],
+                  inputFormatters: [MobileNumberInputFormatter()],
                   validator: (value) {
-                    return value.toString().length == 12
-                        ? aadharOTPsend()
-                        : 'Minimum character length is 12';
+                    if (value!.isEmpty) {
+                      return 'Please a Enter your Aadhar number';
+                    }
+                    if (!RegExp(r'^[0-9]{12}$').hasMatch(value)) {
+                      return 'Please a valid Number';
+                    }
+                    return null;
                   },
                   onChanged: (value) {
                     value.toString().length == 12
@@ -331,7 +426,7 @@ class _KycScreenState extends State<KycScreen> {
                   keyboardType: TextInputType.number,
                   maxLength: 12,
                   decoration: const InputDecoration(
-                    hintText: "Aadhar Num",
+                    hintText: "Aadhar Number",
                     hintStyle: TextStyle(color: whitecolor, fontSize: 14),
                     fillColor: Color(0xff1C1C1E),
                     filled: true,
@@ -406,9 +501,9 @@ class _KycScreenState extends State<KycScreen> {
                       ),
                       padding: const EdgeInsets.all(10),
                       alignment: Alignment.center,
-                      child:const Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children:  [
+                        children: [
                           Text(
                             "Submit KYC",
                             style: TextStyle(
