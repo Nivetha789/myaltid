@@ -103,7 +103,7 @@ class _PlanSelectionState extends State<PlanSelection> {
                     height: 10,
                   ),
                   Text(
-                    number,
+                    number.toString(),
                     style: const TextStyle(
                         color: whitecolor,
                         fontFamily: "Helvatica",
@@ -166,8 +166,8 @@ class _PlanSelectionState extends State<PlanSelection> {
 
           await SharedPreference().setUserId(response.data["data"]["_id"]);
 
-          await SharedPreference()
-              .setUserId(response.data["data"]["c_ActivePlan"]);
+          // await SharedPreference()
+          //     .setUserId(response.data["data"]["c_ActivePlan"]);
 
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => const PaymentmodeSelection()));
@@ -317,7 +317,7 @@ class _PlanSelectionState extends State<PlanSelection> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              option.cTerm,
+                              option.cTerm.toString(),
                               style: const TextStyle(
                                   color: whitecolor,
                                   fontFamily: "Helvatica",
@@ -330,7 +330,7 @@ class _PlanSelectionState extends State<PlanSelection> {
                               height: 10,
                             ),
                             Text(
-                              "${option.nAmount} / m",
+                              "${option.nAmount.toString()} / m",
                               style: const TextStyle(
                                   color: whitecolor,
                                   fontFamily: "Helvatica",

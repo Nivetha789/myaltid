@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/congratulation.dart';
 import 'package:myaltid/widget/mobilenumberformator.dart';
-import 'package:myaltid/widget/pannumber.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
 import '../reasuable/theme.dart';
 
@@ -70,19 +69,16 @@ class _KycScreenState extends State<KycScreen> {
           ..hideCurrentSnackBar()
           ..showSnackBar(snackBar);
       } else if (response.statusCode == 200) {
-        final snackBar = SnackBar(
-          /// need to set following properties for best effect of awesome_snackbar_content
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Hey!',
-            message: 'OTP has been sended registered mobile number!',
-
-            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-            contentType: ContentType.success,
-          ),
+        const snackBar = SnackBar(
+          backgroundColor: Colors.green,
+          content: Text('OTP has been sended registered mobile number'),
+          duration: Duration(seconds: 2),
         );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
 
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
@@ -93,19 +89,12 @@ class _KycScreenState extends State<KycScreen> {
           debugPrint("requestid $requestid");
         });
       } else {
-        final snackBar = SnackBar(
-          /// need to set following properties for best effect of awesome_snackbar_content
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: 'Please enter valid aadhar number!',
-
-            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-            contentType: ContentType.failure,
-          ),
+        const snackBar = SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Please enter valid aadhaar number'),
+          duration: Duration(seconds: 2),
         );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
@@ -137,7 +126,7 @@ class _KycScreenState extends State<KycScreen> {
       debugPrint("pavithra ${response.data}");
 
       if (response.statusCode == 401) {
-      } else if (response.data["status"] == 200) {
+      } else if (response.data["data"]["dob"] != null) {
         setState(() {
           dob = response.data["data"]["dob"];
           print("dob $dob");
@@ -147,16 +136,12 @@ class _KycScreenState extends State<KycScreen> {
         //   MaterialPageRoute(builder: (context) => const Congratulations()),
         // );
       } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: 'Please enter valid otp!',
-            contentType: ContentType.failure,
-          ),
+        const snackBar = SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Please enter valid otp'),
+          duration: Duration(seconds: 2),
         );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
@@ -181,7 +166,8 @@ class _KycScreenState extends State<KycScreen> {
         "c_UserId": userid,
         "c_Pan": pannumber.text,
         "c_Email": username.text,
-        "n_Aadhar": aadharnumber.text.toString()
+        "n_Aadhar": aadharnumber.text.toString(),
+        "c_Dob": dob
       };
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
@@ -353,10 +339,10 @@ class _KycScreenState extends State<KycScreen> {
                   maxLength: 10,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   inputFormatters: [
-                    UpperCaseTextFormatter(),
                     // FilteringTextInputFormatter.allow(
                     //   RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'),
                     // ),
+                    UpperCaseTextFormatter(),
                   ],
                   // inputFormatters: [UpperCaseTextFormatter()],
                   style: const TextStyle(color: whitecolor, fontSize: 16),

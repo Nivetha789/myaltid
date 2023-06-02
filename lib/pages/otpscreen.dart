@@ -72,15 +72,21 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
       } else if (response.statusCode == 200) {
         textEditingController.text = response.data["data"][0].toString();
         final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Oh Hey!',
-            message: 'Your OTP is ! ${response.data["data"][0]}',
-            contentType: ContentType.success,
-          ),
+          backgroundColor: Colors.green,
+          content: Text('Your OTP is ! ${response.data["data"][0]}'),
+          duration: const Duration(seconds: 2),
         );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        // SnackBar(
+        //   elevation: 0,
+        //   behavior: SnackBarBehavior.floating,
+        //   backgroundColor: Colors.transparent,
+        //   content: AwesomeSnackbarContent(
+        //     title: 'Oh Hey!',
+        //     message: 'Your OTP is ! ${response.data["data"][0]}',
+        //     contentType: ContentType.success,
+        //   ),
+        // );
 
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
@@ -89,15 +95,10 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
         //   MaterialPageRoute(builder: (context) => const Congratulations()),
         // );
       } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: 'Please enter valid otp!',
-            contentType: ContentType.failure,
-          ),
+        const snackBar = SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Please Enter Valid OTP'),
+          duration: Duration(seconds: 2),
         );
 
         ScaffoldMessenger.of(context)
@@ -135,16 +136,12 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
             MaterialPageRoute(builder: (context) => const ServiceApp()),
           );
         } else {
-          final snackBar = SnackBar(
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            content: AwesomeSnackbarContent(
-              title: 'On Snap!',
-              message: 'Please enter valid otp!',
-              contentType: ContentType.failure,
-            ),
+          const snackBar = SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Please Enter Valid OTP'),
+            duration: Duration(seconds: 2),
           );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
@@ -187,15 +184,11 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
       } else if (response.statusCode == 200) {
         textEditingController.text = response.data["data"][0].toString();
         final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Oh Hey!',
-            message: 'Your OTP is ! ${response.data["data"][0]}',
-            contentType: ContentType.success,
-          ),
+          backgroundColor: Colors.green,
+          content: Text('Your OTP is ! ${response.data["data"][0]}'),
+          duration: const Duration(seconds: 2),
         );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()

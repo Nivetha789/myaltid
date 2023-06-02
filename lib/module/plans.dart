@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 class Plan {
   final id;
   final cPlan;
@@ -22,8 +24,8 @@ class Plan {
         cPlan: json["c_Plan"],
         nVirtualNumber: json["n_VirtualNumber"],
         nTalktime: json["n_Talktime"],
-        nData: json["c_Data"],
-        nStartsFrom: json["n_StartsFrom"],
+        nData: json["n_Data"],
+        nStartsFrom: json["n_StartPrice"],
         jSubscription: List<JSubscription>.from(
             json["j_Terms"].map((x) => JSubscription.fromJson(x))),
       );
@@ -33,8 +35,8 @@ class Plan {
         "c_Plan": cPlan,
         "n_VirtualNumber": nVirtualNumber,
         "n_Talktime": nTalktime,
-        "c_Data": nData,
-        "n_StartsFrom": nStartsFrom,
+        "n_Data": nData,
+        "n_StartPrice": nStartsFrom,
         "j_Subscription":
             List<dynamic>.from(jSubscription.map((x) => x.toJson())),
       };

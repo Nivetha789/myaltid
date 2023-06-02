@@ -1,10 +1,20 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+
 class MobileNumberInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
     final filteredValue = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    return newValue.copyWith(text: filteredValue);
+  }
+}
+
+class MobileNumberInputFormatter1 extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final filteredValue = newValue.text.replaceAll(RegExp(r'^(9|8|7|6)'), '');
     return newValue.copyWith(text: filteredValue);
   }
 }
@@ -43,7 +53,5 @@ class singleNameInputFormatter extends TextInputFormatter {
     }
 
     return newValue;
- 
-
   }
 }

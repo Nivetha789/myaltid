@@ -108,7 +108,11 @@ class _SignupAppState extends State<SignupApp> {
                 ),
                 TextFormField(
                   controller: phonenumber,
-                  inputFormatters: [MobileNumberInputFormatter()],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^(9|8|7|6)[0-9]*$')),
+                  ],
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   style: const TextStyle(
                       color: Color(0xffEBEBF5),

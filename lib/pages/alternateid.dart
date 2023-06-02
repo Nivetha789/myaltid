@@ -5,7 +5,6 @@ import '../reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
 
-
 class SelectAlternateID extends StatefulWidget {
   const SelectAlternateID({super.key});
 
@@ -116,9 +115,9 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                 child: Container(
                   height: 60,
                   padding: const EdgeInsets.all(10),
-                  child:const Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children:  [
+                    children: [
                       Text(
                         "Diamond Plan",
                         style: TextStyle(
@@ -143,15 +142,15 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                   ),
                 ),
               ),
-             const Card(
+              const Card(
                 elevation: 10,
                 color: blackcolor,
                 shadowColor: buttoncolor,
                 child: Padding(
-                  padding:  EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children:  [
+                    children: [
                       Text(
                         "Select your preferred Alternate ID",
                         style: TextStyle(
@@ -224,15 +223,15 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
               const SizedBox(
                 height: 20,
               ),
-        const      Card(
+              const Card(
                 elevation: 10,
                 color: blackcolor,
                 shadowColor: buttoncolor,
                 child: Padding(
-                  padding:  EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children:  [
+                    children: [
                       Text(
                         "Select Email",
                         style: TextStyle(
@@ -260,6 +259,7 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                         color: whitecolor,
                       ),
                       TextField(
+                        style: TextStyle(color: whitecolor),
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Write your own',
@@ -305,9 +305,9 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                     ),
                     padding: const EdgeInsets.all(10),
                     alignment: Alignment.center,
-                    child:const Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children:  [
+                      children: [
                         Text(
                           "ACTIVATE",
                           style: TextStyle(
