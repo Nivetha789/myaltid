@@ -69,32 +69,45 @@ class _KycScreenState extends State<KycScreen> {
           ..hideCurrentSnackBar()
           ..showSnackBar(snackBar);
       } else if (response.statusCode == 200) {
-        const snackBar = SnackBar(
-          backgroundColor: Colors.green,
-          content: Text('OTP has been sended registered mobile number'),
-          duration: Duration(seconds: 2),
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Oh Hey!',
+            message: 'Otp has been sended registered mobile number!',
+            contentType: ContentType.success,
+          ),
         );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(snackBar);
 
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
+        // ScaffoldMessenger.of(context)
+        //   ..hideCurrentSnackBar()
+        //   ..showSnackBar(snackBar);
         debugPrint(response.data["data"]["requestId"]);
         setState(() {
           requestid = response.data["data"]["requestId"];
           debugPrint("requestid $requestid");
         });
       } else {
-        const snackBar = SnackBar(
-          backgroundColor: Colors.red,
-          content: Text('Please enter valid aadhaar number'),
-          duration: Duration(seconds: 2),
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid aadhaar number',
+            contentType: ContentType.failure,
+          ),
         );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        // const snackBar = SnackBar(
+        //   backgroundColor: Colors.red,
+        //   content: Text('Please enter valid aadhaar number'),
+        //   duration: Duration(seconds: 2),
+        // );
+        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
@@ -136,10 +149,16 @@ class _KycScreenState extends State<KycScreen> {
         //   MaterialPageRoute(builder: (context) => const Congratulations()),
         // );
       } else {
-        const snackBar = SnackBar(
-          backgroundColor: Colors.red,
-          content: Text('Please enter valid otp'),
-          duration: Duration(seconds: 2),
+        otpController.clear();
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
@@ -148,7 +167,7 @@ class _KycScreenState extends State<KycScreen> {
           ..showSnackBar(snackBar);
       }
     } catch (e) {
-      debugPrint(e as String?);
+      debugPrint(e.toString());
     }
   }
 
@@ -225,9 +244,11 @@ class _KycScreenState extends State<KycScreen> {
           ..showSnackBar(snackBar);
       }
     } catch (e) {
-      debugPrint(e as String?);
+      debugPrint(e.toString());
     }
   }
+
+  OtpFieldController otpController = OtpFieldController();
 
   @override
   Widget build(BuildContext context) {
@@ -447,6 +468,7 @@ class _KycScreenState extends State<KycScreen> {
                   height: 10,
                 ),
                 OTPTextField(
+                  controller: otpController,
                   length: 6,
                   width: MediaQuery.of(context).size.width,
                   fieldWidth: 50,

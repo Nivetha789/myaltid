@@ -9,7 +9,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:myaltid/pages/planselection.dart';
 import 'package:myaltid/reasuable/background_screen.dart';
 import 'package:myaltid/reasuable/theme.dart';
-import 'package:myaltid/widget/progressloaded.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
 
 import '../data/api.dart';

@@ -22,7 +22,7 @@ class _ButtonScreenState extends State<ButtonScreen> {
       height: 50,
       decoration: BoxDecoration(
         color: buttoncolor,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
       child: Text(

@@ -1,8 +1,12 @@
+// ignore_for_file: unnecessary_null_comparison
+
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:myaltid/pages/paymentsuccessfull.dart';
 import 'package:myaltid/reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
+import '../reasuable/button.dart';
 
 class PaymentmodeSelection extends StatefulWidget {
   const PaymentmodeSelection({super.key});
@@ -40,19 +44,21 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
 
   late String select = "0";
 
+  late String selectoption = "0";
   Row addRadioButton(int btnValue, String title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Radio(
-          activeColor: whitecolor,
-          fillColor: MaterialStateProperty.all<Color>(whitecolor),
+          activeColor: buttoncolor,
+          fillColor: MaterialStateProperty.all<Color>(buttoncolor),
           value: gender[btnValue],
           groupValue: select,
           onChanged: (value) {
             setState(() {
               debugPrint(value);
               select = value;
+              selectoption = value;
             });
           },
         ),
@@ -185,43 +191,100 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
               const SizedBox(
                 height: 160,
               ),
-              InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (context) => const PaymentSuccessfull()),
-                    );
-                  },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: buttoncolor,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    padding: const EdgeInsets.all(10),
-                    alignment: Alignment.center,
-                    child:const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children:  [
-                        Text(
-                          "Total Payable (inc GST)",
-                          style: TextStyle(
-                              color: blackcolor,
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          "Rs.45",
-                          style: TextStyle(
-                              color: blackcolor,
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      ],
-                    ),
-                  )),
             ],
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          child: SizedBox(
+            width: double.infinity,
+            child: selectoption == "0"
+                ? InkWell(
+                    onTap: () {
+                      final snackBar = SnackBar(
+                        elevation: 0,
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: Colors.transparent,
+                        content: AwesomeSnackbarContent(
+                          title: 'Oh Hey!',
+                          message: 'Please select your plan',
+                          contentType: ContentType.failure,
+                        ),
+                      );
+
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(snackBar);
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: buttoncolor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Total Payable (inc GST)",
+                            style: TextStyle(
+                                color: blackcolor,
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            "Rs.45",
+                            style: TextStyle(
+                                color: blackcolor,
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : InkWell(
+                    onTap: () async {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => const PaymentSuccessfull()),
+                      );
+                      // UserRegister();
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: buttoncolor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Total Payable (inc GST)",
+                            style: TextStyle(
+                                color: blackcolor,
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            "Rs.45",
+                            style: TextStyle(
+                                color: blackcolor,
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
           ),
         ),
       ),

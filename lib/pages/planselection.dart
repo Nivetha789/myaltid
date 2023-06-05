@@ -133,7 +133,7 @@ class _PlanSelectionState extends State<PlanSelection> {
 
   @override
   void initState() {
-    UserRegister();
+    // UserRegister();
     super.initState();
   }
 
@@ -156,37 +156,20 @@ class _PlanSelectionState extends State<PlanSelection> {
         options: Options(contentType: Headers.formUrlEncodedContentType),
       );
       debugPrint("pavithra ${response.data}");
+      // var data = jsonDecode(response.data);/
+      // print("dfkjsfddkjh $data");
+      if (response.data["status"] == 1) {
+        await SharedPreference().setplanid(widget.cid);
 
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        if (response.data["status"] == 1) {
-          await SharedPreference().setplanid(widget.cid);
+        await SharedPreference().setplanid(selectedOption!.id);
 
-          await SharedPreference().setplanid(selectedOption!.id);
+        await SharedPreference().setUserId(response.data["data"]["_id"]);
 
-          await SharedPreference().setUserId(response.data["data"]["_id"]);
+        // await SharedPreference()
+        //     .setUserId(response.data["data"]["c_ActivePlan"]);
 
-          // await SharedPreference()
-          //     .setUserId(response.data["data"]["c_ActivePlan"]);
-
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const PaymentmodeSelection()));
-        } else {
-          final snackBar = SnackBar(
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            content: AwesomeSnackbarContent(
-              title: 'On Snap!',
-              message: response.data["error"],
-              contentType: ContentType.failure,
-            ),
-          );
-
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(snackBar);
-        }
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const PaymentmodeSelection()));
       } else {
         final snackBar = SnackBar(
           elevation: 0,
@@ -194,7 +177,7 @@ class _PlanSelectionState extends State<PlanSelection> {
           backgroundColor: Colors.transparent,
           content: AwesomeSnackbarContent(
             title: 'On Snap!',
-            message: response.data["message"],
+            message: response.data["error"][0],
             contentType: ContentType.failure,
           ),
         );
@@ -204,7 +187,7 @@ class _PlanSelectionState extends State<PlanSelection> {
           ..showSnackBar(snackBar);
       }
     } catch (e) {
-      debugPrint(e as String?);
+      print(e);
     }
   }
 
@@ -308,23 +291,43 @@ class _PlanSelectionState extends State<PlanSelection> {
                     color: blackcolor,
                     shadowColor: goldcolor,
                     child: RadioListTile<JSubscription>(
-                      activeColor: whitecolor,
-                      fillColor: MaterialStateProperty.all<Color>(whitecolor),
-                      title: SizedBox(
+                      activeColor: buttoncolor,
+                      fillColor: MaterialStateProperty.all<Color>(buttoncolor),
+                      title: Container(
                         width: MediaQuery.of(context).size.width - 200,
-                        // padding: const EdgeInsets.only(top: 10),
+                        padding: const EdgeInsets.all(10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              option.cTerm.toString(),
-                              style: const TextStyle(
-                                  color: whitecolor,
-                                  fontFamily: "Helvatica",
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  // fontStyle: FontStyle.italic,
-                                  fontSize: 14),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  option.cTerm == 12
+                                      ? "Annual"
+                                      : "${option.cTerm} Months",
+                                  style: const TextStyle(
+                                      color: whitecolor,
+                                      fontFamily: "Helvatica",
+                                      fontWeight: FontWeight.w400,
+                                      fontStyle: FontStyle.normal,
+                                      // fontStyle: FontStyle.italic,
+                                      fontSize: 14),
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                Text(
+                                  "Pay for${option.cTerm} Months",
+                                  style: const TextStyle(
+                                      color: whitecolor,
+                                      fontFamily: "Helvatica",
+                                      fontWeight: FontWeight.w400,
+                                      fontStyle: FontStyle.normal,
+                                      // fontStyle: FontStyle.italic,
+                                      fontSize: 14),
+                                ),
+                              ],
                             ),
                             const SizedBox(
                               height: 10,
@@ -332,12 +335,13 @@ class _PlanSelectionState extends State<PlanSelection> {
                             Text(
                               "${option.nAmount.toString()} / m",
                               style: const TextStyle(
-                                  color: whitecolor,
-                                  fontFamily: "Helvatica",
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  // fontStyle: FontStyle.italic,
-                                  fontSize: 14),
+                                color: whitecolor,
+                                fontFamily: "Helvatica",
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.normal,
+                                // fontStyle: FontStyle.italic,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -357,37 +361,44 @@ class _PlanSelectionState extends State<PlanSelection> {
               const SizedBox(
                 height: 80,
               ),
-              selectedOption == null
-                  ? InkWell(
-                      onTap: () {
-                        final snackBar = SnackBar(
-                          elevation: 0,
-                          behavior: SnackBarBehavior.floating,
-                          backgroundColor: Colors.transparent,
-                          content: AwesomeSnackbarContent(
-                            title: 'Oh Hey!',
-                            message: 'Please select your plan',
-                            contentType: ContentType.success,
-                          ),
-                        );
-
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(snackBar);
-                      },
-                      child: const ButtonScreen(
-                        buttontext: "Make Payment",
-                      ),
-                    )
-                  : InkWell(
-                      onTap: () async {
-                        UserRegister();
-                      },
-                      child: const ButtonScreen(
-                        buttontext: "Make Payment",
-                      ),
-                    ),
             ],
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: SizedBox(
+            width: double.infinity,
+            child: selectedOption == null
+                ? InkWell(
+                    onTap: () {
+                      final snackBar = SnackBar(
+                        elevation: 0,
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: Colors.transparent,
+                        content: AwesomeSnackbarContent(
+                          title: 'Oh Hey!',
+                          message: 'Please select your plan',
+                          contentType: ContentType.failure,
+                        ),
+                      );
+
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(snackBar);
+                    },
+                    child: const ButtonScreen(
+                      buttontext: "Make Payment",
+                    ),
+                  )
+                : InkWell(
+                    onTap: () async {
+                      UserRegister();
+                    },
+                    child: const ButtonScreen(
+                      buttontext: "Make Payment",
+                    ),
+                  ),
           ),
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myaltid/pages/alternateid.dart';
+import '../reasuable/button.dart';
 import '../reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
@@ -133,8 +134,8 @@ class _PaymentSuccessfullState extends State<PaymentSuccessfull> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: buttoncolor,
-                      blurRadius: 35.0,
+                      color: Colors.white,
+                      blurRadius: 30.0,
                     ),
                   ],
 
@@ -153,13 +154,13 @@ class _PaymentSuccessfullState extends State<PaymentSuccessfull> {
                 ),
               ),
               const SizedBox(
-                height: 20,
+                height: 30,
               ),
               const Text(
                 "Payment successfully completed",
                 style: TextStyle(
                     fontFamily: "Helvatica",
-                    color: whitecolor,
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                     // fontStyle: FontStyle.italic,
                     fontSize: 24),
@@ -168,37 +169,45 @@ class _PaymentSuccessfullState extends State<PaymentSuccessfull> {
               const SizedBox(
                 height: 160,
               ),
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) => const SelectAlternateID()),
-                  );
-                },
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: buttoncolor,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  alignment: Alignment.center,
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children:  [
-                      Text(
-                        "Complete KYC to Activate MYALTID",
-                        style: TextStyle(
-                            color: blackcolor,
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
+            ],
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          child: SizedBox(
+            width: double.infinity,
+            child: InkWell(
+              onTap: () async {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const SelectAlternateID()),
+                );
+                // UserRegister();
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: 50,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: buttoncolor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Complete KYC to Activate MYALTID",
+                      style: TextStyle(
+                          color: blackcolor,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
