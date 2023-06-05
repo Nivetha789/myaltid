@@ -61,20 +61,23 @@ class _SelectPlanState extends State<SelectPlan> {
         color: buttoncolor,
         size: 50.0,
       );
-      var name = await SharedPreference().getuserName();
+      var token = await SharedPreference().gettoken();
 
-      var phonenumber = await SharedPreference().getphonenumber();
-      var parameters = {
-        "c_Name": name,
-        "n_Mobile": phonenumber,
-        "c_ReferralCode": "",
-        "n_ActivePlan": ""
-      };
+      // var phonenumber = await SharedPreference().getphonenumber();
+      // var parameters = {
+      //   "c_Name": name,
+      //   "n_Mobile": phonenumber,
+      //   "c_ReferralCode": "",
+      //   "n_ActivePlan": ""
+      // };
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.get(
         ApiProvider.getplans,
-        data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
+        // data: parameters,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
       );
       debugPrint("pavithra123 ${response.data}");
 

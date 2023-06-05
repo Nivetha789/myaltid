@@ -22,9 +22,9 @@ class Plan {
   factory Plan.fromJson(Map<String, dynamic> json) => Plan(
         id: json["_id"],
         cPlan: json["c_Plan"],
-        nVirtualNumber: json["n_VirtualNumber"],
+        nVirtualNumber: json["n_plan_id"],
         nTalktime: json["n_Talktime"],
-        nData: json["n_Data"],
+        nData: json["c_Data"],
         nStartsFrom: json["n_StartPrice"],
         jSubscription: List<JSubscription>.from(
             json["j_Terms"].map((x) => JSubscription.fromJson(x))),
@@ -33,9 +33,9 @@ class Plan {
   Map<String, dynamic> toJson() => {
         "_id": id,
         "c_Plan": cPlan,
-        "n_VirtualNumber": nVirtualNumber,
+        "n_plan_id": nVirtualNumber,
         "n_Talktime": nTalktime,
-        "n_Data": nData,
+        "c_Data": nData,
         "n_StartPrice": nStartsFrom,
         "j_Subscription":
             List<dynamic>.from(jSubscription.map((x) => x.toJson())),

@@ -143,17 +143,23 @@ class _PlanSelectionState extends State<PlanSelection> {
       var name = await SharedPreference().getuserName();
 
       var phonenumber = await SharedPreference().getphonenumber();
+      var refferalcode = await SharedPreference().getrefferalcode();
+      var token = await SharedPreference().gettoken();
       var parameters = {
         "c_Name": name,
         "n_Mobile": phonenumber,
         "c_Plan": widget.cid,
+        "c_ReferralCode": refferalcode,
         "c_SubscriptionId": selectedOption!.id
       };
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
         ApiProvider.userregister,
         data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
       );
       debugPrint("pavithra ${response.data}");
       // var data = jsonDecode(response.data);/
@@ -318,7 +324,7 @@ class _PlanSelectionState extends State<PlanSelection> {
                                   height: 5,
                                 ),
                                 Text(
-                                  "Pay for${option.cTerm} Months",
+                                  "Pay for ${option.cTerm} Months",
                                   style: const TextStyle(
                                       color: whitecolor,
                                       fontFamily: "Helvatica",

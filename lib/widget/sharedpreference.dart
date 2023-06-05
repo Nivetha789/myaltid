@@ -65,6 +65,30 @@ class SharedPreference {
     String? stringValue = prefs.getString('PhoneNumber');
     return stringValue;
   }
+ setrefferalcode(String stringValue) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('Refferalcode', stringValue);
+    return true;
+  }
+
+  getrefferalcode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //Return String
+    String? stringValue = prefs.getString('Refferalcode');
+    return stringValue;
+  }
+  settoken(String stringValue) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('TokenNumber', stringValue);
+    return true;
+  }
+
+  gettoken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //Return String
+    String? stringValue = prefs.getString('TokenNumber');
+    return stringValue;
+  }
 
   setplanid(String stringValue) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

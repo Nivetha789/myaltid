@@ -1,5 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/otpscreen.dart';
 import 'package:myaltid/reasuable/background_screen.dart';
 import 'package:myaltid/reasuable/button.dart';
@@ -18,9 +23,91 @@ class _SignupAppState extends State<SignupApp> {
   TextEditingController phonenumber = TextEditingController();
 
   TextEditingController namecontroller = TextEditingController();
+  TextEditingController refferalcontroller = TextEditingController();
   bool texterror = false, numbererror = false;
   final formKey = GlobalKey<FormState>();
   late String oldvalue;
+  checkuser() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": phonenumber.text};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.checkuser,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data["status"]}");
+
+      if (response.data["status"] == 1) {
+        if (refferalcontroller.text.isEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => SendOTPScreen(
+                  phonenumber: phonenumber.text,
+                  name: namecontroller.text,
+                  refferalcode: refferalcontroller.text),
+            ),
+          );
+        } else {
+          var parameters1 = {"c_ReferralCode": refferalcontroller.text};
+          final response1 = await dio.post(
+            ApiProvider.checkrefferalcode,
+            data: parameters1,
+            options: Options(contentType: Headers.formUrlEncodedContentType),
+          );
+          if (response1.data["status"] == 1) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SendOTPScreen(
+                    phonenumber: phonenumber.text,
+                    name: namecontroller.text,
+                    refferalcode: refferalcontroller.text),
+              ),
+            );
+          } else {
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'On Snap!',
+                message: 'Please Enter Valid Refferal Code',
+                contentType: ContentType.failure,
+              ),
+            );
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }
+          debugPrint("pavithra ${response1.data}");
+        }
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["message"][0],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Backgroundscreen(
@@ -107,6 +194,51 @@ class _SignupAppState extends State<SignupApp> {
                   height: 20,
                 ),
                 TextFormField(
+                  controller: refferalcontroller,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                    // singleNameInputFormatter()
+                    // SingleSpaceFormatter()
+                  ],
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  style: const TextStyle(
+                      color: Color(0xffEBEBF5),
+                      fontFamily: "Helvatica",
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400),
+                  // validator: (value) {
+                  //   if (value!.isEmpty) {
+                  //     return 'Please a Enter your Name';
+                  //   }
+                  //   // final words = value.split(' ');
+                  //   // if (words.length < 2) {
+                  //   //   return 'Invalid spacing pattern';
+                  //   // }
+
+                  //   if (!RegExp(r'^[a-zA-Z ]').hasMatch(value)) {
+                  //     return 'Please a valid Name';
+                  //   }
+                  //   return null;
+                  // },
+                  // onChanged: (value) {
+                  //   final List l = value.split(' ');
+                  //   if (l.length == 2) {
+                  //     setState(() {
+                  //       oldvalue = value;
+                  //     });
+                  //   }
+                  //   if (l.length == 3) {
+                  //     setState(() {
+                  //       namecontroller.text = oldvalue;
+                  //     });
+                  //   }
+                  // },
+                  decoration: buildInputDecoration("Referral Code"),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
                   controller: phonenumber,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
@@ -148,18 +280,14 @@ class _SignupAppState extends State<SignupApp> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(
-                  height: 70,
+                  height: 40,
                 ),
                 InkWell(
                   onTap: () {
                     if (formKey.currentState!.validate()) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => SendOTPScreen(
-                              phonenumber: phonenumber.text,
-                              name: namecontroller.text),
-                        ),
-                      );
+                      checkuser();
+
+                      // );
                       //check if form data are valid,
                       // your process task ahed if all data are valid
                     }

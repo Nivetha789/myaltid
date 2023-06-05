@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously, non_constant_identifier_names, prefer_interpolation_to_compose_strings
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:datepicker_dropdown/datepicker_dropdown.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +32,7 @@ class _KycScreenState extends State<KycScreen> {
 
   final formKey = GlobalKey<FormState>();
   var otp;
+  bool dateofbirth = false;
   aadharOTPsend() async {
     debugPrint("PAIVTHRA");
     try {
@@ -177,56 +179,46 @@ class _KycScreenState extends State<KycScreen> {
   }
 
   UserRegister() async {
+    print(_selectedDate);
     try {
       Dio dio = Dio();
 
-      var userid = await SharedPreference().getUserId();
+      var token = await SharedPreference().gettoken();
       var parameters = {
-        "c_UserId": userid,
         "c_Pan": pannumber.text,
         "c_Email": username.text,
         "n_Aadhar": aadharnumber.text.toString(),
-        "c_Dob": dob
+        "c_Dob": _selectedDate + "/" + _selectedMonth + "/" + _selectedYear
       };
+      print("PAVITHRA $parameters");
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
         ApiProvider.updatekyc,
         data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
       );
       debugPrint("pavithra ${response.data}");
 
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        if (response.data["status"] == 1) {
-          // await SharedPreference().setplanid(widget.cid);
-
-          // await SharedPreference().setplanid(selectedOption!.id);
-
-          // await SharedPreference().setUserId(response.data["data"]["_id"]);
-
-          // await SharedPreference()
-          //     .setUserId(response.data["data"]["c_ActivePlan"]);
-
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const Congratulations()),
-          );
-        } else {
-          final snackBar = SnackBar(
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            content: AwesomeSnackbarContent(
-              title: 'On Snap!',
-              message: response.data["error"],
-              contentType: ContentType.failure,
-            ),
-          );
-
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(snackBar);
-        }
+      if (response.data["status"] == 1) {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Oh Hey!',
+            message: 'Otp has been sended registered mobile number!',
+            contentType: ContentType.success,
+          ),
+        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
       } else {
         final snackBar = SnackBar(
           elevation: 0,
@@ -234,7 +226,52 @@ class _KycScreenState extends State<KycScreen> {
           backgroundColor: Colors.transparent,
           content: AwesomeSnackbarContent(
             title: 'On Snap!',
-            message: response.data["message"],
+            message: response.data["error"][0],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  verifykyc() async {
+    try {
+      Dio dio = Dio();
+
+      var token = await SharedPreference().gettoken();
+      print(token);
+      var parameters = {
+        "n_otp": otp,
+      };
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.verifykyc,
+        data: parameters,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      debugPrint("pavithra123 ${response.data}");
+
+      if (response.data["status"] == 1) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const Congratulations()),
+        );
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: "Please enter valid otp",
             contentType: ContentType.failure,
           ),
         );
@@ -249,6 +286,27 @@ class _KycScreenState extends State<KycScreen> {
   }
 
   OtpFieldController otpController = OtpFieldController();
+  // int _selectedDay = 14;
+  // int _selectedMonth = 10;
+  // int _selectedYear = 1993;
+  final List<String> _dates =
+      List.generate(31, (index) => (index + 1).toString());
+  final List<String> _months = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    '11',
+    '12',
+  ];
+  final List<String> _years =
+      List.generate(50, (index) => (2023 - index).toString());
 
   @override
   Widget build(BuildContext context) {
@@ -306,14 +364,16 @@ class _KycScreenState extends State<KycScreen> {
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   // inputFormatters: [
                   //   FilteringTextInputFormatter.allow(
-                  //     RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]"),
+                  //     RegExp(r'^[^.][a-z0-9._]+@[a-z0-9]+\.[a-z]+$',
+                  //         caseSensitive: false),
                   //   ),
                   // ],
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Please a Enter Your Email';
                     }
-                    if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
+                    if (!RegExp(r'^[^.][a-z0-9._]+@[a-z0-9]+\.[a-z]+$',
+                            caseSensitive: false)
                         .hasMatch(value)) {
                       return 'Please a valid Email';
                     }
@@ -360,9 +420,7 @@ class _KycScreenState extends State<KycScreen> {
                   maxLength: 10,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   inputFormatters: [
-                    // FilteringTextInputFormatter.allow(
-                    //   RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'),
-                    // ),
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
                     UpperCaseTextFormatter(),
                   ],
                   // inputFormatters: [UpperCaseTextFormatter()],
@@ -395,6 +453,85 @@ class _KycScreenState extends State<KycScreen> {
                     ),
                   ),
                 ),
+                const Text(
+                  "Date of Birth (as per KYC)",
+                  style: TextStyle(
+                    fontFamily: "Helvatica",
+                    color: whitecolor,
+                    fontWeight: FontWeight.w400,
+                    fontStyle: FontStyle.normal,
+                    // fontStyle: FontStyle.italic,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 90,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: const Color(0xff1C1C1E),
+                        ),
+                        child: _buildDropdownButton(
+                          'Date',
+                          _dates,
+                          _selectedDate,
+                          (String? value) {
+                            setState(() {
+                              _selectedDate = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 130,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: const Color(0xff1C1C1E),
+                        ),
+                        child: _buildDropdownButton(
+                          'Month',
+                          _months,
+                          _selectedMonth,
+                          (String? value) {
+                            setState(() {
+                              _selectedMonth = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 90,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: const Color(0xff1C1C1E),
+                        ),
+                        child: _buildDropdownButton(
+                          'Year',
+                          _years,
+                          _selectedYear,
+                          (String? value) {
+                            setState(() {
+                              _selectedYear = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                dateofbirth == true
+                    ? const Text(
+                        "Please select your date of birth",
+                        style: TextStyle(color: Colors.red),
+                      )
+                    : const Text(""),
                 const SizedBox(
                   height: 10,
                 ),
@@ -426,9 +563,7 @@ class _KycScreenState extends State<KycScreen> {
                     return null;
                   },
                   onChanged: (value) {
-                    value.toString().length == 12
-                        ? aadharOTPsend()
-                        : 'Minimum character length is 12';
+                    'Minimum character length is 12';
                   },
                   keyboardType: TextInputType.number,
                   maxLength: 12,
@@ -482,6 +617,7 @@ class _KycScreenState extends State<KycScreen> {
                   onCompleted: (pin) {
                     otp = pin;
                     debugPrint("Completed: $pin" + otp);
+                    verifykyc();
                   },
                   otpFieldStyle: OtpFieldStyle(
                     borderColor: const Color(0xff1C1C1E),
@@ -496,8 +632,25 @@ class _KycScreenState extends State<KycScreen> {
                 ),
                 InkWell(
                     onTap: () {
-                      if (formKey.currentState!.validate()) {
-                        OTPcheck();
+                      if (formKey.currentState!.validate() ||
+                          _selectedDate != null ||
+                          _selectedMonth != null ||
+                          _selectedYear != null) {
+                        // print("dffdh $otp");
+                        // if (otp == null) {
+                        UserRegister();
+                        // } else {
+                        //   verifykyc();
+                        // }
+
+                        setState(() {
+                          dateofbirth = false;
+                        });
+                      } else {
+                        print("dfgdfghdfgd");
+                        setState(() {
+                          dateofbirth = true;
+                        });
                       }
                     },
                     child: Container(
@@ -527,6 +680,59 @@ class _KycScreenState extends State<KycScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  var _selectedDate;
+  var _selectedMonth;
+  var _selectedYear;
+
+  Widget _buildDropdownButton(String label, List<String> items, String? value,
+      void Function(String?)? onChanged) {
+    return DropdownButtonFormField<String>(
+      isExpanded: true,
+      padding: EdgeInsets.only(left: 10),
+      value: value,
+      dropdownColor: const Color(0xff1C1C1E),
+      onChanged: onChanged,
+      // underline: SizedBox(),
+      decoration: InputDecoration(
+        enabledBorder: InputBorder.none, // Remove the border
+        focusedBorder: InputBorder.none, // Remove the border when focused
+        hintText: label,
+      ),
+      items: [
+        DropdownMenuItem<String>(
+          value: null,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontFamily: "Helvatica",
+              color: whitecolor,
+              fontWeight: FontWeight.w400,
+              fontStyle: FontStyle.normal,
+              // fontStyle: FontStyle.italic,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        ...items.map((item) {
+          return DropdownMenuItem<String>(
+            value: item,
+            child: Text(
+              item,
+              style: const TextStyle(
+                fontFamily: "Helvatica",
+                color: whitecolor,
+                fontWeight: FontWeight.w400,
+                fontStyle: FontStyle.normal,
+                // fontStyle: FontStyle.italic,
+                fontSize: 14,
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }

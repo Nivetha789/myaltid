@@ -6,6 +6,7 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:myaltid/data/api.dart';
+import 'package:myaltid/pages/kyc.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../reasuable/theme.dart';
@@ -19,8 +20,9 @@ import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
 
 class SendOTPScreen extends StatefulWidget {
-  final phonenumber, name;
-  const SendOTPScreen({super.key, this.phonenumber, this.name});
+  final phonenumber, name, refferalcode;
+  const SendOTPScreen(
+      {super.key, this.phonenumber, this.name, this.refferalcode});
 
   @override
   State<SendOTPScreen> createState() => _SendOTPScreenState();
@@ -59,7 +61,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
     try {
       Dio dio = Dio();
 
-      var parameters = {"c_Name": widget.name, "n_Mobile": widget.phonenumber};
+      var parameters = {"n_Mobile": widget.phonenumber};
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
         ApiProvider.sendotp,
@@ -117,6 +119,76 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
   }
 
   VerifyOTP() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": widget.phonenumber, "n_Otp": otp};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.verifyotp,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        if (response.data["status"] == 1) {
+          await SharedPreference().setphonenumber(widget.phonenumber!);
+
+          await SharedPreference().setuserName(widget.name!);
+          await SharedPreference().setrefferalcode(widget.refferalcode!);
+          await SharedPreference()
+              .settoken(response.data["data"][0]["c_accessToken"]);
+
+          if (response.data["data"][0]["n_Payment"] == "2") {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const KycScreen()),
+            );
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const ServiceApp()),
+            );
+          }
+        } else {
+          otpController.clear();
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: 'Please enter valid otp!',
+              contentType: ContentType.failure,
+            ),
+          );
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+        }
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e as String?);
+    }
+  }
+//checkrefferalcode
+
+  checkrefferal() async {
     try {
       Dio dio = Dio();
 
@@ -195,11 +267,15 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
       } else if (response.statusCode == 200) {
         textEditingController.text = response.data["data"][0].toString();
         final snackBar = SnackBar(
-          backgroundColor: Colors.green,
-          content: Text('Your OTP is ! ${response.data["data"][0]}'),
-          duration: const Duration(seconds: 2),
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Oh Hey!',
+            message: 'Your OTP is ! ${response.data["data"][0]}',
+            contentType: ContentType.success,
+          ),
         );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
@@ -231,7 +307,8 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
   bool isChecked = false,
       confirmotp = false,
       otpfield = false,
-      errorfield = false;
+      errorfield = false,
+      agreeterm = false;
   var otp;
   @override
   Widget build(BuildContext context) {
@@ -332,41 +409,36 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                               color: buttoncolor),
                         ),
                       ),
-                      InkWell(
-                        onTap: () {
-                          ResendOTP();
-                        },
-                        child: const Row(
-                          children: [
-                            Text(
-                              'Retry Now ',
-                              style: TextStyle(color: buttoncolor),
+                      timerText == "00:00"
+                          ? InkWell(
+                              onTap: () {
+                                ResendOTP();
+                              },
+                              child: const Row(
+                                children: [
+                                  Text(
+                                    'Retry Now ',
+                                    style: TextStyle(color: buttoncolor),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Row(
+                              children: [
+                                const Text(
+                                  'Retry after ',
+                                  style: TextStyle(color: whitecolor),
+                                ),
+                                Text(
+                                  timerText,
+                                  style: const TextStyle(color: buttoncolor),
+                                ),
+                                const Text(
+                                  ' sec',
+                                  style: TextStyle(color: whitecolor),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      )
-                      // : Row(
-                      //     children: [
-                      //       const Text(
-                      //         'Retry after ',
-                      //         style: TextStyle(color: whitecolor),
-                      //       ),
-                      //       Text(
-                      //         timerText,
-                      //         style: const TextStyle(color: buttoncolor),
-                      //       ),
-                      //       const Text(
-                      //         ' sec',
-                      //         style: TextStyle(color: whitecolor),
-                      //       ),
-                      //     ],
-                      //   ),
-                      //           Countdown(
-                      //                 animation: StepTween(
-                      //                   begin: 2 * 60,
-                      //                   end: 0,
-                      //                 ).animate(_controller),
-                      //               ),
                     ],
                   ),
                   const SizedBox(
@@ -412,10 +484,16 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                       ),
                     ],
                   ),
+                  agreeterm == true
+                      ? const Text(
+                          "Please accept agree & terms conditions",
+                          style: TextStyle(color: Colors.red),
+                        )
+                      : const Text(""),
                   const SizedBox(
                     height: 70,
                   ),
-                  otpfield == true
+                  otpfield == true && isChecked == true
                       ? InkWell(
                           onTap: () {
                             debugPrint("PAVITHRA");
@@ -428,10 +506,21 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                       : InkWell(
                           onTap: () {
                             debugPrint("PAVITHRA12");
-                            setState(() {
+                            if (otpfield == false && isChecked == false) {
+                              setState(() {
+                                confirmotp = false;
+                                errorfield = true;
+                                agreeterm = true;
+                              });
+                            } else if (otpfield == false) {
                               confirmotp = false;
                               errorfield = true;
-                            });
+                              agreeterm = false;
+                            } else {
+                              confirmotp = false;
+                              errorfield = false;
+                              agreeterm = true;
+                            }
 
                             // Navigator.of(context).push(
                             //   MaterialPageRoute(
