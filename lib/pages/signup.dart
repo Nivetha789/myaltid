@@ -90,7 +90,8 @@ class _SignupState extends State<Signup> {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) => const SignupApp()),
+                            builder: (context) =>
+                                const SignupApp(signup: "signup")),
                       );
                     },
                     child: const ButtonScreen(
@@ -116,6 +117,11 @@ class _SignupState extends State<Signup> {
                   ),
                   InkWell(
                     onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const SignupApp(signup: "signin")),
+                      );
                       // updateCommunityText(index);
                     },
                     child: Container(

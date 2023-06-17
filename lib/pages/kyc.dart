@@ -5,6 +5,7 @@ import 'package:datepicker_dropdown/datepicker_dropdown.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/congratulation.dart';
 import 'package:myaltid/widget/mobilenumberformator.dart';
@@ -178,8 +179,55 @@ class _KycScreenState extends State<KycScreen> {
     super.initState();
   }
 
+  var selectedMonth;
+  var selectedDate;
+  var selectedYear;
+  List<int> getMonths() {
+    return List<int>.generate(12, (index) => index + 1);
+  }
+
+  List<int> getDaysInMonth(int month, int year) {
+    if (month == 2) {
+      if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+        return List<int>.generate(29, (index) => index + 1);
+      } else {
+        return List<int>.generate(28, (index) => index + 1);
+      }
+    } else if ([4, 6, 9, 11].contains(month)) {
+      return List<int>.generate(30, (index) => index + 1);
+    } else {
+      return List<int>.generate(31, (index) => index + 1);
+    }
+  }
+
+  List<int> getYears() {
+    int currentYear = DateTime.now().year;
+    return List<int>.generate(100, (index) => currentYear - index);
+  }
+
+  bool isage = false;
+  bool isAbove18Years(int year, int month, int day) {
+    DateTime currentDate = DateTime.now();
+    DateTime selectedDate = DateTime(year, month, day);
+    Duration difference = currentDate.difference(selectedDate);
+    int age = (difference.inDays / 365).floor();
+    if (age >= 18) {
+      print("fdhghgdfhgdfg $age");
+      setState(() {
+        isage = false;
+      });
+    } else {
+      print("fdg $age");
+      setState(() {
+        isage = true;
+      });
+    }
+
+    return age >= 18;
+  }
+
+  bool isloading = false;
   UserRegister() async {
-    print(_selectedDate);
     try {
       Dio dio = Dio();
 
@@ -188,9 +236,16 @@ class _KycScreenState extends State<KycScreen> {
         "c_Pan": pannumber.text,
         "c_Email": username.text,
         "n_Aadhar": aadharnumber.text.toString(),
-        "c_Dob": _selectedDate + "/" + _selectedMonth + "/" + _selectedYear
+        "c_Dob": selectedDate.toString() +
+            "/" +
+            selectedMonth.toString() +
+            "/" +
+            selectedYear.toString()
       };
       print("PAVITHRA $parameters");
+      setState(() {
+        isloading = true;
+      });
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
         ApiProvider.updatekyc,
@@ -203,6 +258,9 @@ class _KycScreenState extends State<KycScreen> {
       debugPrint("pavithra ${response.data}");
 
       if (response.data["status"] == 1) {
+        setState(() {
+          isloading = false;
+        });
         final snackBar = SnackBar(
           elevation: 0,
           behavior: SnackBarBehavior.floating,
@@ -220,13 +278,16 @@ class _KycScreenState extends State<KycScreen> {
         //   MaterialPageRoute(builder: (context) => const Congratulations()),
         // );
       } else {
+        setState(() {
+          isloading = false;
+        });
         final snackBar = SnackBar(
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
           content: AwesomeSnackbarContent(
             title: 'On Snap!',
-            message: response.data["error"][0],
+            message: response.data["message"][0] ?? response.data["error"][0],
             contentType: ContentType.failure,
           ),
         );
@@ -236,6 +297,23 @@ class _KycScreenState extends State<KycScreen> {
           ..showSnackBar(snackBar);
       }
     } catch (e) {
+      setState(() {
+        isloading = false;
+      });
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'On Snap!',
+          message: "Something went wrong, Please try again later",
+          contentType: ContentType.failure,
+        ),
+      );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
       debugPrint(e.toString());
     }
   }
@@ -271,7 +349,7 @@ class _KycScreenState extends State<KycScreen> {
           backgroundColor: Colors.transparent,
           content: AwesomeSnackbarContent(
             title: 'On Snap!',
-            message: "Please enter valid otp",
+            message: response.data["error"]["aadhaar_number"][0],
             contentType: ContentType.failure,
           ),
         );
@@ -281,6 +359,21 @@ class _KycScreenState extends State<KycScreen> {
           ..showSnackBar(snackBar);
       }
     } catch (e) {
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'On Snap!',
+          message: "Something went wrong, Please try again later",
+          contentType: ContentType.failure,
+        ),
+      );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+
       debugPrint(e.toString());
     }
   }
@@ -289,24 +382,24 @@ class _KycScreenState extends State<KycScreen> {
   // int _selectedDay = 14;
   // int _selectedMonth = 10;
   // int _selectedYear = 1993;
-  final List<String> _dates =
-      List.generate(31, (index) => (index + 1).toString());
-  final List<String> _months = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-    '11',
-    '12',
-  ];
-  final List<String> _years =
-      List.generate(50, (index) => (2023 - index).toString());
+  // final List<String> _dates =
+  //     List.generate(31, (index) => (index + 1).toString());
+  // final List<String> _months = [
+  //   '1',
+  //   '2',
+  //   '3',
+  //   '4',
+  //   '5',
+  //   '6',
+  //   '7',
+  //   '8',
+  //   '9',
+  //   '10',
+  //   '11',
+  //   '12',
+  // ];
+  // final List<String> _years =
+  //     List.generate(50, (index) => (2023 - index).toString());
 
   @override
   Widget build(BuildContext context) {
@@ -467,7 +560,7 @@ class _KycScreenState extends State<KycScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                Container(
+                SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -478,15 +571,45 @@ class _KycScreenState extends State<KycScreen> {
                           borderRadius: BorderRadius.circular(5),
                           color: const Color(0xff1C1C1E),
                         ),
-                        child: _buildDropdownButton(
-                          'Date',
-                          _dates,
-                          _selectedDate,
-                          (String? value) {
+                        child: DropdownButton<int>(
+                          padding: const EdgeInsets.only(left: 10),
+                          isExpanded: true,
+                          value: selectedMonth,
+                          hint: const Text(
+                            'Month',
+                            style: TextStyle(
+                              fontFamily: "Helvatica",
+                              color: whitecolor,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.normal,
+                              // fontStyle: FontStyle.italic,
+                              fontSize: 14,
+                            ),
+                          ),
+                          onChanged: (newValue) {
                             setState(() {
-                              _selectedDate = value;
+                              selectedMonth = newValue;
+                              selectedDate = null;
                             });
                           },
+                          dropdownColor: const Color(0xff1C1C1E),
+                          underline: const SizedBox(),
+                          items: getMonths().map((int value) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text(
+                                value.toString(),
+                                style: const TextStyle(
+                                  fontFamily: "Helvatica",
+                                  color: whitecolor,
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.normal,
+                                  // fontStyle: FontStyle.italic,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
                       Container(
@@ -495,15 +618,48 @@ class _KycScreenState extends State<KycScreen> {
                           borderRadius: BorderRadius.circular(5),
                           color: const Color(0xff1C1C1E),
                         ),
-                        child: _buildDropdownButton(
-                          'Month',
-                          _months,
-                          _selectedMonth,
-                          (String? value) {
+                        child: DropdownButton<int>(
+                          padding: const EdgeInsets.only(left: 10),
+                          isExpanded: true,
+                          value: selectedDate,
+                          hint: const Text(
+                            'Date',
+                            style: TextStyle(
+                              fontFamily: "Helvatica",
+                              color: whitecolor,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.normal,
+                              // fontStyle: FontStyle.italic,
+                              fontSize: 14,
+                            ),
+                          ),
+                          onChanged: (newValue) {
                             setState(() {
-                              _selectedMonth = value;
+                              selectedDate = newValue;
                             });
                           },
+                          dropdownColor: const Color(0xff1C1C1E),
+                          underline: const SizedBox(),
+                          items: selectedMonth != null
+                              ? getDaysInMonth(selectedMonth,
+                                      selectedYear ?? DateTime.now().year)
+                                  .map((int value) {
+                                  return DropdownMenuItem<int>(
+                                    value: value,
+                                    child: Text(
+                                      value.toString(),
+                                      style: const TextStyle(
+                                        fontFamily: "Helvatica",
+                                        color: whitecolor,
+                                        fontWeight: FontWeight.w400,
+                                        fontStyle: FontStyle.normal,
+                                        // fontStyle: FontStyle.italic,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  );
+                                }).toList()
+                              : null,
                         ),
                       ),
                       Container(
@@ -512,23 +668,59 @@ class _KycScreenState extends State<KycScreen> {
                           borderRadius: BorderRadius.circular(5),
                           color: const Color(0xff1C1C1E),
                         ),
-                        child: _buildDropdownButton(
-                          'Year',
-                          _years,
-                          _selectedYear,
-                          (String? value) {
+                        child: DropdownButton<int>(
+                          padding: const EdgeInsets.only(left: 10),
+                          isExpanded: true,
+                          value: selectedYear,
+                          hint: const Text(
+                            'Year',
+                            style: TextStyle(
+                              fontFamily: "Helvatica",
+                              color: whitecolor,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.normal,
+                              // fontStyle: FontStyle.italic,
+                              fontSize: 14,
+                            ),
+                          ),
+                          onChanged: (newValue) {
                             setState(() {
-                              _selectedYear = value;
+                              selectedYear = newValue;
                             });
                           },
+                          dropdownColor: const Color(0xff1C1C1E),
+
+                          underline: const SizedBox(),
+                          // decoration: InputDecoration(
+                          //   enabledBorder: InputBorder.none, // Remove the border
+                          //   focusedBorder:
+                          //       InputBorder.none, // Remove the border when focused
+                          //   hintText: "Seleted year",
+                          // ),
+                          items: getYears().map((int value) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text(
+                                value.toString(),
+                                style: const TextStyle(
+                                  fontFamily: "Helvatica",
+                                  color: whitecolor,
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.normal,
+                                  // fontStyle: FontStyle.italic,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
                     ],
                   ),
                 ),
-                dateofbirth == true
+                dateofbirth == true || isage == true
                     ? const Text(
-                        "Please select your date of birth",
+                        "Select valid date of birth & age should be above 18 years",
                         style: TextStyle(color: Colors.red),
                       )
                     : const Text(""),
@@ -632,26 +824,30 @@ class _KycScreenState extends State<KycScreen> {
                 ),
                 InkWell(
                     onTap: () {
-                      if (formKey.currentState!.validate() ||
-                          _selectedDate != null ||
-                          _selectedMonth != null ||
-                          _selectedYear != null) {
-                        // print("dffdh $otp");
-                        // if (otp == null) {
-                        UserRegister();
-                        // } else {
-                        //   verifykyc();
-                        // }
+                      // if (isloading == false) {
+                        if (formKey.currentState!.validate() &&
+                            selectedDate != null &&
+                            selectedMonth != null &&
+                            selectedYear != null &&
+                            isAbove18Years(
+                                selectedYear, selectedMonth, selectedDate)) {
+                          // print("dffdh $otp");
+                          // if (otp == null) {
+                          UserRegister();
+                          // } else {
+                          //   verifykyc();
+                          // }
 
-                        setState(() {
-                          dateofbirth = false;
-                        });
-                      } else {
-                        print("dfgdfghdfgd");
-                        setState(() {
-                          dateofbirth = true;
-                        });
-                      }
+                          setState(() {
+                            dateofbirth = false;
+                          });
+                        } else {
+                          print("dfgdfghdfgd");
+                          setState(() {
+                            dateofbirth = true;
+                          });
+                        }
+                      // } else {}
                     },
                     child: Container(
                       width: 140,
@@ -662,16 +858,20 @@ class _KycScreenState extends State<KycScreen> {
                       ),
                       padding: const EdgeInsets.all(10),
                       alignment: Alignment.center,
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            "Submit KYC",
-                            style: TextStyle(
-                                color: blackcolor,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w500),
-                          ),
+                          isloading == false
+                              ? Text(
+                                  "Submit KYC",
+                                  style: TextStyle(
+                                      color: blackcolor,
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              : SpinKitThreeBounce(
+                                  color: blackcolor,
+                                ),
                         ],
                       ),
                     )),
@@ -691,7 +891,7 @@ class _KycScreenState extends State<KycScreen> {
       void Function(String?)? onChanged) {
     return DropdownButtonFormField<String>(
       isExpanded: true,
-      padding: EdgeInsets.only(left: 10),
+      padding: const EdgeInsets.only(left: 10),
       value: value,
       dropdownColor: const Color(0xff1C1C1E),
       onChanged: onChanged,

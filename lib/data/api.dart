@@ -26,4 +26,9 @@ class ApiProvider {
   static const String verifykyc = "${BASE_URL}users/verifyAadhar";
 
   static const String getuser = "${BASE_URL}users/profile";
+
+  static const String getdatautlize = "${BASE_URL}subcription/userplanget";
+
+  static const String addsubscrptiondetils =
+      "${BASE_URL}subcription/subscriptionbuy";
 }

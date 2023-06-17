@@ -4,7 +4,6 @@ import '../../reasuable/theme.dart';
 
 import '../../reasuable/background_screen.dart';
 
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -55,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   bool isselected = false;
-  var forIos = true;
+  var forIos = true;var biometric = true;
   @override
   Widget build(BuildContext context) {
     return Backgroundscreen(

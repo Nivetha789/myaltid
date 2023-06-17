@@ -1,9 +1,14 @@
 // ignore_for_file: unnecessary_null_comparison
 
+import 'dart:math';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/paymentsuccessfull.dart';
 import 'package:myaltid/reasuable/theme.dart';
+import 'package:myaltid/widget/sharedpreference.dart';
 
 import '../reasuable/background_screen.dart';
 import '../reasuable/button.dart';
@@ -16,24 +21,6 @@ class PaymentmodeSelection extends StatefulWidget {
 }
 
 class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
-  var items = [
-    {"name": "Annual ", "number": "pay for full year ", "talktime": "250 / m"},
-    {
-      "name": "6 Months",
-      "number": "pay for 6 Months",
-      "talktime": "350 / m",
-    },
-    {
-      "name": "3 Months",
-      "number": "pay for 3 Months",
-      "talktime": "550 / m",
-    },
-    {
-      "name": "Monthly",
-      "number": "pay for Monthly",
-      "talktime": "700 / m",
-    },
-  ];
   List gender = [
     "UPI",
     "Credit / Debit Card",
@@ -45,6 +32,72 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
   late String select = "0";
 
   late String selectoption = "0";
+  var randomnumber;
+  @override
+  void initState() {
+    randomnumber = generateRandomNumber();
+    // UserRegister();
+    super.initState();
+  }
+
+  UserRegister() async {
+    try {
+      Dio dio = Dio();
+      var name = await SharedPreference().getuserName();
+
+      var phonenumber = await SharedPreference().getphonenumber();
+      var refferalcode = await SharedPreference().getrefferalcode();
+      var token = await SharedPreference().gettoken();
+      var cPlanId = await SharedPreference().getplanid();
+      var cSubscriptionId = await SharedPreference().getsubscriptionId();
+
+      var parameters = {
+        "c_PlanId": cPlanId,
+        "c_SubscriptionId": cSubscriptionId,
+        "c_PaymentId": randomnumber.toString(),
+        "c_paymentStatus": "Sucesss"
+      };
+      print(parameters);
+      print(token);
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.addsubscrptiondetils,
+        data: parameters,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      debugPrint("pavithra ${response.data}");
+      // var data = jsonDecode(response.data);/
+      // print("dfkjsfddkjh $data");
+      if (response.data["status"] == 1) {
+        // await SharedPreference()
+        //     .setUserId(response.data["data"]["c_ActivePlan"]);
+
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const PaymentSuccessfull()));
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["error"][0],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Row addRadioButton(int btnValue, String title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -75,6 +128,23 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
         ),
       ],
     );
+  }
+
+  String generateRandomNumber() {
+    final random = Random();
+    final maxDigits = 18;
+    final buffer = StringBuffer();
+
+    for (var i = 0; i < maxDigits; i++) {
+      buffer.write(random.nextInt(10)); // Generates a random digit from 0 to 9
+    }
+
+    return buffer.toString();
+  }
+
+  void main() {
+    final randomNumber = generateRandomNumber();
+    print(randomNumber);
   }
 
   @override
@@ -208,7 +278,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                         backgroundColor: Colors.transparent,
                         content: AwesomeSnackbarContent(
                           title: 'Oh Hey!',
-                          message: 'Please select your plan',
+                          message: 'Please select your Paymentmode',
                           contentType: ContentType.failure,
                         ),
                       );
@@ -249,11 +319,11 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                   )
                 : InkWell(
                     onTap: () async {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => const PaymentSuccessfull()),
-                      );
-                      // UserRegister();
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //       builder: (context) => const PaymentSuccessfull()),
+                      // );
+                      UserRegister();
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width,

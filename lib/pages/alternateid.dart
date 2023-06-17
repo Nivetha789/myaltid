@@ -112,6 +112,7 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
         "c_Email": vemail.text,
       };
       debugPrint(parameters.toString());
+      print("fgdfkjhgfdkjhgdf $token $parameters");
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
         ApiProvider.updatevirutalid,
@@ -156,6 +157,21 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
           ..showSnackBar(snackBar);
       }
     } catch (e) {
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'On Snap!',
+          message: "Something went wrong, Please try again later",
+          contentType: ContentType.failure,
+        ),
+      );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+      debugPrint(e.toString());
       print(e);
     }
   }
@@ -296,8 +312,13 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                                             jphonenumber[index]
                                                 .nMobile
                                                 .toString(),
-                                            style: const TextStyle(
-                                                color: whitecolor,
+                                            style: TextStyle(
+                                                color: vphoneneumber ==
+                                                        jphonenumber[index]
+                                                            .nMobile
+                                                            .toString()
+                                                    ? buttoncolor
+                                                    : whitecolor,
                                                 fontFamily: "Helvatica",
                                                 fontWeight: FontWeight.w400,
                                                 fontStyle: FontStyle.normal,
@@ -386,8 +407,8 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                                     return InkWell(
                                       onTap: () {
                                         setState(() {
-                                          vemail.text =
-                                              jemail[index].cEmail.toString();
+                                          // vemail.text =
+                                          //     jemail[index].cEmail.toString();
                                         });
                                       },
                                       child: Column(
@@ -416,6 +437,7 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                                   style: const TextStyle(color: whitecolor),
                                   autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
+                                  minLines: 1,
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return 'Please a Enter Your Email';
@@ -436,7 +458,7 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                                     // filled: true,
                                   ),
                                   keyboardType: TextInputType.multiline,
-                                  maxLines: null,
+                                  maxLines: 1,
                                   onChanged: (value) {
                                     vemail.text = value;
                                   },

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../reasuable/numpad.dart';
 import '../../reasuable/theme.dart';
+
 class CalldialpadScreen extends StatefulWidget {
   const CalldialpadScreen({super.key});
 
@@ -11,7 +13,8 @@ class CalldialpadScreen extends StatefulWidget {
 
 class _CalldialpadScreenState extends State<CalldialpadScreen> {
   final TextEditingController _myController = TextEditingController();
-
+  late String oldvalue;
+  bool isvalue = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,11 +39,13 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
               child: SizedBox(
                 height: 70,
                 child: Center(
-                    child: TextField(
+                    child: TextFormField(
                   controller: _myController,
                   textAlign: TextAlign.center,
-                  showCursor: false,
-
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(10)
+                  ], // Limit input to 10 characters
+                  // maxLength: 10,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     suffixIcon: _myController.text.isEmpty
@@ -57,6 +62,15 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
                           ),
                     // filled: true,
                   ),
+                  onChanged: (value) {
+                    if (value.length > 10) {
+                      setState(() {
+                        _myController.text = value.substring(0, 10);
+                        _myController.selection =
+                            TextSelection.collapsed(offset: 10);
+                      });
+                    }
+                  },
 
                   style: const TextStyle(
                       fontSize: 30,
@@ -79,6 +93,7 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
                 _myController.text = _myController.text
                     .substring(0, _myController.text.length - 1);
               },
+              // maxLength: 10,
               // do something with the input numbers
               onSubmit: () {
                 debugPrint('Your code: ${_myController.text}');
@@ -90,6 +105,19 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
                             style: const TextStyle(fontSize: 30),
                           ),
                         ));
+              },
+              onChanged: (value) {
+                debugPrint('Your code: ${_myController.text}');
+                if (value.length > 10) {
+                  _myController.value = TextEditingValue(
+                    text: oldvalue, // Reset the value to the previous value
+                    selection: TextSelection.fromPosition(
+                      TextPosition(offset: 10), // Place the cursor at the end
+                    ),
+                  );
+                } else {
+                  oldvalue = value; // Update the previous value
+                }
               },
             ),
             const SizedBox(

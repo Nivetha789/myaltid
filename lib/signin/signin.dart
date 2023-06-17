@@ -47,8 +47,7 @@ class _SignupAppState extends State<SignupApp> {
               builder: (context) => SendOTPScreen(
                   phonenumber: phonenumber.text,
                   name: namecontroller.text,
-                  refferalcode: refferalcontroller.text,
-                  signup: widget.signup),
+                  refferalcode: refferalcontroller.text),
             ),
           );
         } else {
@@ -64,8 +63,7 @@ class _SignupAppState extends State<SignupApp> {
                 builder: (context) => SendOTPScreen(
                     phonenumber: phonenumber.text,
                     name: namecontroller.text,
-                    refferalcode: refferalcontroller.text,
-                    signup: widget.signup),
+                    refferalcode: refferalcontroller.text),
               ),
             );
           } else {
@@ -124,29 +122,13 @@ class _SignupAppState extends State<SignupApp> {
       debugPrint("pavithra ${response.data}");
 
       if (response.data["status"] == 1) {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["message"][0] +
-                ". Can you please try create a new account",
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
       } else {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SendOTPScreen(
                 phonenumber: phonenumber.text,
                 name: namecontroller.text,
-                refferalcode: refferalcontroller.text,
-                signup: widget.signup),
+                refferalcode: refferalcontroller.text),
           ),
         );
       }

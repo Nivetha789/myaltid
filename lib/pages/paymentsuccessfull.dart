@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+// import 'package:flutter_paynimo/flutter_paynimo.dart';
 import 'package:myaltid/pages/alternateid.dart';
-import '../reasuable/button.dart';
 import '../reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
@@ -13,6 +13,26 @@ class PaymentSuccessfull extends StatefulWidget {
 }
 
 class _PaymentSuccessfullState extends State<PaymentSuccessfull> {
+  String paymentResponse = 'Unknown';
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// INITIALIZE PAYNIMO
+    // initializePaynimo();
+  }
+
+  /// ENTER YOUR PAYNIMO PUBLIC KEY AND MERCHENT ID HERE
+  /// THTESE ARE TEST CREDENTIALS
+  /// MERCHANT ID: T750
+  /// PUB KEY: 1234-6666-6789-56
+
+  // initializePaynimo() async {
+  //   await FlutterPaynimo.configure(
+  //       merchantId: "T750", publicKey: "1234-6666-6789-56");
+  // }
+
   var items = [
     {"name": "Annual ", "number": "pay for full year ", "talktime": "250 / m"},
     {

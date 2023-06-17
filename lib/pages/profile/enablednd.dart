@@ -58,6 +58,16 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
   }
 
   var forIos = true;
+  var enablednd = true;
+  var callaler1 = true;
+  var callaler2 = true;
+  var msgalert1 = true;
+  var msgalert2 = true;
+  var disablednd = false;
+  var disabledndclalert1 = false;
+  var disabledndclalert2 = false;
+  var disabledndmsgalert1 = false;
+  var disabledndmsgalert2 = false;
   @override
   Widget build(BuildContext context) {
     return Backgroundscreen(
@@ -145,9 +155,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: forIos,
+                            value: enablednd,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => enablednd = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -189,9 +199,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: forIos,
+                            value: callaler1,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => callaler1 = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -222,9 +232,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: forIos,
+                            value: callaler2,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => callaler2 = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -269,9 +279,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: forIos,
+                            value: msgalert1,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => msgalert1 = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -302,9 +312,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: forIos,
+                            value: msgalert2,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => msgalert2 = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -338,9 +348,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: false,
+                            value: disablednd,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => disablednd = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -382,9 +392,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: false,
+                            value: disabledndclalert1,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => disabledndclalert1 = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -415,9 +425,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: false,
+                            value: disabledndclalert2,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => disabledndclalert2 = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -462,9 +472,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: false,
+                            value: disabledndmsgalert1,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => disabledndmsgalert1 = value),
                           ),
                           const SizedBox(
                             width: 20,
@@ -495,9 +505,9 @@ class _EnableDndScreenState extends State<EnableDndScreen> {
                             activeColor: buttoncolor,
                             thumbColor: whitecolor,
                             trackColor: Colors.grey,
-                            value: false,
+                            value: disabledndmsgalert2,
                             onChanged: (value) =>
-                                setState(() => forIos = value),
+                                setState(() => disabledndmsgalert2 = value),
                           ),
                           const SizedBox(
                             width: 20,

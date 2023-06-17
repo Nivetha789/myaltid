@@ -167,7 +167,7 @@ class _PlanSelectionState extends State<PlanSelection> {
       if (response.data["status"] == 1) {
         await SharedPreference().setplanid(widget.cid);
 
-        await SharedPreference().setplanid(selectedOption!.id);
+        await SharedPreference().setsubscriptionId(selectedOption!.id);
 
         await SharedPreference().setUserId(response.data["data"]["_id"]);
 

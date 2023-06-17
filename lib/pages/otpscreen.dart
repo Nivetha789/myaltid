@@ -1,18 +1,15 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, unrelated_type_equality_checks, use_build_context_synchronously, non_constant_identifier_names
 
 import 'dart:async';
-
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:myaltid/data/api.dart';
+import 'package:myaltid/pages/calls/calllist.dart';
 import 'package:myaltid/pages/kyc.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../reasuable/theme.dart';
-
 import '../reasuable/background_screen.dart';
-
 import '../reasuable/button.dart';
 import 'package:myaltid/pages/services.dart';
 import 'package:otp_text_field/otp_field.dart';
@@ -20,9 +17,9 @@ import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
 
 class SendOTPScreen extends StatefulWidget {
-  final phonenumber, name, refferalcode;
+  final phonenumber, name, refferalcode, signup;
   const SendOTPScreen(
-      {super.key, this.phonenumber, this.name, this.refferalcode});
+      {super.key, this.phonenumber, this.name, this.refferalcode, this.signup});
 
   @override
   State<SendOTPScreen> createState() => _SendOTPScreenState();
@@ -33,21 +30,29 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
   TextEditingController textEditingController = TextEditingController();
   @override
   void initState() {
-    startTimeout();
     SendOTP();
+    startTimeout();
+
     super.initState();
   }
 
-  final interval = const Duration(seconds: 2);
+  final interval = const Duration(seconds: 1);
 
-  final int timerMaxSeconds = 120;
+  final int timerMaxSeconds = 180;
 
   int currentSeconds = 0;
 
-  String get timerText =>
-      '${((timerMaxSeconds - currentSeconds) ~/ 120).toString().padLeft(2, '0')}:${((timerMaxSeconds - currentSeconds) % 120).toString().padLeft(2, '0')}';
+  String get timerText {
+    if (currentSeconds >= timerMaxSeconds) {
+      return '00:00';
+    } else {
+      return '${((timerMaxSeconds - currentSeconds) ~/ 180).toString().padLeft(2, '0')}:${((timerMaxSeconds - currentSeconds) % 180).toString().padLeft(2, '0')}';
+    }
+  }
+  // '${((timerMaxSeconds - currentSeconds) ~/ 180).toString().padLeft(2, '0')}:${((timerMaxSeconds - currentSeconds) % 180).toString().padLeft(2, '0')}';
 
   startTimeout([int? milliseconds]) {
+    print("sdfhdfjhgsdfjhgsdf $timerText");
     var duration = interval;
     Timer.periodic(duration, (timer) {
       setState(() {
@@ -118,6 +123,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
     }
   }
 
+  bool isconfirmloading = false;
   VerifyOTP() async {
     try {
       Dio dio = Dio();
@@ -139,17 +145,50 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
           await SharedPreference().setrefferalcode(widget.refferalcode!);
           await SharedPreference()
               .settoken(response.data["data"][0]["c_accessToken"]);
+          if (response.data["data"][0]["n_Status"] == "2") {
+            setState(() {
+              isconfirmloading = false;
+            });
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'On Snap!',
+                message: 'Please contact your admin',
+                contentType: ContentType.failure,
+              ),
+            );
 
-          if (response.data["data"][0]["n_Payment"] == "2") {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          } else if (widget.signup != "signup") {
+            setState(() {
+              isconfirmloading = false;
+            });
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const CallistPage()),
+            );
+          } else if (response.data["data"][0]["n_Payment"] == "2") {
+            setState(() {
+              isconfirmloading = false;
+            });
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const KycScreen()),
             );
           } else {
+            setState(() {
+              isconfirmloading = false;
+            });
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const ServiceApp()),
             );
           }
         } else {
+          setState(() {
+            isconfirmloading = false;
+          });
           otpController.clear();
           final snackBar = SnackBar(
             elevation: 0,
@@ -157,7 +196,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
             backgroundColor: Colors.transparent,
             content: AwesomeSnackbarContent(
               title: 'On Snap!',
-              message: 'Please enter valid otp!',
+              message: response.data["error"][0],
               contentType: ContentType.failure,
             ),
           );
@@ -167,6 +206,9 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
             ..showSnackBar(snackBar);
         }
       } else {
+        setState(() {
+          isconfirmloading = false;
+        });
         final snackBar = SnackBar(
           elevation: 0,
           behavior: SnackBarBehavior.floating,
@@ -263,8 +305,13 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
         options: Options(contentType: Headers.formUrlEncodedContentType),
       );
       debugPrint("pavithra ${response.data}");
+      setState(() {
+        isconfirmloading = false;
+      });
       if (response.statusCode == 401) {
       } else if (response.statusCode == 200) {
+        startTimeout();
+        currentSeconds = 0;
         textEditingController.text = response.data["data"][0].toString();
         final snackBar = SnackBar(
           elevation: 0,
@@ -430,7 +477,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                                   style: TextStyle(color: whitecolor),
                                 ),
                                 Text(
-                                  timerText,
+                                  timerText == "01:00" ? "00:180" : timerText,
                                   style: const TextStyle(color: buttoncolor),
                                 ),
                                 const Text(
@@ -444,46 +491,51 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                   const SizedBox(
                     height: 30,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Checkbox(
-                        hoverColor: buttoncolor,
+                  widget.signup == "signup"
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Checkbox(
+                              hoverColor: buttoncolor,
 
-                        fillColor: isChecked
-                            ? MaterialStateProperty.all<Color>(buttoncolor)
-                            : MaterialStateProperty.all<Color>(whitecolor),
-                        checkColor: whitecolor,
-                        //   fillColor: Colors.white,
-                        // overlayColor:
-                        //     MaterialStateProperty.all<Color>(whitecolor),
-                        // fillColor: Color(0xFF0970d6),
-                        activeColor: buttoncolor,
-                        value: isChecked,
-                        onChanged: (value) {
-                          isChecked = !isChecked;
-                          setState(() {
-                            debugPrint("DFDDGDFGDFGFD $isChecked");
-                          });
-                        },
-                      ),
-                      const Text.rich(
-                        TextSpan(
-                          text: 'I agree with ',
-                          style: TextStyle(fontSize: 15, color: whitecolor),
-                          children: <TextSpan>[
-                            TextSpan(
-                                text: 'terms & conditions',
-                                style: TextStyle(
-                                    decoration: TextDecoration.underline,
-                                    fontSize: 15,
-                                    color: Color(0xffE4C793))),
-                            // can add more TextSpans here...
+                              fillColor: isChecked
+                                  ? MaterialStateProperty.all<Color>(
+                                      buttoncolor)
+                                  : MaterialStateProperty.all<Color>(
+                                      whitecolor),
+                              checkColor: whitecolor,
+                              //   fillColor: Colors.white,
+                              // overlayColor:
+                              //     MaterialStateProperty.all<Color>(whitecolor),
+                              // fillColor: Color(0xFF0970d6),
+                              activeColor: buttoncolor,
+                              value: isChecked,
+                              onChanged: (value) {
+                                isChecked = !isChecked;
+                                setState(() {
+                                  debugPrint("DFDDGDFGDFGFD $isChecked");
+                                });
+                              },
+                            ),
+                            const Text.rich(
+                              TextSpan(
+                                text: 'I agree with ',
+                                style:
+                                    TextStyle(fontSize: 15, color: whitecolor),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: 'terms & conditions',
+                                      style: TextStyle(
+                                          decoration: TextDecoration.underline,
+                                          fontSize: 15,
+                                          color: Color(0xffE4C793))),
+                                  // can add more TextSpans here...
+                                ],
+                              ),
+                            ),
                           ],
-                        ),
-                      ),
-                    ],
-                  ),
+                        )
+                      : Container(),
                   agreeterm == true
                       ? const Text(
                           "Please accept agree & terms conditions",
@@ -493,43 +545,91 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                   const SizedBox(
                     height: 70,
                   ),
-                  otpfield == true && isChecked == true
-                      ? InkWell(
-                          onTap: () {
-                            debugPrint("PAVITHRA");
-                            VerifyOTP();
-                          },
-                          child: const ButtonScreen(
-                            buttontext: "Confirm",
-                          ),
-                        )
-                      : InkWell(
-                          onTap: () {
-                            debugPrint("PAVITHRA12");
-                            if (otpfield == false && isChecked == false) {
-                              setState(() {
-                                confirmotp = false;
-                                errorfield = true;
-                                agreeterm = true;
-                              });
-                            } else if (otpfield == false) {
-                              confirmotp = false;
-                              errorfield = true;
-                              agreeterm = false;
-                            } else {
-                              confirmotp = false;
-                              errorfield = false;
-                              agreeterm = true;
-                            }
+                  widget.signup == "signup"
+                      ? Column(
+                          children: [
+                            otpfield == true && isChecked == true
+                                ? InkWell(
+                                    onTap: isconfirmloading == false
+                                        ? () {
+                                            debugPrint("PAVITHRA");
+                                            setState(() {
+                                              isconfirmloading = true;
+                                            });
+                                            VerifyOTP();
+                                          }
+                                        : () {},
+                                    child: const ButtonScreen(
+                                      buttontext: "Confirm",
+                                    ),
+                                  )
+                                : InkWell(
+                                    onTap: () {
+                                      debugPrint("PAVITHRA12");
+                                      if (otpfield == false &&
+                                          isChecked == false) {
+                                        setState(() {
+                                          confirmotp = false;
+                                          errorfield = true;
+                                          agreeterm = true;
+                                        });
+                                      } else if (otpfield == false) {
+                                        confirmotp = false;
+                                        errorfield = true;
+                                        agreeterm = false;
+                                      } else {
+                                        confirmotp = false;
+                                        errorfield = false;
+                                        agreeterm = true;
+                                      }
 
-                            // Navigator.of(context).push(
-                            //   MaterialPageRoute(
-                            //       builder: (context) => const SendOTPScreen()),
-                            // );
-                          },
-                          child: const ButtonScreen(
-                            buttontext: "Confirm",
-                          ),
+                                      // Navigator.of(context).push(
+                                      //   MaterialPageRoute(
+                                      //       builder: (context) => const SendOTPScreen()),
+                                      // );
+                                    },
+                                    child: const ButtonScreen(
+                                      buttontext: "Confirm",
+                                    ),
+                                  ),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            otpfield == true
+                                ? InkWell(
+                                    onTap: isconfirmloading == false
+                                        ? () {
+                                            debugPrint("PAVITHRA");
+                                            setState(() {
+                                              isconfirmloading = true;
+                                            });
+                                            VerifyOTP();
+                                          }
+                                        : () {},
+                                    child: const ButtonScreen(
+                                      buttontext: "Confirm",
+                                    ),
+                                  )
+                                : InkWell(
+                                    onTap: () {
+                                      debugPrint("PAVITHRA12");
+
+                                      setState(() {
+                                        confirmotp = false;
+                                        errorfield = true;
+                                      });
+
+                                      // Navigator.of(context).push(
+                                      //   MaterialPageRoute(
+                                      //       builder: (context) => const SendOTPScreen()),
+                                      // );
+                                    },
+                                    child: const ButtonScreen(
+                                      buttontext: "Confirm",
+                                    ),
+                                  ),
+                          ],
                         ),
                 ],
               )

@@ -10,7 +10,7 @@ class NumPad extends StatelessWidget {
   final Color iconColor;
   final TextEditingController controller;
   final Function delete;
-  final Function onSubmit;
+  final Function onSubmit;  final Function onChanged;
 
   const NumPad({
     Key? key,
@@ -18,7 +18,7 @@ class NumPad extends StatelessWidget {
     this.buttonColor = Colors.indigo,
     this.iconColor = Colors.amber,
     required this.delete,
-    required this.onSubmit,
+    required this.onSubmit, required this.onChanged,
     required this.controller,
   }) : super(key: key);
 
