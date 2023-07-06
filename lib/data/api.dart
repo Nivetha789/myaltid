@@ -29,6 +29,8 @@ class ApiProvider {
 
   static const String getdatautlize = "${BASE_URL}subcription/userplanget";
 
+  static const String getpaymentdetails = "${BASE_URL}subscription/PaymentDetails";
+
   static const String addsubscrptiondetils =
       "${BASE_URL}subcription/subscriptionbuy";
 }

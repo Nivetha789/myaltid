@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:myaltid/pages/calls/calllist.dart';
 import 'package:myaltid/pages/mail/maillist.dart';
 import 'package:myaltid/pages/message/messagelist.dart';
+import 'package:myaltid/pages/selectpaymentmode.dart';
 import 'package:myaltid/reasuable/theme.dart';
 
 class MyStatefulWidget extends StatefulWidget {
@@ -55,9 +56,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
               setState(() {
                 currentIndex = 0;
               });
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const MaillistPage()),
-              );
+              // Navigator.of(context).push(
+              //   MaterialPageRoute(builder: (context) => const PaymentmodeSelection()),
+              // );
             },
             child: Container(
               color: currentIndex == 0 ? tabbgcolor : blackcolor,

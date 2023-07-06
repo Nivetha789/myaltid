@@ -63,7 +63,7 @@ class CongratulationsState extends State<Congratulations> {
       if (response.statusCode == 401) {
       } else if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
-        debugPrint("pavithra155 ${map}");
+        debugPrint("response ${map}");
         await SharedPreference().setuserName(map["data"]["c_UserName"]);
         setState(() {
           isloading = true;

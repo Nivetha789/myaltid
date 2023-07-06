@@ -84,7 +84,7 @@ class _SelectPlanState extends State<SelectPlan> {
       if (response.statusCode == 401) {
       } else if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
-        debugPrint("pavithra155 ${response.data}");
+        debugPrint("response ${response.data}");
         setState(() {
           isloading = true;
         });
@@ -92,7 +92,7 @@ class _SelectPlanState extends State<SelectPlan> {
         //   ProgressDialog().dismissDialog(context);
         // });
         for (var i = 0; i < map["data"].length; i++) {
-          debugPrint("pavithra155 ${map["data"][i]}");
+          debugPrint("response ${map["data"][i]}");
 
           setState(() {
             plans.add(Plan.fromJson(map["data"][i]));
@@ -196,6 +196,7 @@ class _SelectPlanState extends State<SelectPlan> {
                       itemBuilder: (BuildContext context, int index) {
                         return InkWell(
                           onTap: () {
+                            print("plan_iddd "+plans[index].id);
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => PlanSelection(

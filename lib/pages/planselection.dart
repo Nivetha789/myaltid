@@ -1,19 +1,24 @@
 // ignore_for_file: non_constant_identifier_names, prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/data/api.dart';
+import 'package:myaltid/module/PaymentDetailsModel.dart';
 import 'package:myaltid/module/plans.dart';
 import 'package:myaltid/reasuable/theme.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
+import 'package:weipl_checkout_flutter/weipl_checkout_flutter.dart';
 
 import '../reasuable/background_screen.dart';
 import 'package:myaltid/pages/selectpaymentmode.dart';
 
 import '../reasuable/button.dart';
+import '../widget/progressloaded.dart';
 
 class PlanSelection extends StatefulWidget {
   final cid;
@@ -28,6 +33,11 @@ class PlanSelection extends StatefulWidget {
 
 class _PlanSelectionState extends State<PlanSelection> {
   List<JSubscription> subscriptionOptions = [];
+
+  WeiplCheckoutFlutter wlCheckoutFlutter = WeiplCheckoutFlutter();
+
+  String selectionAmount="";
+  String orderId="";
 
 //  Getsubscription() {
 //     for (var i = 0; i < widget.Jsubscription.length; i++) {
@@ -63,6 +73,13 @@ class _PlanSelectionState extends State<PlanSelection> {
   ];
 
   late String select = "0";
+
+  String username="";
+  String mobileNum="";
+  String amount="";
+  String transactionId="";
+  String userId="";
+  String hash="";
 
   Row addRadioButton(int btnValue, String name, number, talktime) {
     return Row(
@@ -161,9 +178,9 @@ class _PlanSelectionState extends State<PlanSelection> {
           headers: {"Authorization": "Bearer $token"},
         ),
       );
-      debugPrint("pavithra ${response.data}");
+      debugPrint("dfkjsfddkjhpavithra ${response.data}");
       // var data = jsonDecode(response.data);/
-      // print("dfkjsfddkjh $data");
+      print("dfkjsfddkjh $token");
       if (response.data["status"] == 1) {
         await SharedPreference().setplanid(widget.cid);
 
@@ -174,8 +191,7 @@ class _PlanSelectionState extends State<PlanSelection> {
         // await SharedPreference()
         //     .setUserId(response.data["data"]["c_ActivePlan"]);
 
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => const PaymentmodeSelection()));
+       getPaymentDetails();
       } else {
         final snackBar = SnackBar(
           elevation: 0,
@@ -357,7 +373,9 @@ class _PlanSelectionState extends State<PlanSelection> {
                       onChanged: (newValue) {
                         setState(() {
                           selectedOption = newValue;
-                          print(selectedOption!.id);
+                          print("selectioniddd "+selectedOption!.id);
+                          selectionAmount=option.nAmount.toString();
+                          orderId=option.id.toString();
                         });
                       },
                     ),
@@ -399,6 +417,25 @@ class _PlanSelectionState extends State<PlanSelection> {
                   )
                 : InkWell(
                     onTap: () async {
+                      print("planiddd "+widget.Jsubscription.toString());
+                      // if (Platform.isIOS) {
+                      //   // iOS code
+                      //   bool status = await wlCheckoutFlutter.checkInstalledUpiApp(
+                      //       "gpay://upi/"); //UPI Schemes :- "phonepe://upi/" OR "gpay://upi/" OR "paytm://".
+                      //   // showAlertDialog(context, "WL SDK Response", "$status");
+                      //   Navigator.of(context).push(MaterialPageRoute(
+                      //       builder: (context) => PaymentmodeSelection(status,selectionAmount,orderId)));
+                      // } else if (Platform.isAndroid) {
+                      //   // android code
+                      //   List response = await wlCheckoutFlutter.upiIntentAppsList();
+                      //   // showAlertDialog(context, "WL SDK Response", "$response");
+                      //   Navigator.of(context).push(MaterialPageRoute(
+                      //       builder: (context) => PaymentmodeSelection(response,selectionAmount,orderId)));
+                      // } else {
+                      //   showAlertDialog(context, "WL SDK Response",
+                      //       "Feature is not available for selected platform.");
+                      // }
+
                       UserRegister();
                     },
                     child: const ButtonScreen(
@@ -409,5 +446,117 @@ class _PlanSelectionState extends State<PlanSelection> {
         ),
       ),
     );
+  }
+
+  void showAlertDialog(BuildContext context, String title, String message) {
+    // set up the buttons
+    Widget continueButton = ElevatedButton(
+      child: const Text("Okay"),
+      onPressed: () {
+        Navigator.pop(context, false);
+      },
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: const EdgeInsets.only(left: 25, right: 25),
+          title: Center(child: Text(title)),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          content: SizedBox(
+            height: 400,
+            width: 300,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(message),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            continueButton,
+          ],
+        );
+      },
+    );
+  }
+
+  //get payment details
+  getPaymentDetails() async {
+    ProgressDialog().showLoaderDialog(context);
+    // BaseOptions options = new BaseOptions(
+    //   baseUrl: ApiProvider().Baseurl,
+    //   connectTimeout: 5000,
+    //   receiveTimeout: 3000,
+    // );
+    // Dio dio = new Dio(options);
+
+    Dio dio = new Dio();
+    // dio.options.connectTimeout = 5000; //5s
+    // dio.options.receiveTimeout = 3000;
+
+    var token = await SharedPreference().gettoken();
+
+    var parameters = {
+      "c_PlanId": widget.cid,
+      "c_SubscriptionId": selectedOption!.id
+    };
+    print("paymentDetailsParams :"+parameters.toString());
+
+    dio.options.contentType = Headers.formUrlEncodedContentType;
+    final response = await dio.post(
+      ApiProvider.getpaymentdetails,
+      data: parameters,
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+        headers: {"Authorization": "Bearer $token"},
+      ),
+    );
+    print("paymentDetailsRes :"+response.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = jsonDecode(response.toString());
+      PaymentDetailsModel paymentDetailsModel = PaymentDetailsModel.fromJson(map);
+
+      if (paymentDetailsModel.status == 1) {
+        ProgressDialog().dismissDialog(context);
+        setState(() {
+          username=paymentDetailsModel.data![0].cName!;
+          mobileNum=paymentDetailsModel.data![0].nMobileNumber!;
+          amount=paymentDetailsModel.data![0].nAmount.toString();
+          transactionId=paymentDetailsModel.data![0].nTransactionId!;
+          userId=paymentDetailsModel.data![0].cUserId!;
+          hash=paymentDetailsModel.data![0].cHash!;
+          print("hashhhhhh "+hash.toString());
+        });
+
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => PaymentmodeSelection(username,mobileNum,amount,transactionId,userId,hash)));
+      } else {
+        ProgressDialog().dismissDialog(context);
+        Fluttertoast.showToast(
+            msg: "Not Found",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            textColor: Colors.white,
+            backgroundColor: Colors.lightGreen,
+            timeInSecForIosWeb: 1);
+      }
+    } else {
+      ProgressDialog().dismissDialog(context);
+      Fluttertoast.showToast(
+          msg: "Bad Network Connection try again..",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          textColor: Colors.white,
+          backgroundColor: Colors.lightGreen,
+          timeInSecForIosWeb: 1);
+    }
   }
 }
