@@ -36,9 +36,8 @@ class PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
             alignment: Alignment.topCenter,
             children: [
               Container(
-
                 child: Image.asset(
-                  "images/star_background.jpg",
+                  "assets/images/star_background.jpg",
                   fit: BoxFit.fitHeight,
                 ),
               ),
@@ -75,8 +74,8 @@ class PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                     Expanded(
                       child: Container(
                         child: Image.asset(widget.booking_status
-                            ? "images/success_payment1.png"
-                            : "images/payment_cancel.jpg"),
+                            ? "assets/images/payment_cancel.jpg"
+                            : "assets/images/payment_cancel.jpg"),
                       ),
                       flex: 5,
                     ),

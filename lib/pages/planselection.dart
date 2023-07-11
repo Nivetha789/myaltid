@@ -1,7 +1,6 @@
 // ignore_for_file: non_constant_identifier_names, prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
@@ -10,13 +9,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/module/PaymentDetailsModel.dart';
 import 'package:myaltid/module/plans.dart';
+import 'package:myaltid/pages/paymentsuccessfull.dart';
+import 'package:myaltid/pages/selectpaymentmode.dart';
 import 'package:myaltid/reasuable/theme.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
 import 'package:weipl_checkout_flutter/weipl_checkout_flutter.dart';
 
+import '../module/TransactionVerifyModel.dart';
 import '../reasuable/background_screen.dart';
-import 'package:myaltid/pages/selectpaymentmode.dart';
-
 import '../reasuable/button.dart';
 import '../widget/progressloaded.dart';
 
@@ -24,6 +24,7 @@ class PlanSelection extends StatefulWidget {
   final cid;
   final List<JSubscription> Jsubscription;
   final cname;
+
   const PlanSelection(
       {super.key, this.cid, required this.Jsubscription, this.cname});
 
@@ -36,8 +37,8 @@ class _PlanSelectionState extends State<PlanSelection> {
 
   WeiplCheckoutFlutter wlCheckoutFlutter = WeiplCheckoutFlutter();
 
-  String selectionAmount="";
-  String orderId="";
+  String selectionAmount = "";
+  String orderId = "";
 
 //  Getsubscription() {
 //     for (var i = 0; i < widget.Jsubscription.length; i++) {
@@ -74,12 +75,18 @@ class _PlanSelectionState extends State<PlanSelection> {
 
   late String select = "0";
 
-  String username="";
-  String mobileNum="";
-  String amount="";
-  String transactionId="";
-  String userId="";
-  String hash="";
+  String username = "";
+  String mobileNum = "";
+  String mailId = "";
+  String amount = "";
+  String transactionId = "";
+  String userId = "";
+  String hash = "";
+  String merchantId = "";
+  String primaryColor = "";
+  String secondColor = "";
+  String btnColor1 = "";
+  String btnColor2 = "";
 
   Row addRadioButton(int btnValue, String name, number, talktime) {
     return Row(
@@ -191,7 +198,7 @@ class _PlanSelectionState extends State<PlanSelection> {
         // await SharedPreference()
         //     .setUserId(response.data["data"]["c_ActivePlan"]);
 
-       getPaymentDetails();
+        getPaymentDetails();
       } else {
         final snackBar = SnackBar(
           elevation: 0,
@@ -373,9 +380,9 @@ class _PlanSelectionState extends State<PlanSelection> {
                       onChanged: (newValue) {
                         setState(() {
                           selectedOption = newValue;
-                          print("selectioniddd "+selectedOption!.id);
-                          selectionAmount=option.nAmount.toString();
-                          orderId=option.id.toString();
+                          print("selectioniddd " + selectedOption!.id);
+                          selectionAmount = option.nAmount.toString();
+                          orderId = option.id.toString();
                         });
                       },
                     ),
@@ -417,7 +424,7 @@ class _PlanSelectionState extends State<PlanSelection> {
                   )
                 : InkWell(
                     onTap: () async {
-                      print("planiddd "+widget.Jsubscription.toString());
+                      print("planiddd " + widget.Jsubscription.toString());
                       // if (Platform.isIOS) {
                       //   // iOS code
                       //   bool status = await wlCheckoutFlutter.checkInstalledUpiApp(
@@ -508,7 +515,7 @@ class _PlanSelectionState extends State<PlanSelection> {
       "c_PlanId": widget.cid,
       "c_SubscriptionId": selectedOption!.id
     };
-    print("paymentDetailsParams :"+parameters.toString());
+    print("paymentDetailsParams :" + parameters.toString());
 
     dio.options.contentType = Headers.formUrlEncodedContentType;
     final response = await dio.post(
@@ -519,25 +526,44 @@ class _PlanSelectionState extends State<PlanSelection> {
         headers: {"Authorization": "Bearer $token"},
       ),
     );
-    print("paymentDetailsRes :"+response.toString());
+    print("paymentDetailsRes :" + response.toString());
     if (response.statusCode == 200) {
       Map<String, dynamic> map = jsonDecode(response.toString());
-      PaymentDetailsModel paymentDetailsModel = PaymentDetailsModel.fromJson(map);
+      PaymentDetailsModel paymentDetailsModel =
+          PaymentDetailsModel.fromJson(map);
 
       if (paymentDetailsModel.status == 1) {
         ProgressDialog().dismissDialog(context);
         setState(() {
-          username=paymentDetailsModel.data![0].cName!;
-          mobileNum=paymentDetailsModel.data![0].nMobileNumber!;
-          amount=paymentDetailsModel.data![0].nAmount.toString();
-          transactionId=paymentDetailsModel.data![0].nTransactionId!;
-          userId=paymentDetailsModel.data![0].cUserId!;
-          hash=paymentDetailsModel.data![0].cHash!;
-          print("hashhhhhh "+hash.toString());
+          username = paymentDetailsModel.data![0].cName!;
+          mobileNum = paymentDetailsModel.data![0].nMobileNumber!;
+          mailId = paymentDetailsModel.data![0].cEmail!;
+          amount = paymentDetailsModel.data![0].nAmount.toString();
+          transactionId = paymentDetailsModel.data![0].nTransactionId!;
+          userId = paymentDetailsModel.data![0].cUserId!;
+          hash = paymentDetailsModel.data![0].cHash!;
+          merchantId = paymentDetailsModel.data![0].cMerchantId!;
+          primaryColor = paymentDetailsModel.data![0].cPrimaryColorCode!;
+          secondColor = paymentDetailsModel.data![0].cSecondaryColorCode!;
+          btnColor1 = paymentDetailsModel.data![0].cButtonColorCode1!;
+          btnColor2 = paymentDetailsModel.data![0].cButtonColorCode2!;
+          print("hashhhhhh " + hash.toString());
         });
 
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => PaymentmodeSelection(username,mobileNum,amount,transactionId,userId,hash)));
+            builder: (context) => PaymentmodeSelection(
+                username,
+                mobileNum,
+                mailId,
+                amount,
+                transactionId,
+                userId,
+                hash,
+                merchantId,
+                primaryColor,
+                secondColor,
+                btnColor1,
+                btnColor2)));
       } else {
         ProgressDialog().dismissDialog(context);
         Fluttertoast.showToast(

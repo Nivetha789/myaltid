@@ -31,6 +31,8 @@ class ApiProvider {
 
   static const String getpaymentdetails = "${BASE_URL}subscription/PaymentDetails";
 
+  static const String updatepaymentdetails = "${BASE_URL}subscription/verify";
+
   static const String addsubscrptiondetils =
       "${BASE_URL}subcription/subscriptionbuy";
 }
