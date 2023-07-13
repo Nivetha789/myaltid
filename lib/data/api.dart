@@ -17,7 +17,7 @@ class ApiProvider {
 
   static const String userregister = "${BASE_URL}users/register";
 
-  static const String getvirutalid = "${BASE_URL}subcription/getVirtualId";
+  static const String getvirutalid = "${BASE_URL}subscription/getVirtualId";
 
   static const String updatevirutalid = "${BASE_URL}users/updateVirtulId";
 
@@ -27,7 +27,7 @@ class ApiProvider {
 
   static const String getuser = "${BASE_URL}users/profile";
 
-  static const String getdatautlize = "${BASE_URL}subcription/userplanget";
+  static const String getdatautlize = "${BASE_URL}subscription/userplanget";
 
   static const String getpaymentdetails = "${BASE_URL}subscription/PaymentDetails";
 

@@ -390,7 +390,6 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                 : InkWell(
                     onTap: () async {
                       String deviceID = ""; // initiaze varibale
-                      var token = await SharedPreference().gettoken();
                       if (Platform.isAndroid) {
                         deviceID = "AndroidSH2"; // Android-specific deviceId, supported options are "AndroidSH1" & "AndroidSH2"
                       } else if (Platform.isIOS) {

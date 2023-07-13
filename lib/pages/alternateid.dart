@@ -1,7 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, prefer_typing_uninitialized_variables
-
 import 'dart:convert';
-
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +6,12 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/module/alternateid.dart';
 import 'package:myaltid/pages/WebViewScreen.dart';
-import 'package:myaltid/pages/kyc.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
 import '../reasuable/dialogbox.dart';
 import '../reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
-import 'htmlscreen.dart';
+import 'kyc.dart';
 
 class SelectAlternateID extends StatefulWidget {
   const SelectAlternateID({super.key});
@@ -25,218 +21,17 @@ class SelectAlternateID extends StatefulWidget {
 }
 
 class _SelectAlternateIDState extends State<SelectAlternateID> {
-  @override
-  void initState() {
-    GetPlan();
-    super.initState();
-  }
 
   bool isloading = false;
   List<JEmail> jemail = [];
   List<JMobile> jphonenumber = [];
-  GetPlan() async {
-    try {
-      Dio dio = Dio();
-      setState(() {
-        isloading = false;
-      });
-      const SpinKitFadingCircle(
-        color: buttoncolor,
-        size: 50.0,
-      );
-      var token = await SharedPreference().gettoken();
-
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.get(
-        ApiProvider.getvirutalid,
-        // data: parameters,
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {"Authorization": "Bearer $token"},
-        ),
-      );
-      debugPrint("pavithra123 ${response.data}");
-
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        Map<String, dynamic> map = jsonDecode(response.toString());
-        debugPrint("response ${response.data}");
-        setState(() {
-          isloading = true;
-        });
-        // setState(() {
-        //   ProgressDialog().dismissDialog(context);
-        // });
-        for (var i = 0; i < map["data"][0]["j_email"].length; i++) {
-          debugPrint("response ${map["data"][0]["j_email"][i]}");
-
-          setState(() {
-            jemail.add(JEmail.fromJson(map["data"][0]["j_email"][i]));
-          });
-        }
-        debugPrint("response ${map["data"][1]}");
-        for (var j = 0; j < map["data"][1]["j_mobile"].length; j++) {
-          debugPrint("response ${map["data"][1]["j_mobile"][j]}");
-
-          setState(() {
-            jphonenumber.add(JMobile.fromJson(map["data"][1]["j_mobile"][j]));
-          });
-        }
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["message"],
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
-
   var vphoneneumber;
   TextEditingController vemail = TextEditingController();
-  updateVirtulId() async {
-    try {
-      Dio dio = Dio();
-      var token = await SharedPreference().gettoken();
-      var parameters = {
-        "n_Mobile": vphoneneumber,
-        "c_Email": vemail.text,
-      };
-      debugPrint(parameters.toString());
-      print("fgdfkjhgfdkjhgdf $token $parameters");
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        ApiProvider.updatevirutalid,
-        data: parameters,
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {"Authorization": "Bearer $token"},
-        ),
-      );
-      debugPrint("pavithra ${response.data}");
-      // var data = jsonDecode(response.data);/
-      // print("dfkjsfddkjh $data");
-      if (response.data["status"] == 1) {
-        // paymentgatewaylink();
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(builder: (context) => const KycScreen()),
-        // );
-        // await SharedPreference().setplanid(widget.cid);
 
-        // await SharedPreference().setplanid(selectedOption!.id);
-
-        // await SharedPreference().setUserId(response.data["data"]["_id"]);
-
-        // // await SharedPreference()
-        // //     .setUserId(response.data["data"]["c_ActivePlan"]);
-
-        // Navigator.of(context).push(MaterialPageRoute(
-        //     builder: (context) => const PaymentmodeSelection()));
-      } else {
-        paymentgatewaylink();
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["message"][0],
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      final snackBar = SnackBar(
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        content: AwesomeSnackbarContent(
-          title: 'On Snap!',
-          message: "Something went wrong, Please try again later",
-          contentType: ContentType.failure,
-        ),
-      );
-
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(snackBar);
-      debugPrint(e.toString());
-      print(e);
-    }
-  }
-
-  paymentgatewaylink() async {
-    try {
-      Dio dio = Dio();
-
-      var token = await SharedPreference().gettoken();
-      var phoneNumber = await SharedPreference().getphonenumber();
-      print(phoneNumber);
-      var cPlanId = await SharedPreference().getplanid();
-      var cSubscriptionId = await SharedPreference().getsubscriptionId();
-
-      var parameters = {
-        "c_PlanId": cPlanId,
-        "c_SubscriptionId": cSubscriptionId,
-      };
-      // print(parameters);
-      // print(token);
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        "http://13.59.194.102/app/index.php",
-        data: parameters,
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {"Authorization": "Bearer $token"},
-        ),
-      );
-      debugPrint("pavithra ${response.data}");
-      // var data = jsonDecode(response.data);
-      Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => WebViewScreen(response.data!)));
-
-      if (response.data["status"] == 1) {
-      print("dfkjsfddkjh" +response.data.toString());
-
-      // await SharedPreference()
-        //     .setUserId(response.data["data"]["c_ActivePlan"]);
-
-        // Navigator.of(context).push(MaterialPageRoute(
-        //     builder: (context) => const PaymentSuccessfull()));
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["error"][0],
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      print(e);
-    }
+  @override
+  void initState() {
+    GetPlan();
+    super.initState();
   }
 
   @override
@@ -596,5 +391,205 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
         ),
       ),
     );
+  }
+
+  GetPlan() async {
+    try {
+      Dio dio = Dio();
+        isloading = false;
+      const SpinKitFadingCircle(
+        color: buttoncolor,
+        size: 50.0,
+      );
+      var token = await SharedPreference().gettoken();
+      print("tokensubcription/getVirtualId "+token);
+
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.get(
+        ApiProvider.getvirutalid,
+        // data: parameters,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      debugPrint("getvirutalid ${response.data}");
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> map = jsonDecode(response.toString());
+        debugPrint("response ${response.data}");
+          isloading = true;
+        // setState(() {
+        //   ProgressDialog().dismissDialog(context);
+        // });
+        for (var i = 0; i < map["data"][0]["j_email"].length; i++) {
+          debugPrint("response ${map["data"][0]["j_email"][i]}");
+
+          setState(() {
+            jemail.add(JEmail.fromJson(map["data"][0]["j_email"][i]));
+          });
+        }
+        debugPrint("response ${map["data"][1]}");
+        for (var j = 0; j < map["data"][1]["j_mobile"].length; j++) {
+          debugPrint("response ${map["data"][1]["j_mobile"][j]}");
+
+          setState(() {
+            jphonenumber.add(JMobile.fromJson(map["data"][1]["j_mobile"][j]));
+          });
+        }
+      } else {
+        isloading = false;
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["message"],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  updateVirtulId() async {
+    try {
+      Dio dio = Dio();
+      var token = await SharedPreference().gettoken();
+      var parameters = {
+        "n_Mobile": vphoneneumber,
+        "c_Email": vemail.text,
+      };
+      debugPrint(parameters.toString());
+      print("fgdfkjhgfdkjhgdf $token $parameters");
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.updatevirutalid,
+        data: parameters,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      debugPrint("pavithra ${response.data}");
+      // var data = jsonDecode(response.data);/
+      // print("dfkjsfddkjh $data");
+      if (response.data["status"] == 1) {
+        // paymentgatewaylink();
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const KycScreen()),
+        );
+        // await SharedPreference().setplanid(widget.cid);
+
+        // await SharedPreference().setplanid(selectedOption!.id);
+
+        // await SharedPreference().setUserId(response.data["data"]["_id"]);
+
+        // // await SharedPreference()
+        // //     .setUserId(response.data["data"]["c_ActivePlan"]);
+
+        // Navigator.of(context).push(MaterialPageRoute(
+        //     builder: (context) => const PaymentmodeSelection()));
+      } else {
+        paymentgatewaylink();
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["message"][0],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'On Snap!',
+          message: "Something went wrong, Please try again later",
+          contentType: ContentType.failure,
+        ),
+      );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+      debugPrint(e.toString());
+      print(e);
+    }
+  }
+
+  paymentgatewaylink() async {
+    try {
+      Dio dio = Dio();
+
+      var token = await SharedPreference().gettoken();
+      var phoneNumber = await SharedPreference().getphonenumber();
+      print(phoneNumber);
+      var cPlanId = await SharedPreference().getplanid();
+      var cSubscriptionId = await SharedPreference().getsubscriptionId();
+
+      var parameters = {
+        "c_PlanId": cPlanId,
+        "c_SubscriptionId": cSubscriptionId,
+      };
+      // print(parameters);
+      // print(token);
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        "http://13.59.194.102/app/index.php",
+        data: parameters,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      debugPrint("pavithra ${response.data}");
+      // var data = jsonDecode(response.data);
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => WebViewScreen(response.data!)));
+
+      if (response.data["status"] == 1) {
+        print("dfkjsfddkjh" +response.data.toString());
+
+        // await SharedPreference()
+        //     .setUserId(response.data["data"]["c_ActivePlan"]);
+
+        // Navigator.of(context).push(MaterialPageRoute(
+        //     builder: (context) => const PaymentSuccessfull()));
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["error"][0],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 }

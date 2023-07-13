@@ -26,13 +26,23 @@ class SendOTPScreen extends StatefulWidget {
 }
 
 class _SendOTPScreenState extends State<SendOTPScreen> {
+
   OtpFieldController otpController = OtpFieldController();
   TextEditingController textEditingController = TextEditingController();
+
+  bool isconfirmloading = false;
+
+  bool isChecked = false,
+      confirmotp = false,
+      otpfield = false,
+      errorfield = false,
+      agreeterm = false;
+  var otp;
+
   @override
   void initState() {
     SendOTP();
     startTimeout();
-
     super.initState();
   }
 
@@ -62,301 +72,6 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
     });
   }
 
-  SendOTP() async {
-    try {
-      Dio dio = Dio();
-
-      var parameters = {"n_Mobile": widget.phonenumber};
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        ApiProvider.sendotp,
-        data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
-      );
-      debugPrint("pavithra ${response.data}");
-
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        textEditingController.text = response.data["data"][0].toString();
-        final snackBar =
-            //  SnackBar(
-            //   backgroundColor: Colors.green,
-            //   content: Text('Your OTP is ! ${response.data["data"][0]}'),
-            //   duration: const Duration(seconds: 2),
-            // );
-            // ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Oh Hey!',
-            message: 'Your OTP is ! ${response.data["data"][0]}',
-            contentType: ContentType.success,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(builder: (context) => const Congratulations()),
-        // );
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: 'Please enter valid otp!',
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
-
-  bool isconfirmloading = false;
-  VerifyOTP() async {
-    try {
-      Dio dio = Dio();
-
-      var parameters = {"n_Mobile": widget.phonenumber, "n_Otp": otp};
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        ApiProvider.verifyotp,
-        data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
-      );
-      debugPrint("pavithra ${response.data}");
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        if (response.data["status"] == 1) {
-          await SharedPreference().setphonenumber(widget.phonenumber!);
-
-          await SharedPreference().setuserName(widget.name!);
-          await SharedPreference().setrefferalcode(widget.refferalcode!);
-          await SharedPreference()
-              .settoken(response.data["data"][0]["c_accessToken"]);
-          if (response.data["data"][0]["n_Status"] == "2") {
-            setState(() {
-              isconfirmloading = false;
-            });
-            final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'On Snap!',
-                message: 'Please contact your admin',
-                contentType: ContentType.failure,
-              ),
-            );
-
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
-          } else if (widget.signup != "signup") {
-            setState(() {
-              isconfirmloading = false;
-            });
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const CallistPage()),
-            );
-          } else if (response.data["data"][0]["n_Payment"] == "2") {
-            setState(() {
-              isconfirmloading = false;
-            });
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const KycScreen()),
-            );
-          } else {
-            setState(() {
-              isconfirmloading = false;
-            });
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const ServiceApp()),
-            );
-          }
-        } else {
-          setState(() {
-            isconfirmloading = false;
-          });
-          otpController.clear();
-          final snackBar = SnackBar(
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            content: AwesomeSnackbarContent(
-              title: 'On Snap!',
-              message: response.data["error"][0],
-              contentType: ContentType.failure,
-            ),
-          );
-
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(snackBar);
-        }
-      } else {
-        setState(() {
-          isconfirmloading = false;
-        });
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: 'Please enter valid otp!',
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      debugPrint(e as String?);
-    }
-  }
-//checkrefferalcode
-
-  checkrefferal() async {
-    try {
-      Dio dio = Dio();
-
-      var parameters = {"n_Mobile": widget.phonenumber, "n_Otp": otp};
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        ApiProvider.verifyotp,
-        data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
-      );
-      debugPrint("pavithra ${response.data}");
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        if (response.data["status"] == 1) {
-          await SharedPreference().setphonenumber(widget.phonenumber!);
-
-          await SharedPreference().setuserName(widget.name!);
-
-          // SharedPreferences.setPrefix(prefix)
-          //   await _prefs.setString('action', 'Start');
-          // await prefs.setString('action', 'Start');
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const ServiceApp()),
-          );
-        } else {
-          otpController.clear();
-          final snackBar = SnackBar(
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            content: AwesomeSnackbarContent(
-              title: 'On Snap!',
-              message: 'Please enter valid otp!',
-              contentType: ContentType.failure,
-            ),
-          );
-
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(snackBar);
-        }
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: 'Please enter valid otp!',
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      debugPrint(e as String?);
-    }
-  }
-
-  ResendOTP() async {
-    try {
-      Dio dio = Dio();
-
-      var parameters = {"n_Mobile": widget.phonenumber};
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        ApiProvider.resendotp,
-        data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
-      );
-      debugPrint("pavithra ${response.data}");
-      setState(() {
-        isconfirmloading = false;
-      });
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        startTimeout();
-        currentSeconds = 0;
-        textEditingController.text = response.data["data"][0].toString();
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Oh Hey!',
-            message: 'Your OTP is ! ${response.data["data"][0]}',
-            contentType: ContentType.success,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(builder: (context) => const Congratulations()),
-        // );
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: 'Please enter valid otp!',
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      debugPrint(e as String?);
-    }
-  }
-
-  bool isChecked = false,
-      confirmotp = false,
-      otpfield = false,
-      errorfield = false,
-      agreeterm = false;
-  var otp;
   @override
   Widget build(BuildContext context) {
     return Backgroundscreen(
@@ -709,5 +424,293 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
         ),
       ),
     );
+  }
+
+  SendOTP() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": widget.phonenumber};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.sendotp,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        textEditingController.text = response.data["data"][0].toString();
+        final snackBar =
+        //  SnackBar(
+        //   backgroundColor: Colors.green,
+        //   content: Text('Your OTP is ! ${response.data["data"][0]}'),
+        //   duration: const Duration(seconds: 2),
+        // );
+        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Oh Hey!',
+            message: 'Your OTP is ! ${response.data["data"][0]}',
+            contentType: ContentType.success,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  VerifyOTP() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": widget.phonenumber, "n_Otp": otp};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.verifyotp,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        if (response.data["status"] == 1) {
+          await SharedPreference().setphonenumber(widget.phonenumber!);
+
+          await SharedPreference().setuserName(widget.name!);
+          await SharedPreference().setrefferalcode(widget.refferalcode!);
+          await SharedPreference()
+              .settoken(response.data["data"][0]["c_accessToken"]);
+          if (response.data["data"][0]["n_Status"] == "2") {
+            setState(() {
+              isconfirmloading = false;
+            });
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'On Snap!',
+                message: 'Please contact your admin',
+                contentType: ContentType.failure,
+              ),
+            );
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          } else if (widget.signup != "signup") {
+            setState(() {
+              isconfirmloading = false;
+            });
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const CallistPage()),
+            );
+          } else if (response.data["data"][0]["n_Payment"] == "2") {
+            setState(() {
+              isconfirmloading = false;
+            });
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const KycScreen()),
+            );
+          } else {
+            setState(() {
+              isconfirmloading = false;
+            });
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const ServiceApp()),
+            );
+          }
+        } else {
+          setState(() {
+            isconfirmloading = false;
+          });
+          otpController.clear();
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: response.data["error"][0],
+              contentType: ContentType.failure,
+            ),
+          );
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+        }
+      } else {
+        setState(() {
+          isconfirmloading = false;
+        });
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e as String?);
+    }
+  }
+//checkrefferalcode
+
+  checkrefferal() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": widget.phonenumber, "n_Otp": otp};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.verifyotp,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        if (response.data["status"] == 1) {
+          await SharedPreference().setphonenumber(widget.phonenumber!);
+
+          await SharedPreference().setuserName(widget.name!);
+
+          // SharedPreferences.setPrefix(prefix)
+          //   await _prefs.setString('action', 'Start');
+          // await prefs.setString('action', 'Start');
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const ServiceApp()),
+          );
+        } else {
+          otpController.clear();
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: 'Please enter valid otp!',
+              contentType: ContentType.failure,
+            ),
+          );
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+        }
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e as String?);
+    }
+  }
+
+  ResendOTP() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": widget.phonenumber};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.resendotp,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+      setState(() {
+        isconfirmloading = false;
+      });
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        startTimeout();
+        currentSeconds = 0;
+        textEditingController.text = response.data["data"][0].toString();
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Oh Hey!',
+            message: 'Your OTP is ! ${response.data["data"][0]}',
+            contentType: ContentType.success,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: 'Please enter valid otp!',
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e as String?);
+    }
   }
 }

@@ -31,6 +31,9 @@ class _KycScreenState extends State<KycScreen> {
   TextEditingController pannumber = TextEditingController();
   TextEditingController aadharnumber = TextEditingController();
 
+  bool otpField=false;
+  String btnText="";
+
   final formKey = GlobalKey<FormState>();
   var otp;
   bool dateofbirth = false;
@@ -78,7 +81,7 @@ class _KycScreenState extends State<KycScreen> {
           backgroundColor: Colors.transparent,
           content: AwesomeSnackbarContent(
             title: 'Oh Hey!',
-            message: 'Otp has been sended registered mobile number!',
+            message: "Success",
             contentType: ContentType.success,
           ),
         );
@@ -92,6 +95,7 @@ class _KycScreenState extends State<KycScreen> {
         debugPrint(response.data["data"]["requestId"]);
         setState(() {
           requestid = response.data["data"]["requestId"];
+          btnText="Verify OTP";
           debugPrint("requestid $requestid");
         });
       } else {
@@ -228,7 +232,7 @@ class _KycScreenState extends State<KycScreen> {
 
   bool isloading = false;
   UserRegister() async {
-    try {
+    String responseMsg="";
       Dio dio = Dio();
 
       var token = await SharedPreference().gettoken();
@@ -257,37 +261,57 @@ class _KycScreenState extends State<KycScreen> {
       );
       debugPrint("pavithra ${response.data}");
 
-      if (response.data["status"] == 1) {
-        setState(() {
-          isloading = false;
-        });
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Oh Hey!',
-            message: 'Otp has been sended registered mobile number!',
-            contentType: ContentType.success,
-          ),
-        );
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(builder: (context) => const Congratulations()),
-        // );
-      } else {
-        setState(() {
-          isloading = false;
-        });
+      if(response.statusCode==200){
+        if (response.data["status"] == 1) {
+
+          responseMsg=response.data["message"][0];
+          setState(() {
+            isloading = false;
+          });
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'Oh Hey!',
+              message: 'Otp has been sent to registered mobile number!',
+              contentType: ContentType.success,
+            ),
+          );
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+          btnText="Verify OTP";
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(builder: (context) => const Congratulations()),
+          // );
+        } else {
+          setState(() {
+            isloading = false;
+          });
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: response.data["error"]["n_Aadhar"].toString(),
+              contentType: ContentType.failure,
+            ),
+          );
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+        }
+      }else{
         final snackBar = SnackBar(
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
           content: AwesomeSnackbarContent(
             title: 'On Snap!',
-            message: response.data["message"][0] ?? response.data["error"][0],
+            message: "Something went wrong... try again...",
             contentType: ContentType.failure,
           ),
         );
@@ -296,26 +320,6 @@ class _KycScreenState extends State<KycScreen> {
           ..hideCurrentSnackBar()
           ..showSnackBar(snackBar);
       }
-    } catch (e) {
-      setState(() {
-        isloading = false;
-      });
-      final snackBar = SnackBar(
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        content: AwesomeSnackbarContent(
-          title: 'On Snap!',
-          message: "Something went wrong, Please try again later",
-          contentType: ContentType.failure,
-        ),
-      );
-
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(snackBar);
-      debugPrint(e.toString());
-    }
   }
 
   verifykyc() async {
@@ -339,7 +343,7 @@ class _KycScreenState extends State<KycScreen> {
       debugPrint("pavithra123 ${response.data}");
 
       if (response.data["status"] == 1) {
-        Navigator.of(context).push(
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const Congratulations()),
         );
       } else {
@@ -453,6 +457,7 @@ class _KycScreenState extends State<KycScreen> {
                 ),
                 TextFormField(
                   controller: username,
+                  keyboardType: TextInputType.emailAddress,
                   style: const TextStyle(color: whitecolor, fontSize: 16),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   // inputFormatters: [
@@ -754,8 +759,25 @@ class _KycScreenState extends State<KycScreen> {
                     }
                     return null;
                   },
+                  onFieldSubmitted: (value){
+                    print("valueeeee "+value);
+                    if(value.length==12){
+                      otpField=true;
+                      btnText="Send OTP";
+                    }else{
+                      btnText="Submit KYC";
+                      otpField=false;
+                    }
+                  },
                   onChanged: (value) {
                     'Minimum character length is 12';
+                    if(aadharnumber.text.length==12){
+                      otpField=true;
+                      btnText="Enter OTP";
+                    }else{
+                      btnText="Submit KYC";
+                      otpField=false;
+                    }
                   },
                   keyboardType: TextInputType.number,
                   maxLength: 12,
@@ -780,40 +802,50 @@ class _KycScreenState extends State<KycScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                const Text(
-                  "Enter OTP",
-                  style: TextStyle(
-                    fontFamily: "Helvatica",
-                    color: whitecolor,
-                    fontWeight: FontWeight.w400,
-                    fontStyle: FontStyle.normal,
-                    // fontStyle: FontStyle.italic,
-                    fontSize: 14,
+                 Visibility(
+                   visible: otpField,
+                   child: Text(
+                    "Enter OTP",
+                    style: TextStyle(
+                      fontFamily: "Helvatica",
+                      color: whitecolor,
+                      fontWeight: FontWeight.w400,
+                      fontStyle: FontStyle.normal,
+                      // fontStyle: FontStyle.italic,
+                      fontSize: 14,
+                    ),
+                ),
+                 ),
+                Visibility(
+                  visible: otpField,
+                  child: const SizedBox(
+                    height: 10,
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                OTPTextField(
-                  controller: otpController,
-                  length: 6,
-                  width: MediaQuery.of(context).size.width,
-                  fieldWidth: 50,
-                  fieldStyle: FieldStyle.box,
-                  style: const TextStyle(
-                      color: whitecolor,
-                      fontSize: 15,
-                      fontFamily: "Helvatica",
-                      fontWeight: FontWeight.w500),
-                  textFieldAlignment: MainAxisAlignment.spaceAround,
-                  onCompleted: (pin) {
-                    otp = pin;
-                    debugPrint("Completed: $pin" + otp);
-                    verifykyc();
-                  },
-                  otpFieldStyle: OtpFieldStyle(
-                    borderColor: const Color(0xff1C1C1E),
-                    backgroundColor: const Color(0xff1C1C1E),
+                Visibility(
+                  visible: otpField,
+                  child: OTPTextField(
+                    controller: otpController,
+                    length: 6,
+                    width: MediaQuery.of(context).size.width,
+                    fieldWidth: 50,
+                    fieldStyle: FieldStyle.box,
+                    style: const TextStyle(
+                        color: whitecolor,
+                        fontSize: 15,
+                        fontFamily: "Helvatica",
+                        fontWeight: FontWeight.w500),
+                    textFieldAlignment: MainAxisAlignment.spaceAround,
+                    onCompleted: (pin) {
+                      otp = pin;
+                      btnText="Submit KYC";
+                      debugPrint("Completed: $pin" + otp);
+                      verifykyc();
+                    },
+                    otpFieldStyle: OtpFieldStyle(
+                      borderColor: const Color(0xff1C1C1E),
+                      backgroundColor: const Color(0xff1C1C1E),
+                    ),
                   ),
                 ),
                 const SizedBox(
@@ -863,7 +895,7 @@ class _KycScreenState extends State<KycScreen> {
                         children: [
                           isloading == false
                               ? Text(
-                                  "Submit KYC",
+                                btnText,
                                   style: TextStyle(
                                       color: blackcolor,
                                       fontSize: 15.0,

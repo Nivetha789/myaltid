@@ -13,6 +13,7 @@ import 'package:myaltid/widget/textfield.dart';
 
 class SignupApp extends StatefulWidget {
   final signup;
+
   const SignupApp({super.key, this.signup});
 
   @override
@@ -27,6 +28,7 @@ class _SignupAppState extends State<SignupApp> {
   bool texterror = false, numbererror = false;
   final formKey = GlobalKey<FormState>();
   late String oldvalue;
+
   checkuser() async {
     try {
       Dio dio = Dio();
@@ -198,6 +200,7 @@ class _SignupAppState extends State<SignupApp> {
                           ),
                           TextFormField(
                             controller: namecontroller,
+                            textCapitalization: TextCapitalization.words,
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(
                                 RegExp(r"[a-zA-Z]+|\s"),

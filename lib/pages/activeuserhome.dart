@@ -43,89 +43,8 @@ class _ActiveUserHomeState extends State<ActiveUserHome> {
       availabletalktime = "0",
       nutlizeddata = "0",
       nutlizedtalktime = "0";
-  GetPlan() async {
-    try {
-      Dio dio = Dio();
-      setState(() {
-        isloading = false;
-      });
-      // ProgressDialog().showLoaderDialog(context);
-      const SpinKitFadingCircle(
-        color: buttoncolor,
-        size: 50.0,
-      );
-      var token = await SharedPreference().gettoken();
-      cname = await SharedPreference().getuserName();
-      print(token);
-      // var phonenumber = await SharedPreference().getphonenumber();
-      // var parameters = {
-      //   "c_Name": name,
-      //   "n_Mobile": phonenumber,
-      //   "c_ReferralCode": "",
-      //   "n_ActivePlan": ""
-      // };
-      dio.options.contentType = Headers.formUrlEncodedContentType;
 
-      final response = await dio.get(
-        ApiProvider.getdatautlize,
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {"Authorization": "Bearer $token"},
-        ),
-      );
-      final response1 = await dio.get(
-        ApiProvider.getuser,
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {"Authorization": "Bearer $token"},
-        ),
-      );
-      debugPrint("pavithra123  $cname");
-      if (cname == null || cname == "") {
-        await SharedPreference()
-            .setuserName(response1.data["data"]["c_UserName"]);
-        cname = await SharedPreference().getuserName();
-      } else {
-        cname = await SharedPreference().getuserName();
-      }
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        Map<String, dynamic> map = jsonDecode(response.toString());
-        debugPrint("response ${map}");
-        setState(() {
-          isloading = true;
-          availabledata = map["data"]["n_AvailableData"].toString();
-          availabletalktime = map["data"]["n_AvailableTalkTime"].toString();
-          nutlizeddata = map["data"]["n_UtilizedData"].toString();
-          nutlizedtalktime = map["data"]["n_UtilizedTalkTime"].toString();
-          dateexpire = map["data"]["dt_ExpiredAt"].toString();
-          nsubscrption = map["data"]["n_SubscriptionDuration"].toString();
-          nsubscrptionprice = map["data"]["n_SubscriptionPrice"].toString();
-        });
-
-        // setState(() {
-        //   ProgressDialog().dismissDialog(context);
-        // });
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["message"],
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
+  var biometric = true;
 
   @override
   void initState() {
@@ -133,7 +52,6 @@ class _ActiveUserHomeState extends State<ActiveUserHome> {
     super.initState();
   }
 
-  var biometric = true;
   Row addRadioButton(int btnValue, String title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -642,5 +560,89 @@ class _ActiveUserHomeState extends State<ActiveUserHome> {
         ),
       ),
     );
+  }
+
+  GetPlan() async {
+    try {
+      Dio dio = Dio();
+      setState(() {
+        isloading = false;
+      });
+      // ProgressDialog().showLoaderDialog(context);
+      const SpinKitFadingCircle(
+        color: buttoncolor,
+        size: 50.0,
+      );
+      var token = await SharedPreference().gettoken();
+      cname = await SharedPreference().getuserName();
+      print(token);
+      var phonenumber = await SharedPreference().getphonenumber();
+      // var parameters = {
+      //   "c_Name": cname,
+      //   "n_Mobile": phonenumber,
+      //   "c_ReferralCode": "",
+      //   "n_ActivePlan": ""
+      // };
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+
+      final response = await dio.get(
+        ApiProvider.getdatautlize,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      final response1 = await dio.get(
+        ApiProvider.getuser,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      debugPrint("profileee  $cname");
+      if (cname == null || cname == "") {
+        await SharedPreference()
+            .setuserName(response1.data["data"]["c_UserName"]);
+        cname = await SharedPreference().getuserName();
+      } else {
+        cname = await SharedPreference().getuserName();
+      }
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        Map<String, dynamic> map = jsonDecode(response.toString());
+        debugPrint("response ${map}");
+        setState(() {
+          isloading = true;
+          availabledata = map["data"]["n_AvailableData"].toString();
+          availabletalktime = map["data"]["n_AvailableTalkTime"].toString();
+          nutlizeddata = map["data"]["n_UtilizedData"].toString();
+          nutlizedtalktime = map["data"]["n_UtilizedTalkTime"].toString();
+          dateexpire = map["data"]["dt_ExpiredAt"].toString();
+          nsubscrption = map["data"]["n_SubscriptionDuration"].toString();
+          nsubscrptionprice = map["data"]["n_SubscriptionPrice"].toString();
+        });
+
+        // setState(() {
+        //   ProgressDialog().dismissDialog(context);
+        // });
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["message"],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 }

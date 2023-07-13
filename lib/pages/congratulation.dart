@@ -23,80 +23,6 @@ class Congratulations extends StatefulWidget {
 class CongratulationsState extends State<Congratulations> {
   bool isloading = false;
   var cemail, cname, cmobile, nsubscrption = "0", nsubscrptionprice = "0";
-  GetPlan() async {
-    try {
-      Dio dio = Dio();
-      setState(() {
-        isloading = false;
-      });
-      // ProgressDialog().showLoaderDialog(context);
-      const SpinKitFadingCircle(
-        color: buttoncolor,
-        size: 50.0,
-      );
-      var token = await SharedPreference().gettoken();
-      print(token);
-      // var phonenumber = await SharedPreference().getphonenumber();
-      // var parameters = {
-      //   "c_Name": name,
-      //   "n_Mobile": phonenumber,
-      //   "c_ReferralCode": "",
-      //   "n_ActivePlan": ""
-      // };
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.get(
-        ApiProvider.getuser,
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {"Authorization": "Bearer $token"},
-        ),
-      );
-      final response1 = await dio.get(
-        ApiProvider.getdatautlize,
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {"Authorization": "Bearer $token"},
-        ),
-      );
-      debugPrint("pavithra123 ${response1.data}");
-
-      if (response.statusCode == 401) {
-      } else if (response.statusCode == 200) {
-        Map<String, dynamic> map = jsonDecode(response.toString());
-        debugPrint("response ${map}");
-        await SharedPreference().setuserName(map["data"]["c_UserName"]);
-        setState(() {
-          isloading = true;
-          cemail = map["data"]["c_virtualEmail"];
-          cname = map["data"]["c_UserName"];
-          cmobile = map["data"]["c_VirtualMobile"].toString();
-          nsubscrption = map["data"]["n_SubscriptionDuration"].toString();
-          nsubscrptionprice = map["data"]["n_SubscriptionPrice"].toString();
-        });
-
-        // setState(() {
-        //   ProgressDialog().dismissDialog(context);
-        // });
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["message"],
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
 
   @override
   void initState() {
@@ -252,7 +178,9 @@ class CongratulationsState extends State<Congratulations> {
                               height: 20,
                             ),
                             Text(
-                              cmobile=="" ? "6874 8030 898":cmobile,
+                              cmobile != ""
+                                  ? cmobile
+                                  : "-",
                               style: GoogleFonts.openSans(
                                 textStyle: const TextStyle(
                                     color: whitecolor,
@@ -299,7 +227,9 @@ class CongratulationsState extends State<Congratulations> {
                               height: 20,
                             ),
                             Text(
-                              cemail ?? "",
+                              cemail != ""
+                                  ? cemail
+                                  : "-",
                               style: GoogleFonts.openSans(
                                 textStyle: const TextStyle(
                                     color: whitecolor,
@@ -469,5 +399,80 @@ class CongratulationsState extends State<Congratulations> {
         ),
       ),
     );
+  }
+
+  GetPlan() async {
+    try {
+      Dio dio = Dio();
+      setState(() {
+        isloading = false;
+      });
+      // ProgressDialog().showLoaderDialog(context);
+      const SpinKitFadingCircle(
+        color: buttoncolor,
+        size: 50.0,
+      );
+      var token = await SharedPreference().gettoken();
+      print(token);
+      // var phonenumber = await SharedPreference().getphonenumber();
+      // var parameters = {
+      //   "c_Name": name,
+      //   "n_Mobile": phonenumber,
+      //   "c_ReferralCode": "",
+      //   "n_ActivePlan": ""
+      // };
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.get(
+        ApiProvider.getuser,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      final response1 = await dio.get(
+        ApiProvider.getdatautlize,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {"Authorization": "Bearer $token"},
+        ),
+      );
+      debugPrint("pavithra123 ${response1.data}");
+
+      if (response.statusCode == 401) {
+      } else if (response.statusCode == 200) {
+        Map<String, dynamic> map = jsonDecode(response.toString());
+        debugPrint("response ${map}");
+        await SharedPreference().setuserName(map["data"]["c_UserName"]);
+        setState(() {
+          isloading = true;
+          cemail = map["data"]["c_virtualEmail"];
+          cname = map["data"]["c_UserName"];
+          cmobile = map["data"]["c_VirtualMobile"].toString();
+          nsubscrption = map["data"]["n_SubscriptionDuration"].toString();
+          nsubscrptionprice = map["data"]["n_SubscriptionPrice"].toString();
+        });
+
+        // setState(() {
+        //   ProgressDialog().dismissDialog(context);
+        // });
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["message"],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 }

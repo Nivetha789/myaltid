@@ -1,14 +1,17 @@
 // ignore_for_file: non_constant_identifier_names, prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/module/PaymentDetailsModel.dart';
 import 'package:myaltid/module/plans.dart';
+import 'package:myaltid/pages/payment_success_screen.dart';
 import 'package:myaltid/pages/paymentsuccessfull.dart';
 import 'package:myaltid/pages/selectpaymentmode.dart';
 import 'package:myaltid/reasuable/theme.dart';
@@ -455,46 +458,6 @@ class _PlanSelectionState extends State<PlanSelection> {
     );
   }
 
-  void showAlertDialog(BuildContext context, String title, String message) {
-    // set up the buttons
-    Widget continueButton = ElevatedButton(
-      child: const Text("Okay"),
-      onPressed: () {
-        Navigator.pop(context, false);
-      },
-    );
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          contentPadding: const EdgeInsets.only(left: 25, right: 25),
-          title: Center(child: Text(title)),
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          content: SizedBox(
-            height: 400,
-            width: 300,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(message),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            continueButton,
-          ],
-        );
-      },
-    );
-  }
-
   //get payment details
   getPaymentDetails() async {
     ProgressDialog().showLoaderDialog(context);
@@ -547,23 +510,54 @@ class _PlanSelectionState extends State<PlanSelection> {
           secondColor = paymentDetailsModel.data![0].cSecondaryColorCode!;
           btnColor1 = paymentDetailsModel.data![0].cButtonColorCode1!;
           btnColor2 = paymentDetailsModel.data![0].cButtonColorCode2!;
-          print("hashhhhhh " + hash.toString());
+          // print("hashhhhhh " + hash.toString());
         });
+        String deviceID = ""; // initiaze varibale
+        if (Platform.isAndroid) {
+          deviceID = "AndroidSH2"; // Android-specific deviceId, supported options are "AndroidSH1" & "AndroidSH2"
+        } else if (Platform.isIOS) {
+          deviceID = "iOSSH2"; // iOS-specific deviceId, supported options are "iOSSH1" & "iOSSH2"
+        }
 
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => PaymentmodeSelection(
-                username,
-                mobileNum,
-                mailId,
-                amount,
-                transactionId,
-                userId,
-                hash,
-                merchantId,
-                primaryColor,
-                secondColor,
-                btnColor1,
-                btnColor2)));
+        var reqJson = {
+          "features": {
+            "enableAbortResponse": true,
+            "enableExpressPay": true,
+            "enableInstrumentDeRegistration": true,
+            "enableMerTxnDetails": true
+          },
+          "consumerData": {
+            "deviceId": deviceID,   //supported values "ANDROIDSH1" or "ANDROIDSH2" for Android, supported values "iOSSH1" or "iOSSH2" for iOS and supported values
+            "token":
+             hash,
+            "paymentMode": "all",
+            "merchantLogoUrl":
+            "https://www.paynimo.com/CompanyDocs/company-logo-vertical.png", //provided merchant logo will be displayed
+            "merchantId": merchantId,
+            "currency": "INR",
+            "consumerId": userId,
+            "consumerMobileNo": mobileNum,
+            "consumerEmailId": mailId,
+            "txnId": transactionId, //Unique merchant transaction ID
+            "items": [
+              {"itemId": "first", "amount": amount, "comAmt": "0"}
+            ],
+            "customStyle": {
+              "PRIMARY_COLOR_CODE":
+              primaryColor, //merchant primary color code
+              "SECONDARY_COLOR_CODE":
+              secondColor, //provide merchant"s suitable color code
+              "BUTTON_COLOR_CODE_1":
+              btnColor1, //merchant"s button background color code
+              "BUTTON_COLOR_CODE_2":
+              btnColor2 //provide merchant"s suitable color code for button text
+            }
+          }
+        };
+
+        wlCheckoutFlutter.on(
+            WeiplCheckoutFlutter.wlResponse, handleResponse);
+        wlCheckoutFlutter.open(reqJson);
       } else {
         ProgressDialog().dismissDialog(context);
         Fluttertoast.showToast(
@@ -584,5 +578,139 @@ class _PlanSelectionState extends State<PlanSelection> {
           backgroundColor: Colors.lightGreen,
           timeInSecForIosWeb: 1);
     }
+  }
+
+  void handleResponse(Map<dynamic, dynamic> response) {
+    // showAlertDialog(context, "WL SDK Response", "$response");
+    print("responsepayment "+response.toString());
+
+    List<String> clist =  response.toString().split("|");
+
+    print("splitListsplitList "+clist.toString());
+
+    final dateList = clist.toString().split(",");
+    // print("split " + dateList[3]);
+    print("split2" + dateList[1]);
+    if(dateList[1].toString() == " success"){
+      updatePaymentDetails(dateList[3],dateList[5]);
+    }else{
+      Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+              builder: (BuildContext context) => PaymentSuccessScreen(
+                  "SORRY !",
+                  false,
+                  "Your Package Payment Unsuccessfully !!",
+                  "")));
+    }
+
+  }
+
+
+  //update payment details
+  updatePaymentDetails(String paymentID,String transactionID) async {
+    ProgressDialog().showLoaderDialog(context);
+    // BaseOptions options = new BaseOptions(
+    //   baseUrl: ApiProvider().Baseurl,
+    //   connectTimeout: 5000,
+    //   receiveTimeout: 3000,
+    // );
+    // Dio dio = new Dio(options);
+
+    Dio dio = new Dio();
+    // dio.options.connectTimeout = 5000; //5s
+    // dio.options.receiveTimeout = 3000;
+
+    var token = await SharedPreference().gettoken();
+
+    var parameters = {"c_PaymentId": paymentID,"c_TxnId":transactionID};
+    print("updatePaymentDetailsParams :" + parameters.toString());
+
+    dio.options.contentType = Headers.formUrlEncodedContentType;
+    final response = await dio.post(
+      ApiProvider.updatepaymentdetails,
+      data: parameters,
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+        headers: {"Authorization": "Bearer $token"},
+      ),
+    );
+    print("updatePaymentDetailsRes :" + response.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = jsonDecode(response.toString());
+      TransactionVerifyModel transactionVerifyModel =
+      TransactionVerifyModel.fromJson(map);
+
+      if (transactionVerifyModel.status == 1) {
+        ProgressDialog().dismissDialog(context);
+        Fluttertoast.showToast(
+            msg: transactionVerifyModel.message.toString(),
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            textColor: Colors.white,
+            backgroundColor: Colors.lightGreen,
+            timeInSecForIosWeb: 1);
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => PaymentSuccessfull()));
+      } else {
+        ProgressDialog().dismissDialog(context);
+        Fluttertoast.showToast(
+            msg: "Not Found",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            textColor: Colors.white,
+            backgroundColor: Colors.lightGreen,
+            timeInSecForIosWeb: 1);
+      }
+    } else {
+      ProgressDialog().dismissDialog(context);
+      Fluttertoast.showToast(
+          msg: "Bad Network Connection try again..",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          textColor: Colors.white,
+          backgroundColor: Colors.lightGreen,
+          timeInSecForIosWeb: 1);
+    }
+  }
+
+  void showAlertDialog(BuildContext context, String title, String message) {
+    // set up the buttons
+    Widget continueButton = ElevatedButton(
+      child: const Text("Okay"),
+      onPressed: () {
+        Navigator.pop(context, false);
+      },
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: const EdgeInsets.only(left: 25, right: 25),
+          title: Center(child: Text(title)),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          content: SizedBox(
+            height: 400,
+            width: 300,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(message),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            continueButton,
+          ],
+        );
+      },
+    );
   }
 }

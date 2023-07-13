@@ -180,6 +180,7 @@ class _SignupAppState extends State<SignupApp> {
                           ),
                           TextFormField(
                             controller: namecontroller,
+                            textCapitalization: TextCapitalization. words,
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(
                                 RegExp(r"[a-zA-Z]+|\s"),
