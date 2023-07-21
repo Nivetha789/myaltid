@@ -182,7 +182,7 @@ class _CallistPageState extends State<CallistPage>
 
   Widget allCallList() {
     return ListView.builder(
-      itemCount: 10,
+      itemCount: 0,
       shrinkWrap: true,
       itemBuilder: (BuildContext context, int index) {
         return InkWell(
@@ -241,7 +241,7 @@ class _CallistPageState extends State<CallistPage>
 
   Widget incomingCallList() {
     return ListView.builder(
-      itemCount: 10,
+      itemCount: 0,
       shrinkWrap: true,
       itemBuilder: (BuildContext context, int index) {
         return Container(
@@ -293,7 +293,7 @@ class _CallistPageState extends State<CallistPage>
 
   Widget outgoingCallList() {
     return ListView.builder(
-      itemCount: 10,
+      itemCount: 0,
       shrinkWrap: true,
       itemBuilder: (BuildContext context, int index) {
         return Container(

@@ -33,6 +33,8 @@ class ApiProvider {
 
   static const String updatepaymentdetails = "${BASE_URL}subscription/verify";
 
+  static const String dialnumber = "${BASE_URL}call/MakeCall";
+
   static const String addsubscrptiondetils =
       "${BASE_URL}subcription/subscriptionbuy";
 }

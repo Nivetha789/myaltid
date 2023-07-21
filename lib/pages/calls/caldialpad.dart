@@ -1,8 +1,16 @@
+import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../../data/api.dart';
+import '../../module/PhoneDialModel.dart';
 import '../../reasuable/numpad.dart';
 import '../../reasuable/theme.dart';
+import '../../utils/check_internet.dart';
+import '../../widget/progressloaded.dart';
+import '../../widget/sharedpreference.dart';
 
 class CalldialpadScreen extends StatefulWidget {
   const CalldialpadScreen({super.key});
@@ -45,21 +53,19 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
                   inputFormatters: [
                     LengthLimitingTextInputFormatter(10)
                   ], // Limit input to 10 characters
-                  // maxLength: 10,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    suffixIcon: _myController.text.isEmpty
-                        ? const SizedBox()
-                        : IconButton(
-                            onPressed: () {
-                              _myController.text = _myController.text
-                                  .substring(0, _myController.text.length - 1);
-                            },
-                            icon: const Icon(
-                              Icons.backspace,
-                              color: whitecolor,
-                            ),
-                          ),
+                    suffixIcon: _myController.text.isNotEmpty
+                        ?const SizedBox(): IconButton(
+                      onPressed: () {
+                        _myController.text = _myController.text
+                            .substring(0, _myController.text.length - 1);
+                      },
+                      icon: const Icon(
+                        Icons.backspace,
+                        color: Colors.white,
+                      ),
+                    )
                     // filled: true,
                   ),
                   onChanged: (value) {
@@ -80,6 +86,8 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
 
                   // Disable the default soft keybaord
                   keyboardType: TextInputType.none,
+                      maxLines: 1,
+                      // maxLength: 10,
                 )),
               ),
             ),
@@ -137,7 +145,32 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
               ),
               child: InkWell(
                 splashColor: buttoncolor, // Splash color
-                onTap: () {},
+                onTap: () {
+                  print("numberrrr "+_myController.text);
+                  check().then((intenet) {
+                    if (intenet != null && intenet) {
+                      if(_myController.text.length==10){
+                        dialPadApi(_myController.text);
+                      }else{
+                        Fluttertoast.showToast(
+                            msg: "Your mobile number should contain 10 digits.",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                            textColor: Colors.white,
+                            backgroundColor: Colors.lightGreen,
+                            timeInSecForIosWeb: 1);
+                      }
+                    } else {
+                      Fluttertoast.showToast(
+                          msg: "Please check your internet connection",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          textColor: Colors.white,
+                          backgroundColor: Colors.lightGreen,
+                          timeInSecForIosWeb: 1);
+                    }
+                  });
+                },
                 child: const SizedBox(
                     child: Icon(
                   Icons.wifi_calling_3_sharp,
@@ -150,5 +183,71 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
         ),
       ),
     );
+  }
+
+  //dialpad api
+  dialPadApi(String number) async {
+    ProgressDialog().showLoaderDialog(context);
+    // BaseOptions options = new BaseOptions(
+    //   baseUrl: ApiProvider().Baseurl,
+    //   connectTimeout: 5000,
+    //   receiveTimeout: 3000,
+    // );
+    // Dio dio = new Dio(options);
+
+    Dio dio = new Dio();
+    // dio.options.connectTimeout = 5000; //5s
+    // dio.options.receiveTimeout = 3000;
+
+    var token = await SharedPreference().gettoken();
+
+    var parameters = {
+      "n_Callee": _myController.text,
+    };
+    print("paymentDetailsParams :" + parameters.toString());
+
+    dio.options.contentType = Headers.formUrlEncodedContentType;
+    final response = await dio.post(
+      ApiProvider.dialnumber,
+      data: parameters,
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+        headers: {"Authorization": "Bearer $token",
+          "Content-Type": "application/x-www-form-urlencoded"},
+      ),
+    );
+    print("paymentDetailsRes :" + response.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = jsonDecode(response.toString());
+      PhoneDialerModel phoneDialModel =
+      PhoneDialerModel.fromJson(map);
+
+      if (phoneDialModel.status == 1) {
+        ProgressDialog().dismissDialog(context);
+        _callNumber(number);
+      } else {
+        ProgressDialog().dismissDialog(context);
+        Fluttertoast.showToast(
+            msg: phoneDialModel.message.toString(),
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            textColor: Colors.white,
+            backgroundColor: Colors.lightGreen,
+            timeInSecForIosWeb: 1);
+      }
+    } else {
+      ProgressDialog().dismissDialog(context);
+      Fluttertoast.showToast(
+          msg: "Bad Network Connection try again..",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          textColor: Colors.white,
+          backgroundColor: Colors.lightGreen,
+          timeInSecForIosWeb: 1);
+    }
+  }
+
+  _callNumber(String number) async{
+    bool? res = await FlutterPhoneDirectCaller.callNumber(number);
   }
 }
