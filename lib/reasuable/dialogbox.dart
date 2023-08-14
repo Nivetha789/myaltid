@@ -8,7 +8,11 @@ import 'package:myaltid/pages/profile/enablednd.dart';
 import 'package:myaltid/pages/profile/referfriend.dart';
 import 'package:myaltid/reasuable/theme.dart';
 
-void Dialogbox(BuildContext context) {
+import '../widget/sharedpreference.dart';
+
+void Dialogbox(BuildContext context) async{
+  String dndStatus=  await SharedPreference().getDnd();
+  print("dndddddddd "+dndStatus.toString());
   showGeneralDialog(
     context: context,
     barrierColor: Colors.black38,
@@ -105,13 +109,14 @@ void Dialogbox(BuildContext context) {
                 ),
                 InkWell(
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (context) => const EnableDndScreen()),
+                          builder: (context) => EnableDndScreen()),
                     );
                   },
                   child: Text(
-                    "Enable DND",
+                    dndStatus==1 ? "Disable DND" :"Enable DND",
                     style: GoogleFonts.roboto(
                       textStyle: const TextStyle(
                           color: whitecolor,

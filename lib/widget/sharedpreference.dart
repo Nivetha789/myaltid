@@ -90,6 +90,20 @@ class SharedPreference {
     return stringValue;
   }
 
+  //dnd
+  setDnd(String stringValue) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('dnd', stringValue);
+    return true;
+  }
+
+  getDnd() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //Return String
+    String? stringValue = prefs.getString('dnd');
+    return stringValue;
+  }
+
   setplanid(String stringValue) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('c_Plan', stringValue);

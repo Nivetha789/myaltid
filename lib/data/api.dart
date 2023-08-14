@@ -35,6 +35,10 @@ class ApiProvider {
 
   static const String dialnumber = "${BASE_URL}call/MakeCall";
 
+  static const String allCalls = "${BASE_URL}call/history";
+
+  static const String updateDND = "${BASE_URL}users/updatePreference";
+
   static const String addsubscrptiondetils =
       "${BASE_URL}subcription/subscriptionbuy";
 }
