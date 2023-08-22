@@ -39,6 +39,8 @@ class ApiProvider {
 
   static const String updateDND = "${BASE_URL}users/updatePreference";
 
+  static const String messageTemplate = "${BASE_URL}message/Templates";
+
   static const String addsubscrptiondetils =
       "${BASE_URL}subcription/subscriptionbuy";
 }
