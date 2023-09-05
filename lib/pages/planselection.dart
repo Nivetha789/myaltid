@@ -179,6 +179,7 @@ class _PlanSelectionState extends State<PlanSelection> {
         "c_ReferralCode": refferalcode,
         "c_SubscriptionId": selectedOption!.id
       };
+      print("planselectionparam : "+parameters.toString());
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
         ApiProvider.userregister,

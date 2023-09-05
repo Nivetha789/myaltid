@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/calls/calllist.dart';
+import 'package:myaltid/pages/signup.dart';
 import 'package:myaltid/reasuable/dialogbox.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
 import '../reasuable/theme.dart';
@@ -611,16 +612,57 @@ class _ActiveUserHomeState extends State<ActiveUserHome> {
       } else if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
         debugPrint("response ${map}");
-        setState(() {
-          isloading = true;
-          availabledata = map["data"]["n_AvailableData"].toString();
-          availabletalktime = map["data"]["n_AvailableTalkTime"].toString();
-          nutlizeddata = map["data"]["n_UtilizedData"].toString();
-          nutlizedtalktime = map["data"]["n_UtilizedTalkTime"].toString();
-          dateexpire = map["data"]["dt_ExpiredAt"].toString();
-          nsubscrption = map["data"]["n_SubscriptionDuration"].toString();
-          nsubscrptionprice = map["data"]["n_SubscriptionPrice"].toString();
-        });
+        if(map["status"]==1){
+          setState(() {
+            isloading = true;
+            availabledata = map["data"]["n_AvailableData"].toString();
+            availabletalktime = map["data"]["n_AvailableTalkTime"].toString();
+            nutlizeddata = map["data"]["n_UtilizedData"].toString();
+            nutlizedtalktime = map["data"]["n_UtilizedTalkTime"].toString();
+            dateexpire = map["data"]["dt_ExpiredAt"].toString();
+            nsubscrption = map["data"]["n_SubscriptionDuration"].toString();
+            nsubscrptionprice = map["data"]["n_SubscriptionPrice"].toString();
+          });
+        }else{
+          var dialog = AlertDialog(
+            title: Text('Login',
+                style: TextStyle(
+                    color: buttoncolor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16)),
+            content: Text('Session was expired kindly login again',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15)),
+            actions: [
+              ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                    ),
+                    backgroundColor:
+                    MaterialStateProperty.all(buttoncolor),
+                  ),
+                  onPressed: () async{
+                    Navigator.pop(context);
+                    await SharedPreference().clearSharep().then((v) {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) => Signup()));
+                    });
+                  },
+                  child: Text('  OK  ',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16),))
+            ],
+          );
+          showDialog(
+              context: context, builder: (BuildContext context) => dialog);
+        }
+
 
         // setState(() {
         //   ProgressDialog().dismissDialog(context);

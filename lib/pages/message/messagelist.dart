@@ -20,17 +20,20 @@ class _MessagelistPageState extends State<MessagelistPage>
   bool isselected = false;
   var forIos = true;
   List<Widget> myTabs = [
-    const SizedBox(
+    Container(
+      alignment: Alignment.center,
       width: 70.0,
       child: Tab(text: 'All'),
     ),
-    const SizedBox(
+    Container(
+      alignment: Alignment.center,
       width: 70,
-      child: Tab(text: 'known Senders'),
+      child: Tab(text: 'Known\nSenders'),
     ),
-    const SizedBox(
+    Container(
+      alignment: Alignment.center,
       width: 70,
-      child: Tab(text: 'Unknown Senders'),
+      child: Tab(text: 'Unknown\nSenders'),
     ),
   ];
 
@@ -106,44 +109,43 @@ class _MessagelistPageState extends State<MessagelistPage>
             height: 0,
           ),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                alignment: Alignment.centerRight,
-                height: 40,
-                width: MediaQuery.of(context).size.width,
-                color: const Color(0xff1D2C1D),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    CupertinoSwitch(
-                      activeColor: buttoncolor,
-                      thumbColor: whitecolor,
-                      trackColor: goldcolor,
-                      value: forIos,
-                      onChanged: (value) => setState(() => forIos = value),
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    const Text(
-                      "DND Enabled",
-                      style: TextStyle(
-                          color: whitecolor,
-                          fontFamily: "Helvatica",
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w500),
-                    )
-                  ],
-                ),
+        body: ListView(
+          shrinkWrap: false,
+          physics: NeverScrollableScrollPhysics(),
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              alignment: Alignment.centerRight,
+              height: 40,
+              width: MediaQuery.of(context).size.width,
+              color: const Color(0xff1D2C1D),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CupertinoSwitch(
+                    activeColor: buttoncolor,
+                    thumbColor: whitecolor,
+                    trackColor: goldcolor,
+                    value: forIos,
+                    onChanged: (value) => setState(() => forIos = value),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  const Text(
+                    "DND Enabled",
+                    style: TextStyle(
+                        color: whitecolor,
+                        fontFamily: "Helvatica",
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w500),
+                  )
+                ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 20.0),
+              child: Row(
                 children: [
                   Container(
                     width: 80,
@@ -168,21 +170,19 @@ class _MessagelistPageState extends State<MessagelistPage>
                   ),
                 ],
               ),
-              SingleChildScrollView(
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      allCallList(),
-                      incomingCallList(),
-                      outgoingCallList()
-                    ],
-                  ),
-                ),
+            ),
+            Container(
+              height: MediaQuery.of(context).size.height/1.4,
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  allCallList(),
+                  incomingCallList(),
+                  outgoingCallList()
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
             backgroundColor: buttoncolor,
@@ -201,254 +201,264 @@ class _MessagelistPageState extends State<MessagelistPage>
   }
 
   Widget allCallList() {
-    return ListView.builder(
-      itemCount: 10,
-      shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) {
-        return InkWell(
-          onTap: () {
-            // Navigator.of(context).push(
-            //   MaterialPageRoute(builder: (context) => const CallingPage()),
-            // );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(5),
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 40,
-                      decoration: const BoxDecoration(
-                        color: Color(0xffFFF4E0),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const SizedBox(
-                        height: 40,
+    return Container(
+      margin: EdgeInsets.only(bottom: 50.0),
+      child: ListView.builder(
+        itemCount: 10,
+        shrinkWrap: true,
+        physics: AlwaysScrollableScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          return InkWell(
+            onTap: () {
+              // Navigator.of(context).push(
+              //   MaterialPageRoute(builder: (context) => const CallingPage()),
+              // );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
                         width: 40,
-                        child: Center(
-                          child: Text(
-                            "A",
-                            style: TextStyle(
-                                color: blackcolor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600),
-                            textAlign: TextAlign.center,
+                        decoration: const BoxDecoration(
+                          color: Color(0xffFFF4E0),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const SizedBox(
+                          height: 40,
+                          width: 40,
+                          child: Center(
+                            child: Text(
+                              "A",
+                              style: TextStyle(
+                                  color: blackcolor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Airtel",
+                              style: TextStyle(color: whitecolor, fontSize: 16),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              "Airtel Packing your bags for inter....",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: whitecolor, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            "Airtel",
-                            style: TextStyle(color: whitecolor, fontSize: 16),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            "Airtel Packing your bags for inter....",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: whitecolor, fontSize: 14),
+                            "32 Min",
+                            style: TextStyle(color: whitecolor, fontSize: 13),
                           ),
                         ],
                       ),
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "32 Min",
-                          style: TextStyle(color: whitecolor, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Divider(
-                  color: buttoncolor,
-                )
-              ],
+                    ],
+                  ),
+                  const Divider(
+                    color: buttoncolor,
+                  )
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   Widget incomingCallList() {
-    return ListView.builder(
-      itemCount: 10,
-      shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) {
-        return InkWell(
-          onTap: () {
-            // Navigator.of(context).push(
-            //   MaterialPageRoute(builder: (context) => const CallingPage()),
-            // );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(5),
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 40,
-                      decoration: const BoxDecoration(
-                        color: Color(0xffFFF4E0),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const SizedBox(
-                        height: 40,
+    return Container(
+      margin: EdgeInsets.only(bottom: 50.0),
+      child: ListView.builder(
+        itemCount: 10,
+        shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index) {
+          return InkWell(
+            onTap: () {
+              // Navigator.of(context).push(
+              //   MaterialPageRoute(builder: (context) => const CallingPage()),
+              // );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
                         width: 40,
-                        child: Center(
-                          child: Text(
-                            "A",
-                            style: TextStyle(
-                                color: blackcolor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600),
-                            textAlign: TextAlign.center,
+                        decoration: const BoxDecoration(
+                          color: Color(0xffFFF4E0),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const SizedBox(
+                          height: 40,
+                          width: 40,
+                          child: Center(
+                            child: Text(
+                              "A",
+                              style: TextStyle(
+                                  color: blackcolor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Airtel",
+                              style: TextStyle(color: whitecolor, fontSize: 16),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              "Airtel Packing your bags for inter....",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: whitecolor, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            "Airtel",
-                            style: TextStyle(color: whitecolor, fontSize: 16),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            "Airtel Packing your bags for inter....",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: whitecolor, fontSize: 14),
+                            "32 Min",
+                            style: TextStyle(color: whitecolor, fontSize: 13),
                           ),
                         ],
                       ),
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "32 Min",
-                          style: TextStyle(color: whitecolor, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Divider(
-                  color: buttoncolor,
-                )
-              ],
+                    ],
+                  ),
+                  const Divider(
+                    color: buttoncolor,
+                  )
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   Widget outgoingCallList() {
-    return ListView.builder(
-      itemCount: 10,
-      shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) {
-        return InkWell(
-          onTap: () {
-            // Navigator.of(context).push(
-            //   MaterialPageRoute(builder: (context) => const CallingPage()),
-            // );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(5),
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 40,
-                      decoration: const BoxDecoration(
-                        color: Color(0xffFFF4E0),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const SizedBox(
-                        height: 40,
+    return Container(
+      margin: EdgeInsets.only(bottom: 50.0),
+      child: ListView.builder(
+        itemCount: 20,
+        shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index) {
+          return InkWell(
+            onTap: () {
+              // Navigator.of(context).push(
+              //   MaterialPageRoute(builder: (context) => const CallingPage()),
+              // );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
                         width: 40,
-                        child: Center(
-                          child: Text(
-                            "A",
-                            style: TextStyle(
-                                color: blackcolor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600),
-                            textAlign: TextAlign.center,
+                        decoration: const BoxDecoration(
+                          color: Color(0xffFFF4E0),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const SizedBox(
+                          height: 40,
+                          width: 40,
+                          child: Center(
+                            child: Text(
+                              "A",
+                              style: TextStyle(
+                                  color: blackcolor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Airtel",
+                              style: TextStyle(color: whitecolor, fontSize: 16),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              "Airtel Packing your bags for inter....",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: whitecolor, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            "Airtel",
-                            style: TextStyle(color: whitecolor, fontSize: 16),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            "Airtel Packing your bags for inter....",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: whitecolor, fontSize: 14),
+                            "32 Min",
+                            style: TextStyle(color: whitecolor, fontSize: 13),
                           ),
                         ],
                       ),
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "32 Min",
-                          style: TextStyle(color: whitecolor, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Divider(
-                  color: buttoncolor,
-                )
-              ],
+                    ],
+                  ),
+                  const Divider(
+                    color: buttoncolor,
+                  )
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

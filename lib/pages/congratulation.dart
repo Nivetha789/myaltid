@@ -7,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/activeuserhome.dart';
+import 'package:myaltid/pages/signup.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
 import '../reasuable/dialogbox.dart';
 import '../reasuable/theme.dart';
@@ -31,6 +32,7 @@ class CongratulationsState extends State<Congratulations> {
   }
 
   var forIos = true;
+
   @override
   Widget build(BuildContext context) {
     return Backgroundscreen(
@@ -178,9 +180,7 @@ class CongratulationsState extends State<Congratulations> {
                               height: 20,
                             ),
                             Text(
-                              cmobile != ""
-                                  ? cmobile
-                                  : "-",
+                              cmobile != "" ? cmobile : "-",
                               style: GoogleFonts.openSans(
                                 textStyle: const TextStyle(
                                     color: whitecolor,
@@ -227,9 +227,7 @@ class CongratulationsState extends State<Congratulations> {
                               height: 20,
                             ),
                             Text(
-                              cemail != ""
-                                  ? cemail
-                                  : "-",
+                              cemail != "" ? cemail : "-",
                               style: GoogleFonts.openSans(
                                 textStyle: const TextStyle(
                                     color: whitecolor,
@@ -291,7 +289,7 @@ class CongratulationsState extends State<Congratulations> {
                               height: 10,
                             ),
                             Row(
-                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 InkWell(
                                   onTap: () {
@@ -364,6 +362,93 @@ class CongratulationsState extends State<Congratulations> {
                                   ),
                                 ),
                               ],
+                            ),
+                            InkWell(
+                              onTap: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        content: Text(
+                                            'Are you sure, do you want to logout?',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.w500),),
+                                        actions: <Widget>[
+                                          ElevatedButton(
+                                            child: Text('No'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop(false);
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                                backgroundColor: buttoncolor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width /
+                                                              1.7),
+                                                )),
+                                          ),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                                backgroundColor:buttoncolor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width / 2),
+                                                )),
+                                            child: Text('Yes'),
+                                            onPressed: () async {
+                                              await SharedPreference()
+                                                  .clearSharep()
+                                                  .then((v) {
+                                                Navigator.of(context)
+                                                    .pushReplacement(
+                                                        MaterialPageRoute(
+                                                            builder: (BuildContext
+                                                                    context) =>
+                                                                Signup()));
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    });
+                              },
+                              child: Container(
+                                margin:
+                                    EdgeInsets.only(top: 15.0, bottom: 15.0),
+                                width: 140,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                padding: const EdgeInsets.all(10),
+                                alignment: Alignment.center,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.logout,
+                                      size: 22.0,
+                                      color: buttoncolor,
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 5.0),
+                                      child: Text(
+                                        "LOGOUT",
+                                        style: TextStyle(
+                                            color: buttoncolor,
+                                            fontFamily: "Helvatica",
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
                         ),

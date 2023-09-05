@@ -11,8 +11,12 @@ import 'package:myaltid/reasuable/theme.dart';
 import '../widget/sharedpreference.dart';
 
 void Dialogbox(BuildContext context) async{
-  String dndStatus=  await SharedPreference().getDnd();
-  print("dndddddddd "+dndStatus.toString());
+  String dndStatus="";
+  if(await SharedPreference().getDnd()!=null){
+    dndStatus=await SharedPreference().getDnd();
+  }else{
+    dndStatus="";
+  }
   showGeneralDialog(
     context: context,
     barrierColor: Colors.black38,

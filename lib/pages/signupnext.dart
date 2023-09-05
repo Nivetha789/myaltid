@@ -28,134 +28,8 @@ class _SignupAppState extends State<SignupApp> {
   bool texterror = false, numbererror = false;
   final formKey = GlobalKey<FormState>();
   late String oldvalue;
-
-  checkuser() async {
-    try {
-      Dio dio = Dio();
-
-      var parameters = {"n_Mobile": phonenumber.text};
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        ApiProvider.checkuser,
-        data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
-      );
-      debugPrint("pavithra ${response.data["status"]}");
-
-      if (response.data["status"] == 1) {
-        if (refferalcontroller.text.isEmpty) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => SendOTPScreen(
-                  phonenumber: phonenumber.text,
-                  name: namecontroller.text,
-                  refferalcode: refferalcontroller.text,
-                  signup: widget.signup),
-            ),
-          );
-        } else {
-          var parameters1 = {"c_ReferralCode": refferalcontroller.text};
-          final response1 = await dio.post(
-            ApiProvider.checkrefferalcode,
-            data: parameters1,
-            options: Options(contentType: Headers.formUrlEncodedContentType),
-          );
-          if (response1.data["status"] == 1) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => SendOTPScreen(
-                    phonenumber: phonenumber.text,
-                    name: namecontroller.text,
-                    refferalcode: refferalcontroller.text,
-                    signup: widget.signup),
-              ),
-            );
-          } else {
-            final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'On Snap!',
-                message: 'Please Enter Valid Refferal Code',
-                contentType: ContentType.failure,
-              ),
-            );
-
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
-          }
-          debugPrint("pavithra ${response1.data}");
-        }
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(builder: (context) => const Congratulations()),
-        // );
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["message"][0],
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
-
-  checkuserlogin() async {
-    try {
-      Dio dio = Dio();
-
-      var parameters = {"n_Mobile": phonenumber.text};
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        ApiProvider.checkuser,
-        data: parameters,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
-      );
-      debugPrint("pavithra ${response.data}");
-
-      if (response.data["status"] == 1) {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["message"][0] +
-                ". Can you please try create a new account",
-            contentType: ContentType.failure,
-          ),
-        );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
-      } else {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => SendOTPScreen(
-                phonenumber: phonenumber.text,
-                name: namecontroller.text,
-                refferalcode: refferalcontroller.text,
-                signup: widget.signup),
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
+  bool isTapped = false;
+  bool sendOtpBtn = false;
 
   @override
   Widget build(BuildContext context) {
@@ -312,6 +186,20 @@ class _SignupAppState extends State<SignupApp> {
                             maxLength: 10,
                             keyboardType: TextInputType.number,
                             decoration: buildInputDecoration("Mobile Number"),
+                            onFieldSubmitted: (value) {
+                              if (value.length == 10) {
+                                sendOtpBtn = true;
+                              } else {
+                                sendOtpBtn = false;
+                              }
+                            },
+                            onChanged: (value) {
+                              if (value.length == 10) {
+                                sendOtpBtn = true;
+                              } else {
+                                sendOtpBtn = false;
+                              }
+                            },
                             validator: (value) {
                               if (value!.isEmpty) {
                                 return 'Please a Enter your Phone number';
@@ -362,6 +250,20 @@ class _SignupAppState extends State<SignupApp> {
                             maxLength: 10,
                             keyboardType: TextInputType.number,
                             decoration: buildInputDecoration("Mobile Number"),
+                            onFieldSubmitted: (value) {
+                              if (value.length == 10) {
+                                sendOtpBtn = true;
+                              } else {
+                                sendOtpBtn = false;
+                              }
+                            },
+                            onChanged: (value) {
+                              if (value.length == 10) {
+                                sendOtpBtn = true;
+                              } else {
+                                sendOtpBtn = false;
+                              }
+                            },
                             validator: (value) {
                               if (value!.isEmpty) {
                                 return 'Please a Enter your Phone number';
@@ -378,19 +280,26 @@ class _SignupAppState extends State<SignupApp> {
                 const SizedBox(
                   height: 40,
                 ),
-                InkWell(
-                  onTap: () {
-                    if (formKey.currentState!.validate()) {
-                      widget.signup == "signup"
-                          ? checkuser()
-                          : checkuserlogin();
-                      // );
-                      //check if form data are valid,
-                      // your process task ahed if all data are valid
-                    }
-                  },
-                  child: const ButtonScreen(
-                    buttontext: "Send OTP?",
+                Visibility(
+                  visible: sendOtpBtn,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(primary: buttoncolor),
+                    onPressed: isTapped ? againCall : callBack,
+                    child: Container(
+                      alignment: Alignment.center,
+                      width: MediaQuery.of(context).size.width / 2.2,
+                      padding: const EdgeInsets.only(top: 12.0, bottom: 12.0),
+                      child: Text(
+                        "Send OTP?",
+                        style: TextStyle(
+                            fontFamily: "Helvatica",
+                            color: whitecolor,
+                            fontWeight: FontWeight.w600,
+                            fontStyle: FontStyle.normal,
+                            // fontStyle: FontStyle.italic,
+                            fontSize: 15),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -399,5 +308,173 @@ class _SignupAppState extends State<SignupApp> {
         ),
       ),
     );
+  }
+
+  void callBack() {
+    setState(() {
+      isTapped = true;
+    });
+    if (formKey.currentState!.validate()) {
+      widget.signup == "signup" ? checkuser() : checkuserlogin();
+      // );
+      //check if form data are valid,
+      // your process task ahead if all data are valid
+    }
+  }
+
+  void againCall() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Send OTP"),
+          content: Text("Send OTP for this number?"),
+          actions: [
+            TextButton(
+              child: Text("Close"),
+              onPressed: () {
+                phonenumber.text = "";
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                callBack();
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  checkuser() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": phonenumber.text};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.checkuser,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data["status"]}");
+
+      if (response.data["status"] == 1) {
+        if (refferalcontroller.text.isEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => SendOTPScreen(
+                  phonenumber: phonenumber.text,
+                  name: namecontroller.text,
+                  refferalcode: refferalcontroller.text,
+                  signup: widget.signup),
+            ),
+          );
+        } else {
+          var parameters1 = {"c_ReferralCode": refferalcontroller.text};
+          final response1 = await dio.post(
+            ApiProvider.checkrefferalcode,
+            data: parameters1,
+            options: Options(contentType: Headers.formUrlEncodedContentType),
+          );
+          if (response1.data["status"] == 1) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SendOTPScreen(
+                    phonenumber: phonenumber.text,
+                    name: namecontroller.text,
+                    refferalcode: refferalcontroller.text,
+                    signup: widget.signup),
+              ),
+            );
+          } else {
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'On Snap!',
+                message: 'Please Enter Valid Refferal Code',
+                contentType: ContentType.failure,
+              ),
+            );
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }
+          debugPrint("pavithra ${response1.data}");
+        }
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
+      } else {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["message"][0],
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  checkuserlogin() async {
+    try {
+      Dio dio = Dio();
+
+      var parameters = {"n_Mobile": phonenumber.text};
+      dio.options.contentType = Headers.formUrlEncodedContentType;
+      final response = await dio.post(
+        ApiProvider.checkuser,
+        data: parameters,
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+      debugPrint("pavithra ${response.data}");
+
+      if (response.data["status"] == 1) {
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'On Snap!',
+            message: response.data["message"][0] +
+                ". Can you please try create a new account",
+            contentType: ContentType.failure,
+          ),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      } else {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SendOTPScreen(
+                phonenumber: phonenumber.text,
+                name: namecontroller.text,
+                refferalcode: refferalcontroller.text,
+                signup: widget.signup),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 }

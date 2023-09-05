@@ -254,7 +254,7 @@ class _SendMessageState extends State<SendMessage> {
                               // print("moblengthhh " +
                               //     mobilenumberController.text.toString()+", "+msgTemId+", ");
                               Fluttertoast.showToast(
-                                  msg: "Sucess",
+                                  msg: "Success",
                                   toastLength: Toast.LENGTH_SHORT,
                                   gravity: ToastGravity.BOTTOM,
                                   textColor: Colors.black,

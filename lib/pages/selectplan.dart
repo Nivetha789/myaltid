@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:myaltid/pages/planselection.dart';
+import 'package:myaltid/pages/signup.dart';
 import 'package:myaltid/reasuable/background_screen.dart';
 import 'package:myaltid/reasuable/theme.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
@@ -15,7 +16,6 @@ import '../data/api.dart';
 import '../module/plans.dart';
 
 class SelectPlan extends StatefulWidget {
-  const SelectPlan({super.key});
 
   @override
   State<SelectPlan> createState() => _SelectPlanState();
@@ -85,18 +85,58 @@ class _SelectPlanState extends State<SelectPlan> {
       } else if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
         debugPrint("response ${response.data}");
-        setState(() {
-          isloading = true;
-        });
-        // setState(() {
-        //   ProgressDialog().dismissDialog(context);
-        // });
-        for (var i = 0; i < map["data"].length; i++) {
-          debugPrint("response ${map["data"][i]}");
-
+        if(map["status"]==1){
           setState(() {
-            plans.add(Plan.fromJson(map["data"][i]));
+            isloading = true;
           });
+          // setState(() {
+          //   ProgressDialog().dismissDialog(context);
+          // });
+          for (var i = 0; i < map["data"].length; i++) {
+            debugPrint("response ${map["data"][i]}");
+
+            setState(() {
+              plans.add(Plan.fromJson(map["data"][i]));
+            });
+          }
+        }else{
+          var dialog = AlertDialog(
+            title: Text('Login',
+                style: TextStyle(
+                    color: buttoncolor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16)),
+            content: Text('Session was expired kindly login again',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15)),
+            actions: [
+              ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                    ),
+                    backgroundColor:
+                    MaterialStateProperty.all(buttoncolor),
+                  ),
+                  onPressed: () async{
+                    Navigator.pop(context);
+                    await SharedPreference().clearSharep().then((v) {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) => Signup()));
+                    });
+                  },
+                  child: Text('  OK  ',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16),))
+            ],
+          );
+          showDialog(
+              context: context, builder: (BuildContext context) => dialog);
         }
       } else {
         final snackBar = SnackBar(

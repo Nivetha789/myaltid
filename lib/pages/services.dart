@@ -225,7 +225,7 @@ class _ServiceAppState extends State<ServiceApp> {
               InkWell(
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const SelectPlan()),
+                    MaterialPageRoute(builder: (context) => SelectPlan()),
                   );
                 },
                 child: const ButtonScreen(

@@ -442,7 +442,7 @@ class _KycScreenState extends State<KycScreen> {
                   height: 0,
                 ),
                 const Text(
-                  "Email ID (other than MYALTID)",
+                  "Email ID (Aadhaar linked email)",
                   style: TextStyle(
                     fontFamily: "Helvatica",
                     color: whitecolor,
@@ -579,53 +579,6 @@ class _KycScreenState extends State<KycScreen> {
                         child: DropdownButton<int>(
                           padding: const EdgeInsets.only(left: 10),
                           isExpanded: true,
-                          value: selectedMonth,
-                          hint: const Text(
-                            'Month',
-                            style: TextStyle(
-                              fontFamily: "Helvatica",
-                              color: whitecolor,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              // fontStyle: FontStyle.italic,
-                              fontSize: 14,
-                            ),
-                          ),
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedMonth = newValue;
-                              selectedDate = null;
-                            });
-                          },
-                          dropdownColor: const Color(0xff1C1C1E),
-                          underline: const SizedBox(),
-                          items: getMonths().map((int value) {
-                            return DropdownMenuItem<int>(
-                              value: value,
-                              child: Text(
-                                value.toString(),
-                                style: const TextStyle(
-                                  fontFamily: "Helvatica",
-                                  color: whitecolor,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  // fontStyle: FontStyle.italic,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      Container(
-                        width: 130,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: const Color(0xff1C1C1E),
-                        ),
-                        child: DropdownButton<int>(
-                          padding: const EdgeInsets.only(left: 10),
-                          isExpanded: true,
                           value: selectedDate,
                           hint: const Text(
                             'Date',
@@ -665,6 +618,53 @@ class _KycScreenState extends State<KycScreen> {
                                   );
                                 }).toList()
                               : null,
+                        ),
+                      ),
+                      Container(
+                        width: 130,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: const Color(0xff1C1C1E),
+                        ),
+                        child: DropdownButton<int>(
+                          padding: const EdgeInsets.only(left: 10),
+                          isExpanded: true,
+                          value: selectedMonth,
+                          hint: const Text(
+                            'Month',
+                            style: TextStyle(
+                              fontFamily: "Helvatica",
+                              color: whitecolor,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.normal,
+                              // fontStyle: FontStyle.italic,
+                              fontSize: 14,
+                            ),
+                          ),
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedMonth = newValue;
+                              selectedDate = null;
+                            });
+                          },
+                          dropdownColor: const Color(0xff1C1C1E),
+                          underline: const SizedBox(),
+                          items: getMonths().map((int value) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text(
+                                value.toString(),
+                                style: const TextStyle(
+                                  fontFamily: "Helvatica",
+                                  color: whitecolor,
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.normal,
+                                  // fontStyle: FontStyle.italic,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
                       Container(

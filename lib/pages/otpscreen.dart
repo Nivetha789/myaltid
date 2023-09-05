@@ -1,23 +1,29 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, unrelated_type_equality_checks, use_build_context_synchronously, non_constant_identifier_names
 
 import 'dart:async';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/calls/calllist.dart';
 import 'package:myaltid/pages/kyc.dart';
-import 'package:myaltid/widget/sharedpreference.dart';
-import '../reasuable/theme.dart';
-import '../reasuable/background_screen.dart';
-import '../reasuable/button.dart';
+import 'package:myaltid/pages/selectplan.dart';
 import 'package:myaltid/pages/services.dart';
+import 'package:myaltid/widget/sharedpreference.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
 
+import '../reasuable/background_screen.dart';
+import '../reasuable/button.dart';
+import '../reasuable/theme.dart';
+import 'activeuserhome.dart';
+import 'alternateid.dart';
+
 class SendOTPScreen extends StatefulWidget {
   final phonenumber, name, refferalcode, signup;
+
   const SendOTPScreen(
       {super.key, this.phonenumber, this.name, this.refferalcode, this.signup});
 
@@ -26,7 +32,6 @@ class SendOTPScreen extends StatefulWidget {
 }
 
 class _SendOTPScreenState extends State<SendOTPScreen> {
-
   OtpFieldController otpController = OtpFieldController();
   TextEditingController textEditingController = TextEditingController();
 
@@ -59,6 +64,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
       return '${((timerMaxSeconds - currentSeconds) ~/ 180).toString().padLeft(2, '0')}:${((timerMaxSeconds - currentSeconds) % 180).toString().padLeft(2, '0')}';
     }
   }
+
   // '${((timerMaxSeconds - currentSeconds) ~/ 180).toString().padLeft(2, '0')}:${((timerMaxSeconds - currentSeconds) % 180).toString().padLeft(2, '0')}';
 
   startTimeout([int? milliseconds]) {
@@ -443,13 +449,13 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
       } else if (response.statusCode == 200) {
         textEditingController.text = response.data["data"][0].toString();
         final snackBar =
-        //  SnackBar(
-        //   backgroundColor: Colors.green,
-        //   content: Text('Your OTP is ! ${response.data["data"][0]}'),
-        //   duration: const Duration(seconds: 2),
-        // );
-        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        SnackBar(
+            //  SnackBar(
+            //   backgroundColor: Colors.green,
+            //   content: Text('Your OTP is ! ${response.data["data"][0]}'),
+            //   duration: const Duration(seconds: 2),
+            // );
+            // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            SnackBar(
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
@@ -498,56 +504,101 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
         data: parameters,
         options: Options(contentType: Headers.formUrlEncodedContentType),
       );
-      debugPrint("pavithra ${response.data}");
+      debugPrint("verifyOtpRes: ${response.data}");
       if (response.statusCode == 401) {
       } else if (response.statusCode == 200) {
         if (response.data["status"] == 1) {
           await SharedPreference().setphonenumber(widget.phonenumber!);
-
-          await SharedPreference().setuserName(widget.name!);
+          if (response.data["data"][0]["c_Name"].toString().isNotEmpty) {
+            await SharedPreference()
+                .setuserName(response.data["data"][0]["c_Name"].toString());
+          } else {
+            await SharedPreference().setuserName(widget.name);
+          }
           await SharedPreference().setrefferalcode(widget.refferalcode!);
           await SharedPreference()
               .settoken(response.data["data"][0]["c_accessToken"]);
-          if (response.data["data"][0]["n_Status"] == "2") {
+          // if (response.data["data"][0]["n_Status"] == 2) {
+          //   setState(() {
+          //     isconfirmloading = false;
+          //   });
+          //   final snackBar = SnackBar(
+          //     elevation: 0,
+          //     behavior: SnackBarBehavior.floating,
+          //     backgroundColor: Colors.transparent,
+          //     content: AwesomeSnackbarContent(
+          //       title: 'On Snap!',
+          //       message: 'Please contact your admin',
+          //       contentType: ContentType.failure,
+          //     ),
+          //   );
+          //
+          //   ScaffoldMessenger.of(context)
+          //     ..hideCurrentSnackBar()
+          //     ..showSnackBar(snackBar);
+          // }
+          print("widget.signup " + widget.signup.toString());
+          if (widget.signup != "signup") {
             setState(() {
               isconfirmloading = false;
             });
-            final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'On Snap!',
-                message: 'Please contact your admin',
-                contentType: ContentType.failure,
-              ),
-            );
-
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
-          } else if (widget.signup != "signup") {
-            setState(() {
-              isconfirmloading = false;
-            });
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const CallistPage()),
-            );
-          } else if (response.data["data"][0]["n_Payment"] == "2") {
-            setState(() {
-              isconfirmloading = false;
-            });
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const KycScreen()),
-            );
+            if(response.data["data"][0]["n_Virtual"] == 1){
+              //virtual incomplete
+              await SharedPreference().setLogin("4");
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => SelectAlternateID()),
+                      (Route<dynamic> route) => false);
+            }else{
+              if (response.data["data"][0]["n_Payment"] == 2 &&
+                  response.data["data"][0]["n_Kyc"] == 1) {
+                //kyc incomplete
+                await SharedPreference().setLogin("3");
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => KycScreen()),
+                        (Route<dynamic> route) => false);
+              } else if (response.data["data"][0]["n_Payment"] == 1 &&
+                  response.data["data"][0]["n_Kyc"] == 2) {
+                //payment incomplete
+                await SharedPreference().setLogin("2");
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => SelectPlan()),
+                        (Route<dynamic> route) => false);
+              } else if (response.data["data"][0]["n_Payment"] == 2 &&
+                  response.data["data"][0]["n_Kyc"] == 2 && response.data["data"][0]["n_Virtual"] == 2) {
+                await SharedPreference().setLogin("1");
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => ActiveUserHome()),
+                        (Route<dynamic> route) => false);
+              } else {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => CallistPage()),
+                        (Route<dynamic> route) => false);
+              }
+            }
           } else {
             setState(() {
               isconfirmloading = false;
             });
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const ServiceApp()),
-            );
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => ServiceApp()),
+                (Route<dynamic> route) => false);
           }
+
+          // else if (response.data["data"][0]["n_Payment"] == 2) {
+          //   setState(() {
+          //     isconfirmloading = false;
+          //   });
+          //   Navigator.of(context).push(
+          //     MaterialPageRoute(builder: (context) => const KycScreen()),
+          //   );
+          // } else {
+          //   setState(() {
+          //     isconfirmloading = false;
+          //   });
+          //   Navigator.of(context).push(
+          //     MaterialPageRoute(builder: (context) => const ServiceApp()),
+          //   );
+          // }
         } else {
           setState(() {
             isconfirmloading = false;
@@ -588,9 +639,10 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
           ..showSnackBar(snackBar);
       }
     } catch (e) {
-      debugPrint(e as String?);
+      debugPrint("exceptionn : " + e.toString());
     }
   }
+
 //checkrefferalcode
 
   checkrefferal() async {

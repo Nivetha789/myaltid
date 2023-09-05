@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/module/alternateid.dart';
 import 'package:myaltid/pages/WebViewScreen.dart';
+import 'package:myaltid/pages/signup.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
 import '../reasuable/dialogbox.dart';
 import '../reasuable/theme.dart';
@@ -160,6 +162,7 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                                           vphoneneumber = jphonenumber[index]
                                               .nMobile
                                               .toString();
+                                          vemail.text=vphoneneumber+"@myaltid.com";
                                         });
                                       },
                                       child: Column(
@@ -191,46 +194,6 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                                     );
                                   },
                                 ),
-
-                                // Text(
-                                //   "909090909",
-                                //   style: TextStyle(
-                                //       color: whitecolor,
-                                //       fontFamily: "Helvatica",
-                                //       fontWeight: FontWeight.w400,
-                                //       fontStyle: FontStyle.normal,
-                                //       // fontStyle: FontStyle.italic,
-                                //       fontSize: 14),
-                                // ),
-                                // Divider(
-                                //   color: whitecolor,
-                                // ),
-                                // Text(
-                                //   "887878878",
-                                //   style: TextStyle(
-                                //       color: whitecolor,
-                                //       fontFamily: "Helvatica",
-                                //       fontWeight: FontWeight.w400,
-                                //       fontStyle: FontStyle.normal,
-                                //       // fontStyle: FontStyle.italic,
-                                //       fontSize: 14),
-                                // ),
-                                // Divider(
-                                //   color: whitecolor,
-                                // ),
-                                // Text(
-                                //   "565656565",
-                                //   style: TextStyle(
-                                //       color: whitecolor,
-                                //       fontFamily: "Helvatica",
-                                //       fontWeight: FontWeight.w400,
-                                //       fontStyle: FontStyle.normal,
-                                //       // fontStyle: FontStyle.italic,
-                                //       fontSize: 14),
-                                // ),
-                                // SizedBox(
-                                //   height: 20,
-                                // ),
                               ],
                             ),
                           ),
@@ -238,103 +201,61 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                         const SizedBox(
                           height: 20,
                         ),
-                        Card(
-                          elevation: 10,
-                          color: blackcolor,
-                          shadowColor: buttoncolor,
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Select Email",
-                                  style: TextStyle(
-                                      color: whitecolor,
-                                      fontFamily: "Helvatica",
-                                      fontWeight: FontWeight.w500,
-                                      fontStyle: FontStyle.normal,
-                                      // fontStyle: FontStyle.italic,
-                                      fontSize: 16),
-                                ),
-                                ListView.builder(
-                                  itemCount: jemail.length,
-                                  shrinkWrap: true,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          // vemail.text =
-                                          //     jemail[index].cEmail.toString();
-                                        });
-                                      },
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            jemail[index].cEmail.toString(),
-                                            style: const TextStyle(
-                                                color: whitecolor,
-                                                fontFamily: "Helvatica",
-                                                fontWeight: FontWeight.w400,
-                                                fontStyle: FontStyle.normal,
-                                                // fontStyle: FontStyle.italic,
-                                                fontSize: 14),
-                                          ),
-                                          const Divider(
-                                            color: whitecolor,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                                TextFormField(
-                                  style: const TextStyle(color: whitecolor),
-                                  autovalidateMode:
-                                      AutovalidateMode.onUserInteraction,
-                                  minLines: 1,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please a Enter Your Email';
-                                    }
-                                    if (!RegExp(
-                                            r'^[^.][a-z0-9._]+@[a-z0-9]+\.[a-z]+$',
-                                            caseSensitive: false)
-                                        .hasMatch(value)) {
-                                      return 'Please a valid Email';
-                                    }
-                                    return null;
-                                  },
-                                  decoration: const InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'Write your own',
-                                    hintStyle: TextStyle(
-                                        color: whitecolor, fontSize: 15),
-                                    // filled: true,
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          child: Card(
+                            elevation: 10,
+                            color: blackcolor,
+                            shadowColor: buttoncolor,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Your Email ID",
+                                    style: TextStyle(
+                                        color: whitecolor,
+                                        fontFamily: "Helvatica",
+                                        fontWeight: FontWeight.w500,
+                                        fontStyle: FontStyle.normal,
+                                        // fontStyle: FontStyle.italic,
+                                        fontSize: 16),
                                   ),
-                                  keyboardType: TextInputType.multiline,
-                                  maxLines: 1,
-                                  onChanged: (value) {
-                                    vemail.text = value;
-                                  },
-                                ),
-                                const Text(
-                                  "----------------------------------",
-                                  style: TextStyle(
-                                      color: whitecolor,
-                                      fontFamily: "Helvatica",
-                                      fontWeight: FontWeight.w400,
-                                      fontStyle: FontStyle.normal,
-                                      // fontStyle: FontStyle.italic,
-                                      fontSize: 14),
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                              ],
+                                  Container(
+                                    margin: EdgeInsets.only(top: 10.0),
+                                    child: TextFormField(
+                                      autofocus: false,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.text,
+                                      controller: vemail,
+                                      maxLines: 1,
+                                      enabled: false,
+                                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                                      style: const TextStyle(
+                                          color: whitecolor,
+                                          fontFamily: "Helvatica",
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          // fontStyle: FontStyle.italic,
+                                          fontSize: 14),
+                                    ),
+                                  ),
+                                  const Text(
+                                    "----------------------------------",
+                                    style: TextStyle(
+                                        color: whitecolor,
+                                        fontFamily: "Helvatica",
+                                        fontWeight: FontWeight.w400,
+                                        fontStyle: FontStyle.normal,
+                                        // fontStyle: FontStyle.italic,
+                                        fontSize: 15),
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -345,7 +266,7 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                     ),
               InkWell(
                   onTap: () {
-                    if (vemail.text.isEmpty || vphoneneumber == null) {
+                    if (vphoneneumber == null) {
                       final snackBar = SnackBar(
                         elevation: 0,
                         behavior: SnackBarBehavior.floating,
@@ -418,24 +339,64 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
       if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
         debugPrint("response ${response.data}");
+        if(map["status"]==1){
           isloading = true;
-        // setState(() {
-        //   ProgressDialog().dismissDialog(context);
-        // });
-        for (var i = 0; i < map["data"][0]["j_email"].length; i++) {
-          debugPrint("response ${map["data"][0]["j_email"][i]}");
+          // setState(() {
+          //   ProgressDialog().dismissDialog(context);
+          // });
+          for (var i = 0; i < map["data"][0]["j_email"].length; i++) {
+            debugPrint("response ${map["data"][0]["j_email"][i]}");
 
-          setState(() {
-            jemail.add(JEmail.fromJson(map["data"][0]["j_email"][i]));
-          });
-        }
-        debugPrint("response ${map["data"][1]}");
-        for (var j = 0; j < map["data"][1]["j_mobile"].length; j++) {
-          debugPrint("response ${map["data"][1]["j_mobile"][j]}");
+            setState(() {
+              jemail.add(JEmail.fromJson(map["data"][0]["j_email"][i]));
+            });
+          }
+          debugPrint("response ${map["data"][1]}");
+          for (var j = 0; j < map["data"][1]["j_mobile"].length; j++) {
+            debugPrint("response ${map["data"][1]["j_mobile"][j]}");
 
-          setState(() {
-            jphonenumber.add(JMobile.fromJson(map["data"][1]["j_mobile"][j]));
-          });
+            setState(() {
+              jphonenumber.add(JMobile.fromJson(map["data"][1]["j_mobile"][j]));
+            });
+          }
+        }else{
+          var dialog = AlertDialog(
+            title: Text('Login',
+                style: TextStyle(
+                    color: buttoncolor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16)),
+            content: Text('Session was expired kindly login again',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15)),
+            actions: [
+              ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                    ),
+                    backgroundColor:
+                    MaterialStateProperty.all(buttoncolor),
+                  ),
+                  onPressed: () async{
+                    Navigator.pop(context);
+                    await SharedPreference().clearSharep().then((v) {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) => Signup()));
+                    });
+                  },
+                  child: Text('  OK  ',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16),))
+            ],
+          );
+          showDialog(
+              context: context, builder: (BuildContext context) => dialog);
         }
       } else {
         isloading = false;
@@ -468,7 +429,7 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
         "c_Email": vemail.text,
       };
       debugPrint(parameters.toString());
-      print("fgdfkjhgfdkjhgdf $token $parameters");
+      print("virtualiddparams $token $parameters");
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
         ApiProvider.updatevirutalid,
