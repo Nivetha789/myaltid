@@ -111,15 +111,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (BuildContext context) {
                 return SelectPlan();
               }), (Route<dynamic> route) => false));
-    } else if (await SharedPreference().getLogin() == "3") {
-      //kyc incomplete
-      Timer(
-          Duration(seconds: 3),
-          () => Navigator.pushAndRemoveUntil(context,
-                  MaterialPageRoute(builder: (BuildContext context) {
-                return KycScreen();
-              }), (Route<dynamic> route) => false));
-    } else if (await SharedPreference().getLogin() == "4") {
+    }
+    // else if (await SharedPreference().getLogin() == "3") {
+    //   //kyc incomplete
+    //   Timer(
+    //       Duration(seconds: 3),
+    //       () => Navigator.pushAndRemoveUntil(context,
+    //               MaterialPageRoute(builder: (BuildContext context) {
+    //             return KycScreen();
+    //           }), (Route<dynamic> route) => false));
+    // }
+    else if (await SharedPreference().getLogin() == "4") {
       //virtual incomplete
       Timer(
           Duration(seconds: 3),

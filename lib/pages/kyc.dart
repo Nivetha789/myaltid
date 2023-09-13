@@ -1,22 +1,23 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously, non_constant_identifier_names, prefer_interpolation_to_compose_strings
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:datepicker_dropdown/datepicker_dropdown.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/pages/congratulation.dart';
+import 'package:myaltid/pages/signup.dart';
 import 'package:myaltid/widget/mobilenumberformator.dart';
+import 'package:myaltid/widget/progressloaded.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
-import '../reasuable/theme.dart';
-
-import '../reasuable/background_screen.dart';
-
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
+
+import '../reasuable/background_screen.dart';
+import '../reasuable/theme.dart';
 
 class KycScreen extends StatefulWidget {
   const KycScreen({super.key});
@@ -31,13 +32,14 @@ class _KycScreenState extends State<KycScreen> {
   TextEditingController pannumber = TextEditingController();
   TextEditingController aadharnumber = TextEditingController();
 
-  bool otpField=false;
-  String btnText="";
+  bool otpField = false;
+  String btnText = "Submit";
 
   final formKey = GlobalKey<FormState>();
   var otp;
   bool dateofbirth = false;
-  aadharOTPsend() async {
+
+  /*aadharOTPsend() async {
     debugPrint("PAIVTHRA");
     try {
       Dio dio = Dio();
@@ -95,7 +97,7 @@ class _KycScreenState extends State<KycScreen> {
         debugPrint(response.data["data"]["requestId"]);
         setState(() {
           requestid = response.data["data"]["requestId"];
-          btnText="Verify OTP";
+          btnText = "Verify OTP";
           debugPrint("requestid $requestid");
         });
       } else {
@@ -123,12 +125,12 @@ class _KycScreenState extends State<KycScreen> {
     } catch (e) {
       debugPrint(e as String?);
     }
-  }
+  }*/
 
   var requestid;
   var dob;
 
-  OTPcheck() async {
+  /*OTPcheck() async {
     debugPrint("pavithra12343 $requestid");
 
     try {
@@ -176,7 +178,7 @@ class _KycScreenState extends State<KycScreen> {
     } catch (e) {
       debugPrint(e.toString());
     }
-  }
+  }*/
 
   @override
   void initState() {
@@ -186,6 +188,7 @@ class _KycScreenState extends State<KycScreen> {
   var selectedMonth;
   var selectedDate;
   var selectedYear;
+
   List<int> getMonths() {
     return List<int>.generate(12, (index) => index + 1);
   }
@@ -210,6 +213,7 @@ class _KycScreenState extends State<KycScreen> {
   }
 
   bool isage = false;
+
   bool isAbove18Years(int year, int month, int day) {
     DateTime currentDate = DateTime.now();
     DateTime selectedDate = DateTime(year, month, day);
@@ -230,88 +234,66 @@ class _KycScreenState extends State<KycScreen> {
     return age >= 18;
   }
 
-  bool isloading = false;
   UserRegister() async {
-    String responseMsg="";
-      Dio dio = Dio();
+    ProgressDialog().showLoaderDialog(context);
+    Dio dio = Dio();
 
-      var token = await SharedPreference().gettoken();
-      var parameters = {
-        "c_Pan": pannumber.text,
-        "c_Email": username.text,
-        "n_Aadhar": aadharnumber.text.toString(),
-        "c_Dob": selectedDate.toString() +
-            "/" +
-            selectedMonth.toString() +
-            "/" +
-            selectedYear.toString()
-      };
-      print("PAVITHRA $parameters");
-      setState(() {
-        isloading = true;
-      });
-      dio.options.contentType = Headers.formUrlEncodedContentType;
-      final response = await dio.post(
-        ApiProvider.updatekyc,
-        data: parameters,
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {"Authorization": "Bearer $token"},
-        ),
-      );
-      debugPrint("pavithra ${response.data}");
+    var token = await SharedPreference().gettoken();
+    print("tokennnnn " + token);
+    var parameters = {
+      "c_Pan": pannumber.text,
+      "c_Email": username.text,
+      "n_Aadhar": aadharnumber.text.toString(),
+      "c_Dob": selectedDate.toString() +
+          "/" +
+          selectedMonth.toString() +
+          "/" +
+          selectedYear.toString()
+    };
+    print("updatekycParam $parameters");
+    dio.options.contentType = Headers.formUrlEncodedContentType;
+    final response = await dio.post(ApiProvider.updatekyc,
+        options:
+            Options(contentType: Headers.formUrlEncodedContentType, headers: {
+          'Content-Type': "application/json",
+          'Authorization': "Bearer " + token,
+        }),
+        data: parameters);
+    debugPrint("updatekycRes ${response.data}");
 
-      if(response.statusCode==200){
-        if (response.data["status"] == 1) {
-
-          responseMsg=response.data["message"][0];
-          setState(() {
-            isloading = false;
-          });
-          final snackBar = SnackBar(
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            content: AwesomeSnackbarContent(
-              title: 'Oh Hey!',
-              message: 'Otp has been sent to registered mobile number!',
-              contentType: ContentType.success,
-            ),
-          );
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(snackBar);
-          btnText="Verify OTP";
-          // Navigator.of(context).push(
-          //   MaterialPageRoute(builder: (context) => const Congratulations()),
-          // );
-        } else {
-          setState(() {
-            isloading = false;
-          });
-          final snackBar = SnackBar(
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            content: AwesomeSnackbarContent(
-              title: 'On Snap!',
-              message: response.data["error"]["n_Aadhar"].toString(),
-              contentType: ContentType.failure,
-            ),
-          );
-
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(snackBar);
-        }
-      }else{
+    if (response.statusCode == 200) {
+      if (response.data["status"] == 1) {
+        ProgressDialog().dismissDialog(context);
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Oh Hey!',
+            message: 'Otp has been sent to registered mobile number!',
+            contentType: ContentType.success,
+          ),
+        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+        setState(() {
+          otpField = true;
+          btnText = "Verify OTP";
+        });
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(builder: (context) => const Congratulations()),
+        // );
+      } else {
+        otpField = false;
+        ProgressDialog().dismissDialog(context);
         final snackBar = SnackBar(
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
           content: AwesomeSnackbarContent(
             title: 'On Snap!',
-            message: "Something went wrong... try again...",
+            message: response.data["error"].toString(),
             contentType: ContentType.failure,
           ),
         );
@@ -320,9 +302,64 @@ class _KycScreenState extends State<KycScreen> {
           ..hideCurrentSnackBar()
           ..showSnackBar(snackBar);
       }
+    } else if (response.statusCode == 401) {
+      ProgressDialog().dismissDialog(context);
+      var dialog = AlertDialog(
+        title: Text('Login',
+            style: TextStyle(
+                color: buttoncolor, fontWeight: FontWeight.w700, fontSize: 16)),
+        content: Text('Session was expired kindly login again',
+            style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
+                fontSize: 15)),
+        actions: [
+          ElevatedButton(
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                ),
+                backgroundColor: MaterialStateProperty.all(buttoncolor),
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                await SharedPreference().clearSharep().then((v) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (BuildContext context) => Signup()));
+                });
+              },
+              child: Text(
+                '  OK  ',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16),
+              ))
+        ],
+      );
+      showDialog(context: context, builder: (BuildContext context) => dialog);
+    } else {
+      ProgressDialog().dismissDialog(context);
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'On Snap!',
+          message: "Something went wrong... try again...",
+          contentType: ContentType.failure,
+        ),
+      );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+    }
   }
 
   verifykyc() async {
+    ProgressDialog().showLoaderDialog(context);
     try {
       Dio dio = Dio();
 
@@ -340,29 +377,74 @@ class _KycScreenState extends State<KycScreen> {
           headers: {"Authorization": "Bearer $token"},
         ),
       );
-      debugPrint("pavithra123 ${response.data}");
 
-      if (response.data["status"] == 1) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const Congratulations()),
-        );
-      } else {
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["error"]["aadhaar_number"][0],
-            contentType: ContentType.failure,
-          ),
-        );
+      print("kycResponse : " + response.toString());
+      if (response.statusCode == 200) {
+        if (response.data["status"] == 1) {
+          ProgressDialog().dismissDialog(context);
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => Congratulations()),
+          );
+        } else {
+          ProgressDialog().dismissDialog(context);
+          otpController=new OtpFieldController();
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: response.data["error"].toString(),
+              contentType: ContentType.failure,
+            ),
+          );
 
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+        }
+      } else if (response.statusCode == 401) {
+        ProgressDialog().dismissDialog(context);
+        var dialog = AlertDialog(
+          title: Text('Login',
+              style: TextStyle(
+                  color: buttoncolor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16)),
+          content: Text('Session was expired kindly login again',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15)),
+          actions: [
+            ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                  ),
+                  backgroundColor: MaterialStateProperty.all(buttoncolor),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await SharedPreference().clearSharep().then((v) {
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (BuildContext context) => Signup()));
+                  });
+                },
+                child: Text(
+                  '  OK  ',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16),
+                ))
+          ],
+        );
+        showDialog(context: context, builder: (BuildContext context) => dialog);
       }
     } catch (e) {
+      ProgressDialog().dismissDialog(context);
       final snackBar = SnackBar(
         elevation: 0,
         behavior: SnackBarBehavior.floating,
@@ -383,6 +465,7 @@ class _KycScreenState extends State<KycScreen> {
   }
 
   OtpFieldController otpController = OtpFieldController();
+
   // int _selectedDay = 14;
   // int _selectedMonth = 10;
   // int _selectedYear = 1993;
@@ -577,48 +660,44 @@ class _KycScreenState extends State<KycScreen> {
                           color: const Color(0xff1C1C1E),
                         ),
                         child: DropdownButton<int>(
-                          padding: const EdgeInsets.only(left: 10),
-                          isExpanded: true,
-                          value: selectedDate,
-                          hint: const Text(
-                            'Date',
-                            style: TextStyle(
-                              fontFamily: "Helvatica",
-                              color: whitecolor,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              // fontStyle: FontStyle.italic,
-                              fontSize: 14,
+                            padding: const EdgeInsets.only(left: 10),
+                            isExpanded: true,
+                            value: selectedDate,
+                            hint: const Text(
+                              'Date',
+                              style: TextStyle(
+                                fontFamily: "Helvatica",
+                                color: whitecolor,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.normal,
+                                // fontStyle: FontStyle.italic,
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedDate = newValue;
-                            });
-                          },
-                          dropdownColor: const Color(0xff1C1C1E),
-                          underline: const SizedBox(),
-                          items: selectedMonth != null
-                              ? getDaysInMonth(selectedMonth,
-                                      selectedYear ?? DateTime.now().year)
-                                  .map((int value) {
-                                  return DropdownMenuItem<int>(
-                                    value: value,
-                                    child: Text(
-                                      value.toString(),
-                                      style: const TextStyle(
-                                        fontFamily: "Helvatica",
-                                        color: whitecolor,
-                                        fontWeight: FontWeight.w400,
-                                        fontStyle: FontStyle.normal,
-                                        // fontStyle: FontStyle.italic,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  );
-                                }).toList()
-                              : null,
-                        ),
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedDate = newValue;
+                              });
+                            },
+                            dropdownColor: const Color(0xff1C1C1E),
+                            underline: const SizedBox(),
+                            items: getDaysInMonth(0, 0 ?? DateTime.now().year)
+                                .map((int value) {
+                              return DropdownMenuItem<int>(
+                                value: value,
+                                child: Text(
+                                  value.toString(),
+                                  style: const TextStyle(
+                                    fontFamily: "Helvatica",
+                                    color: whitecolor,
+                                    fontWeight: FontWeight.w400,
+                                    fontStyle: FontStyle.normal,
+                                    // fontStyle: FontStyle.italic,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              );
+                            }).toList()),
                       ),
                       Container(
                         width: 130,
@@ -644,7 +723,64 @@ class _KycScreenState extends State<KycScreen> {
                           onChanged: (newValue) {
                             setState(() {
                               selectedMonth = newValue;
-                              selectedDate = null;
+                              print("monthhhhhh " +
+                                  selectedMonth.toString() +
+                                  ", " +
+                                  selectedDate.toString());
+                              if (selectedDate == 29 && selectedMonth == 2 ||
+                                  selectedDate == 30 && selectedMonth == 2 ||
+                                  selectedDate == 31 && selectedMonth == 2) {
+                                Fluttertoast.showToast(
+                                    msg: "Please change date...",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    textColor: Colors.white,
+                                    backgroundColor: buttoncolor,
+                                    timeInSecForIosWeb: 1);
+                                selectedDate = null;
+                              } else if (selectedDate == 31 &&
+                                  selectedMonth == 6) {
+                                Fluttertoast.showToast(
+                                    msg: "Please change date...",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    textColor: Colors.white,
+                                    backgroundColor: buttoncolor,
+                                    timeInSecForIosWeb: 1);
+                                selectedDate = null;
+                              } else if (selectedDate == 31 &&
+                                  selectedMonth == 4) {
+                                Fluttertoast.showToast(
+                                    msg: "Please change date...",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    textColor: Colors.white,
+                                    backgroundColor: buttoncolor,
+                                    timeInSecForIosWeb: 1);
+                                selectedDate = null;
+                              } else if (selectedDate == 31 &&
+                                  selectedMonth == 9) {
+                                Fluttertoast.showToast(
+                                    msg: "Please change date...",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    textColor: Colors.white,
+                                    backgroundColor: buttoncolor,
+                                    timeInSecForIosWeb: 1);
+                                selectedDate = null;
+                              } else if (selectedDate == 31 &&
+                                  selectedMonth == 11) {
+                                Fluttertoast.showToast(
+                                    msg: "Please change date...",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    textColor: Colors.white,
+                                    backgroundColor: buttoncolor,
+                                    timeInSecForIosWeb: 1);
+                                selectedDate = null;
+                              } else {
+                                selectedDate = selectedDate;
+                              }
                             });
                           },
                           dropdownColor: const Color(0xff1C1C1E),
@@ -728,12 +864,12 @@ class _KycScreenState extends State<KycScreen> {
                         "Select valid date of birth & age should be above 18 years",
                         style: TextStyle(color: Colors.red),
                       )
-                    : const Text(""),
+                    : const Text("testttt"),
                 const SizedBox(
                   height: 10,
                 ),
                 const Text(
-                  "Enter Aadhar Number",
+                  "Enter Aadhaar Number",
                   style: TextStyle(
                     fontFamily: "Helvatica",
                     color: whitecolor,
@@ -752,37 +888,35 @@ class _KycScreenState extends State<KycScreen> {
                   inputFormatters: [MobileNumberInputFormatter()],
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Please a Enter your Aadhar number';
+                      return 'Please a Enter your Aadhaar number';
                     }
                     if (!RegExp(r'^[0-9]{12}$').hasMatch(value)) {
                       return 'Please a valid Number';
                     }
                     return null;
                   },
-                  onFieldSubmitted: (value){
-                    print("valueeeee "+value);
-                    if(value.length==12){
-                      otpField=true;
-                      btnText="Send OTP";
-                    }else{
-                      btnText="Submit KYC";
-                      otpField=false;
+                  onFieldSubmitted: (value) {
+                    print("valueeeee " + value);
+                    if (value.length == 12) {
+                      btnText = "Send OTP";
+                    } else {
+                      btnText = "Submit KYC";
+                      otpField = false;
                     }
                   },
                   onChanged: (value) {
                     'Minimum character length is 12';
-                    if(aadharnumber.text.length==12){
-                      otpField=true;
-                      btnText="Enter OTP";
-                    }else{
-                      btnText="Submit KYC";
-                      otpField=false;
+                    if (aadharnumber.text.length == 12) {
+                      btnText = "Send OTP";
+                    } else {
+                      btnText = "Submit KYC";
+                      otpField = false;
                     }
                   },
                   keyboardType: TextInputType.number,
                   maxLength: 12,
                   decoration: const InputDecoration(
-                    hintText: "Aadhar Number",
+                    hintText: "Aadhaar Number",
                     hintStyle: TextStyle(color: whitecolor, fontSize: 14),
                     fillColor: Color(0xff1C1C1E),
                     filled: true,
@@ -802,9 +936,9 @@ class _KycScreenState extends State<KycScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                 Visibility(
-                   visible: otpField,
-                   child: Text(
+                Visibility(
+                  visible: otpField,
+                  child: Text(
                     "Enter OTP",
                     style: TextStyle(
                       fontFamily: "Helvatica",
@@ -814,8 +948,8 @@ class _KycScreenState extends State<KycScreen> {
                       // fontStyle: FontStyle.italic,
                       fontSize: 14,
                     ),
+                  ),
                 ),
-                 ),
                 Visibility(
                   visible: otpField,
                   child: const SizedBox(
@@ -838,9 +972,11 @@ class _KycScreenState extends State<KycScreen> {
                     textFieldAlignment: MainAxisAlignment.spaceAround,
                     onCompleted: (pin) {
                       otp = pin;
-                      btnText="Submit KYC";
+                      btnText = "Submit KYC";
                       debugPrint("Completed: $pin" + otp);
-                      verifykyc();
+                      if (btnText == "Submit KYC") {
+                        verifykyc();
+                      }
                     },
                     otpFieldStyle: OtpFieldStyle(
                       borderColor: const Color(0xff1C1C1E),
@@ -857,28 +993,26 @@ class _KycScreenState extends State<KycScreen> {
                 InkWell(
                     onTap: () {
                       // if (isloading == false) {
-                        if (formKey.currentState!.validate() &&
-                            selectedDate != null &&
-                            selectedMonth != null &&
-                            selectedYear != null &&
-                            isAbove18Years(
-                                selectedYear, selectedMonth, selectedDate)) {
-                          // print("dffdh $otp");
-                          // if (otp == null) {
+                      if (formKey.currentState!.validate() &&
+                          selectedDate != null &&
+                          selectedMonth != null &&
+                          selectedYear != null &&
+                          isAbove18Years(
+                              selectedYear, selectedMonth, selectedDate)) {
+                        print("btnText " + btnText.toString());
+                        if (btnText == "Send OTP") {
                           UserRegister();
-                          // } else {
-                          //   verifykyc();
-                          // }
-
-                          setState(() {
-                            dateofbirth = false;
-                          });
-                        } else {
-                          print("dfgdfghdfgd");
-                          setState(() {
-                            dateofbirth = true;
-                          });
+                        } else if (otp.length == 6 && btnText == "Submit KYC") {
+                          verifykyc();
                         }
+                        setState(() {
+                          dateofbirth = false;
+                        });
+                      } else {
+                        setState(() {
+                          dateofbirth = true;
+                        });
+                      }
                       // } else {}
                     },
                     child: Container(
@@ -893,17 +1027,13 @@ class _KycScreenState extends State<KycScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          isloading == false
-                              ? Text(
-                                btnText,
-                                  style: TextStyle(
-                                      color: blackcolor,
-                                      fontSize: 15.0,
-                                      fontWeight: FontWeight.w500),
-                                )
-                              : SpinKitThreeBounce(
-                                  color: blackcolor,
-                                ),
+                          Text(
+                            btnText,
+                            style: TextStyle(
+                                color: blackcolor,
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w500),
+                          )
                         ],
                       ),
                     )),

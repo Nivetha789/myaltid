@@ -14,6 +14,7 @@ import 'package:myaltid/widget/sharedpreference.dart';
 
 import '../data/api.dart';
 import '../module/plans.dart';
+import '../reasuable/dialogbox.dart';
 
 class SelectPlan extends StatefulWidget {
 
@@ -82,10 +83,47 @@ class _SelectPlanState extends State<SelectPlan> {
       debugPrint("pavithra123 ${response.data}");
 
       if (response.statusCode == 401) {
+        var dialog = AlertDialog(
+          title: Text('Login',
+              style: TextStyle(
+                  color: buttoncolor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16)),
+          content: Text('Session was expired kindly login again',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15)),
+          actions: [
+            ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                  ),
+                  backgroundColor:
+                  MaterialStateProperty.all(buttoncolor),
+                ),
+                onPressed: () async{
+                  Navigator.pop(context);
+                  await SharedPreference().clearSharep().then((v) {
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (BuildContext context) => Signup()));
+                  });
+                },
+                child: Text('  OK  ',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16),))
+          ],
+        );
+        showDialog(
+            context: context, builder: (BuildContext context) => dialog);
       } else if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
         debugPrint("response ${response.data}");
-        if(map["status"]==1){
+        if(map["status"]==1) {
           setState(() {
             isloading = true;
           });
@@ -100,43 +138,20 @@ class _SelectPlanState extends State<SelectPlan> {
             });
           }
         }else{
-          var dialog = AlertDialog(
-            title: Text('Login',
-                style: TextStyle(
-                    color: buttoncolor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16)),
-            content: Text('Session was expired kindly login again',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 15)),
-            actions: [
-              ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                    ),
-                    backgroundColor:
-                    MaterialStateProperty.all(buttoncolor),
-                  ),
-                  onPressed: () async{
-                    Navigator.pop(context);
-                    await SharedPreference().clearSharep().then((v) {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (BuildContext context) => Signup()));
-                    });
-                  },
-                  child: Text('  OK  ',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16),))
-            ],
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: response.data["message"],
+              contentType: ContentType.failure,
+            ),
           );
-          showDialog(
-              context: context, builder: (BuildContext context) => dialog);
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
         }
       } else {
         final snackBar = SnackBar(
@@ -193,7 +208,9 @@ class _SelectPlanState extends State<SelectPlan> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {},
+                          onTap: () {
+                            Dialogbox(context);
+                          },
                           child: const SizedBox(
                             width: 50,
                             height: 50,

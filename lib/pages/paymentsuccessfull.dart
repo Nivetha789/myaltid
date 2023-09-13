@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter_paynimo/flutter_paynimo.dart';
 import 'package:myaltid/pages/alternateid.dart';
+import '../reasuable/dialogbox.dart';
 import '../reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
@@ -126,7 +127,9 @@ class _PaymentSuccessfullState extends State<PaymentSuccessfull> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {},
+                          onTap: () {
+                            Dialogbox(context);
+                          },
                           child: const SizedBox(
                             width: 50,
                             height: 50,

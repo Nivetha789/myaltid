@@ -4,6 +4,8 @@ import 'package:myaltid/reasuable/button.dart';
 import 'package:myaltid/reasuable/theme.dart';
 import 'package:myaltid/pages/selectplan.dart';
 
+import '../reasuable/dialogbox.dart';
+
 class ServiceApp extends StatefulWidget {
   const ServiceApp({super.key});
 
@@ -32,7 +34,9 @@ class _ServiceAppState extends State<ServiceApp> {
                     color: blackcolor, // Button color
                     child: InkWell(
                       splashColor: Colors.red, // Splash color
-                      onTap: () {},
+                      onTap: () {
+                        Dialogbox(context);
+                      },
                       child: const SizedBox(
                         width: 50,
                         height: 50,

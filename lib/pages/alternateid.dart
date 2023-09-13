@@ -23,7 +23,6 @@ class SelectAlternateID extends StatefulWidget {
 }
 
 class _SelectAlternateIDState extends State<SelectAlternateID> {
-
   bool isloading = false;
   List<JEmail> jemail = [];
   List<JMobile> jphonenumber = [];
@@ -41,228 +40,241 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
     return Backgroundscreen(
       ccontainerchild: Scaffold(
         backgroundColor: Colors.transparent,
-        body: SingleChildScrollView(
+        body: Container(
           padding: const EdgeInsets.all(15),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "My Alternate ID",
-                    style: TextStyle(
-                        fontFamily: "Helvatica",
-                        color: whitecolor,
-                        fontWeight: FontWeight.w600,
-                        fontStyle: FontStyle.normal,
-                        // fontStyle: FontStyle.italic,
-                        fontSize: 20),
-                    textAlign: TextAlign.start,
-                  ),
-                  Container(
-                    alignment: Alignment.bottomRight,
-                    child: ClipOval(
-                      child: Material(
-                        color: blackcolor, // Button color
-                        child: InkWell(
-                          splashColor: Colors.red, // Splash color
-                          onTap: () {
-                            Dialogbox(context);
-                          },
-                          child: const SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: Icon(
-                              Icons.person,
-                              color: buttoncolor,
+              Expanded(
+                flex: 2,
+                child: Container(
+                  margin: EdgeInsets.only(top: 30.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "My Alternate ID",
+                        style: TextStyle(
+                            fontFamily: "Helvatica",
+                            color: whitecolor,
+                            fontWeight: FontWeight.w600,
+                            fontStyle: FontStyle.normal,
+                            // fontStyle: FontStyle.italic,
+                            fontSize: 20),
+                        textAlign: TextAlign.start,
+                      ),
+                      Container(
+                        alignment: Alignment.bottomRight,
+                        child: ClipOval(
+                          child: Material(
+                            color: blackcolor, // Button color
+                            child: InkWell(
+                              splashColor: Colors.red, // Splash color
+                              onTap: () {
+                                Dialogbox(context);
+                              },
+                              child: const SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: Icon(
+                                  Icons.person,
+                                  color: buttoncolor,
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
+                ),
               ),
               isloading == false
                   ? const SpinKitFadingCircle(
                       color: buttoncolor,
                       size: 50.0,
                     )
-                  : Column(
-                      children: [
-                        Card(
-                          elevation: 10,
-                          color: blackcolor,
-                          shadowColor: buttoncolor,
-                          child: Container(
-                            height: 60,
-                            padding: const EdgeInsets.all(10),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Diamond Plan",
-                                  style: TextStyle(
-                                      color: goldcolor,
-                                      fontFamily: "Helvatica",
-                                      fontWeight: FontWeight.w400,
-                                      fontStyle: FontStyle.normal,
-                                      // fontStyle: FontStyle.italic,
-                                      fontSize: 14),
-                                ),
-                                Text(
-                                  "Change Plan",
-                                  style: TextStyle(
-                                      color: buttoncolor,
-                                      fontFamily: "Helvatica",
-                                      fontWeight: FontWeight.w500,
-                                      fontStyle: FontStyle.normal,
-                                      // fontStyle: FontStyle.italic,
-                                      fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Card(
-                          elevation: 10,
-                          color: blackcolor,
-                          shadowColor: buttoncolor,
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Select your preferred Alternate ID",
-                                  style: TextStyle(
-                                      color: whitecolor,
-                                      fontFamily: "Helvatica",
-                                      fontWeight: FontWeight.w400,
-                                      fontStyle: FontStyle.normal,
-                                      // fontStyle: FontStyle.italic,
-                                      fontSize: 14),
-                                ),
-
-                                ListView.builder(
-                                  itemCount: jphonenumber.length,
-                                  shrinkWrap: true,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          vphoneneumber = jphonenumber[index]
-                                              .nMobile
-                                              .toString();
-                                          vemail.text=vphoneneumber+"@myaltid.com";
-                                        });
-                                      },
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            jphonenumber[index]
-                                                .nMobile
-                                                .toString(),
-                                            style: TextStyle(
-                                                color: vphoneneumber ==
-                                                        jphonenumber[index]
-                                                            .nMobile
-                                                            .toString()
-                                                    ? buttoncolor
-                                                    : whitecolor,
-                                                fontFamily: "Helvatica",
-                                                fontWeight: FontWeight.w400,
-                                                fontStyle: FontStyle.normal,
-                                                // fontStyle: FontStyle.italic,
-                                                fontSize: 14),
-                                          ),
-                                          const Divider(
-                                            color: whitecolor,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          child: Card(
-                            elevation: 10,
-                            color: blackcolor,
-                            shadowColor: buttoncolor,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Your Email ID",
-                                    style: TextStyle(
-                                        color: whitecolor,
-                                        fontFamily: "Helvatica",
-                                        fontWeight: FontWeight.w500,
-                                        fontStyle: FontStyle.normal,
-                                        // fontStyle: FontStyle.italic,
-                                        fontSize: 16),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(top: 10.0),
-                                    child: TextFormField(
-                                      autofocus: false,
-                                      textInputAction: TextInputAction.next,
-                                      keyboardType: TextInputType.text,
-                                      controller: vemail,
-                                      maxLines: 1,
-                                      enabled: false,
-                                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                                      style: const TextStyle(
-                                          color: whitecolor,
+                  : Expanded(
+                      flex: 9,
+                      child: Container(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            Card(
+                              elevation: 10,
+                              color: blackcolor,
+                              shadowColor: buttoncolor,
+                              child: Container(
+                                height: 60,
+                                padding: const EdgeInsets.all(10),
+                                child: const Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Diamond Plan",
+                                      style: TextStyle(
+                                          color: goldcolor,
                                           fontFamily: "Helvatica",
                                           fontWeight: FontWeight.w400,
                                           fontStyle: FontStyle.normal,
                                           // fontStyle: FontStyle.italic,
                                           fontSize: 14),
                                     ),
-                                  ),
-                                  const Text(
-                                    "----------------------------------",
-                                    style: TextStyle(
-                                        color: whitecolor,
-                                        fontFamily: "Helvatica",
-                                        fontWeight: FontWeight.w400,
-                                        fontStyle: FontStyle.normal,
-                                        // fontStyle: FontStyle.italic,
-                                        fontSize: 15),
-                                  ),
-                                  const SizedBox(
-                                    height: 20,
-                                  ),
-                                ],
+                                    Text(
+                                      "Change Plan",
+                                      style: TextStyle(
+                                          color: buttoncolor,
+                                          fontFamily: "Helvatica",
+                                          fontWeight: FontWeight.w500,
+                                          fontStyle: FontStyle.normal,
+                                          // fontStyle: FontStyle.italic,
+                                          fontSize: 12),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
+                            Container(
+                              margin:EdgeInsets.only(left:16.0,top:10.0,bottom:10.0),
+                              child: const Text(
+                                "Select your preferred Alternate ID",
+                                style: TextStyle(
+                                    color: whitecolor,
+                                    fontFamily: "Helvatica",
+                                    fontWeight: FontWeight.w400,
+                                    fontStyle: FontStyle.normal,
+                                    // fontStyle: FontStyle.italic,
+                                    fontSize: 14),
+                              ),
+                            ),
+                            Card(
+                              elevation: 10,
+                              color: blackcolor,
+                              shadowColor: buttoncolor,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ListView.builder(
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: jphonenumber.length,
+                                      shrinkWrap: true,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              vphoneneumber =
+                                                  jphonenumber[index]
+                                                      .nMobile
+                                                      .toString();
+                                              vemail.text = vphoneneumber +
+                                                  "@myaltid.com";
+                                            });
+                                          },
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                jphonenumber[index]
+                                                    .nMobile
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    color: vphoneneumber ==
+                                                            jphonenumber[index]
+                                                                .nMobile
+                                                                .toString()
+                                                        ? buttoncolor
+                                                        : whitecolor,
+                                                    fontFamily: "Helvatica",
+                                                    fontWeight: FontWeight.w400,
+                                                    fontStyle: FontStyle.normal,
+                                                    // fontStyle: FontStyle.italic,
+                                                    fontSize: 14),
+                                              ),
+                                              const Divider(
+                                                color: whitecolor,
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Card(
+                                elevation: 10,
+                                color: blackcolor,
+                                shadowColor: buttoncolor,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Your Email ID",
+                                        style: TextStyle(
+                                            color: whitecolor,
+                                            fontFamily: "Helvatica",
+                                            fontWeight: FontWeight.w500,
+                                            fontStyle: FontStyle.normal,
+                                            // fontStyle: FontStyle.italic,
+                                            fontSize: 16),
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(top: 10.0),
+                                        child: TextFormField(
+                                          autofocus: false,
+                                          textInputAction: TextInputAction.next,
+                                          keyboardType: TextInputType.text,
+                                          controller: vemail,
+                                          maxLines: 1,
+                                          enabled: false,
+                                          maxLengthEnforcement:
+                                              MaxLengthEnforcement.enforced,
+                                          style: const TextStyle(
+                                              color: whitecolor,
+                                              fontFamily: "Helvatica",
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                              // fontStyle: FontStyle.italic,
+                                              fontSize: 14),
+                                        ),
+                                      ),
+                                      const Text(
+                                        "----------------------------------",
+                                        style: TextStyle(
+                                            color: whitecolor,
+                                            fontFamily: "Helvatica",
+                                            fontWeight: FontWeight.w400,
+                                            fontStyle: FontStyle.normal,
+                                            // fontStyle: FontStyle.italic,
+                                            fontSize: 15),
+                                      ),
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 50,
+                            ),
+                          ],
                         ),
-                        const SizedBox(
-                          height: 50,
-                        ),
-                      ],
+                      ),
                     ),
               InkWell(
                   onTap: () {
@@ -317,13 +329,13 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
   GetPlan() async {
     try {
       Dio dio = Dio();
-        isloading = false;
+      isloading = false;
       const SpinKitFadingCircle(
         color: buttoncolor,
         size: 50.0,
       );
       var token = await SharedPreference().gettoken();
-      print("tokensubcription/getVirtualId "+token);
+      print("tokensubcription/getVirtualId " + token);
 
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.get(
@@ -339,7 +351,7 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
       if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
         debugPrint("response ${response.data}");
-        if(map["status"]==1){
+        if (map["status"] == 1) {
           isloading = true;
           // setState(() {
           //   ProgressDialog().dismissDialog(context);
@@ -359,61 +371,61 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
               jphonenumber.add(JMobile.fromJson(map["data"][1]["j_mobile"][j]));
             });
           }
-        }else{
-          var dialog = AlertDialog(
-            title: Text('Login',
-                style: TextStyle(
-                    color: buttoncolor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16)),
-            content: Text('Session was expired kindly login again',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 15)),
-            actions: [
-              ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                    ),
-                    backgroundColor:
-                    MaterialStateProperty.all(buttoncolor),
-                  ),
-                  onPressed: () async{
-                    Navigator.pop(context);
-                    await SharedPreference().clearSharep().then((v) {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (BuildContext context) => Signup()));
-                    });
-                  },
-                  child: Text('  OK  ',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16),))
-            ],
+        } else {
+          isloading = false;
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: response.data["message"],
+              contentType: ContentType.failure,
+            ),
           );
-          showDialog(
-              context: context, builder: (BuildContext context) => dialog);
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
         }
       } else {
-        isloading = false;
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["message"],
-            contentType: ContentType.failure,
-          ),
+        var dialog = AlertDialog(
+          title: Text('Login',
+              style: TextStyle(
+                  color: buttoncolor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16)),
+          content: Text('Session was expired kindly login again',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15)),
+          actions: [
+            ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                  ),
+                  backgroundColor: MaterialStateProperty.all(buttoncolor),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await SharedPreference().clearSharep().then((v) {
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (BuildContext context) => Signup()));
+                  });
+                },
+                child: Text(
+                  '  OK  ',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16),
+                ))
+          ],
         );
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
+        showDialog(context: context, builder: (BuildContext context) => dialog);
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -522,11 +534,11 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
       );
       debugPrint("pavithra ${response.data}");
       // var data = jsonDecode(response.data);
-      Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => WebViewScreen(response.data!)));
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => WebViewScreen(response.data!)));
 
       if (response.data["status"] == 1) {
-        print("dfkjsfddkjh" +response.data.toString());
+        print("dfkjsfddkjh" + response.data.toString());
 
         // await SharedPreference()
         //     .setUserId(response.data["data"]["c_ActivePlan"]);

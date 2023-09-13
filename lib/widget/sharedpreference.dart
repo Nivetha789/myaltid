@@ -157,6 +157,19 @@ class SharedPreference {
     return stringValue;
   }
 
+  setNStatus(String stringValue) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('n_status', stringValue);
+    return true;
+  }
+
+  getNStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //Return String
+    String? stringValue = prefs.getString('n_status');
+    return stringValue;
+  }
+
   clearSharep() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.clear();

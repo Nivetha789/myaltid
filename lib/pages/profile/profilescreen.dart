@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../reasuable/dialogbox.dart';
 import '../../reasuable/theme.dart';
 
 import '../../reasuable/background_screen.dart';
@@ -89,7 +90,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {},
+                          onTap: () {
+                            Dialogbox(context);
+                          },
                           child: const SizedBox(
                             width: 50,
                             height: 50,

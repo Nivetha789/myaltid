@@ -14,6 +14,7 @@ import 'package:myaltid/widget/sharedpreference.dart';
 import 'package:weipl_checkout_flutter/weipl_checkout_flutter.dart';
 import '../module/TransactionVerifyModel.dart';
 import '../reasuable/background_screen.dart';
+import '../reasuable/dialogbox.dart';
 import '../widget/progressloaded.dart';
 import 'WebViewScreen.dart';
 
@@ -250,7 +251,9 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {},
+                          onTap: () {
+                            Dialogbox(context);
+                          },
                           child: const SizedBox(
                             width: 50,
                             height: 50,

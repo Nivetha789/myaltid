@@ -518,61 +518,73 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
           await SharedPreference().setrefferalcode(widget.refferalcode!);
           await SharedPreference()
               .settoken(response.data["data"][0]["c_accessToken"]);
-          // if (response.data["data"][0]["n_Status"] == 2) {
-          //   setState(() {
-          //     isconfirmloading = false;
-          //   });
-          //   final snackBar = SnackBar(
-          //     elevation: 0,
-          //     behavior: SnackBarBehavior.floating,
-          //     backgroundColor: Colors.transparent,
-          //     content: AwesomeSnackbarContent(
-          //       title: 'On Snap!',
-          //       message: 'Please contact your admin',
-          //       contentType: ContentType.failure,
-          //     ),
-          //   );
-          //
-          //   ScaffoldMessenger.of(context)
-          //     ..hideCurrentSnackBar()
-          //     ..showSnackBar(snackBar);
-          // }
+
           print("widget.signup " + widget.signup.toString());
+          await SharedPreference().setNStatus(response.data["data"][0]["n_Status"].toString());
+
           if (widget.signup != "signup") {
             setState(() {
               isconfirmloading = false;
             });
-            if(response.data["data"][0]["n_Virtual"] == 1){
-              //virtual incomplete
-              await SharedPreference().setLogin("4");
+            if (response.data["data"][0]["n_Status"] == 3) {
+              setState(() {
+                isconfirmloading = false;
+              });
+              final snackBar = SnackBar(
+                elevation: 0,
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.transparent,
+                content: AwesomeSnackbarContent(
+                  title: 'On Snap!',
+                  message: 'Please contact your admin',
+                  contentType: ContentType.failure,
+                ),
+              );
+
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(snackBar);
+            } else if (response.data["data"][0]["n_Status"] == 1) {
+              setState(() {
+                isconfirmloading = false;
+              });
+              await SharedPreference().setLogin("2");
               Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => SelectAlternateID()),
+                  MaterialPageRoute(builder: (context) => ServiceApp()),
                       (Route<dynamic> route) => false);
-            }else{
+            } else {
               if (response.data["data"][0]["n_Payment"] == 2 &&
                   response.data["data"][0]["n_Kyc"] == 1) {
                 //kyc incomplete
                 await SharedPreference().setLogin("3");
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => KycScreen()),
-                        (Route<dynamic> route) => false);
+                    (Route<dynamic> route) => false);
+              } else if (response.data["data"][0]["n_Payment"] == 2 &&
+                  response.data["data"][0]["n_Virtual"] == 2) {
+                //kyc incomplete
+                await SharedPreference().setLogin("3");
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => KycScreen()),
+                    (Route<dynamic> route) => false);
               } else if (response.data["data"][0]["n_Payment"] == 1 &&
                   response.data["data"][0]["n_Kyc"] == 2) {
                 //payment incomplete
                 await SharedPreference().setLogin("2");
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => SelectPlan()),
-                        (Route<dynamic> route) => false);
+                    (Route<dynamic> route) => false);
               } else if (response.data["data"][0]["n_Payment"] == 2 &&
-                  response.data["data"][0]["n_Kyc"] == 2 && response.data["data"][0]["n_Virtual"] == 2) {
+                  response.data["data"][0]["n_Kyc"] == 2 &&
+                  response.data["data"][0]["n_Virtual"] == 2) {
                 await SharedPreference().setLogin("1");
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => ActiveUserHome()),
-                        (Route<dynamic> route) => false);
+                    (Route<dynamic> route) => false);
               } else {
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => CallistPage()),
-                        (Route<dynamic> route) => false);
+                    (Route<dynamic> route) => false);
               }
             }
           } else {

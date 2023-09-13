@@ -16,11 +16,13 @@ import 'package:myaltid/pages/paymentsuccessfull.dart';
 import 'package:myaltid/pages/selectpaymentmode.dart';
 import 'package:myaltid/reasuable/theme.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weipl_checkout_flutter/weipl_checkout_flutter.dart';
 
 import '../module/TransactionVerifyModel.dart';
 import '../reasuable/background_screen.dart';
 import '../reasuable/button.dart';
+import '../reasuable/dialogbox.dart';
 import '../widget/progressloaded.dart';
 
 class PlanSelection extends StatefulWidget {
@@ -258,7 +260,9 @@ class _PlanSelectionState extends State<PlanSelection> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {},
+                          onTap: () {
+                            Dialogbox(context);
+                          },
                           child: const SizedBox(
                             width: 50,
                             height: 50,
@@ -446,8 +450,12 @@ class _PlanSelectionState extends State<PlanSelection> {
                       //   showAlertDialog(context, "WL SDK Response",
                       //       "Feature is not available for selected platform.");
                       // }
-
-                      UserRegister();
+                      String n_status=await SharedPreference().getNStatus();
+                      if(n_status=="1"){
+                        UserRegister();
+                      }else{
+                        getPaymentDetails();
+                      }
                     },
                     child: const ButtonScreen(
                       buttontext: "Make Payment",
