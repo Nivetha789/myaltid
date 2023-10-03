@@ -5,6 +5,7 @@ import '../reasuable/dialogbox.dart';
 import '../reasuable/theme.dart';
 
 import '../reasuable/background_screen.dart';
+import '../widget/sharedpreference.dart';
 
 class PaymentSuccessfull extends StatefulWidget {
   const PaymentSuccessfull({super.key});
@@ -202,10 +203,10 @@ class _PaymentSuccessfullState extends State<PaymentSuccessfull> {
             width: double.infinity,
             child: InkWell(
               onTap: () async {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const SelectAlternateID()),
-                );
+                await SharedPreference().setLogin("4");
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => SelectAlternateID()),
+                        (Route<dynamic> route) => false);
                 // UserRegister();
               },
               child: Container(

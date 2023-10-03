@@ -150,12 +150,13 @@ class _CallistPageState extends State<CallistPage>
   }
 
   setValue() async{
-    disableStatus= await SharedPreference().getDnd();
-    print("dddnndndndndnndndndnd");
-    if(disableStatus==1){
-      forIos=true;
-    }else{
-      forIos=false;
+    if(await SharedPreference().getDnd()!=null) {
+      disableStatus = await SharedPreference().getDnd();
+      if (disableStatus == 1) {
+        forIos = true;
+      } else {
+        forIos = false;
+      }
     }
   }
 
@@ -202,8 +203,18 @@ class _CallistPageState extends State<CallistPage>
                     color: blackcolor, // Button color
                     child: InkWell(
                       splashColor: Colors.red, // Splash color
-                      onTap: () {
+                      onTap: () async{
+                        if (await SharedPreference().getLogin()!=null || await SharedPreference().getLogin() == "1") {
                         Dialogbox(context);
+                        } else {
+                        Fluttertoast.showToast(
+                        msg: "Complete your stages to use this feature!",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        textColor: Colors.white,
+                        backgroundColor: buttoncolor,
+                        timeInSecForIosWeb: 1);
+                        }
                       },
                       child: const SizedBox(
                         width: 50,

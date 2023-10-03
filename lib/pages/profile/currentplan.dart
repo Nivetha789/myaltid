@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myaltid/pages/activeuserhome.dart';
 import '../../reasuable/dialogbox.dart';
@@ -7,6 +8,7 @@ import '../../reasuable/theme.dart';
 import '../../reasuable/background_screen.dart';
 
 import '../../reasuable/bottomnavbar.dart';
+import '../../widget/sharedpreference.dart';
 class CurrentplanScreen extends StatefulWidget {
   const CurrentplanScreen({super.key});
 
@@ -50,8 +52,18 @@ class _CurrentplanScreenState extends State<CurrentplanScreen> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {
+                          onTap: () async{
+                            if (await SharedPreference().getLogin() == "1") {
                             Dialogbox(context);
+                            } else {
+                            Fluttertoast.showToast(
+                            msg: "Select your Plan",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                            textColor: Colors.white,
+                            backgroundColor: buttoncolor,
+                            timeInSecForIosWeb: 1);
+                            }
                           },
                           child: const SizedBox(
                             width: 50,

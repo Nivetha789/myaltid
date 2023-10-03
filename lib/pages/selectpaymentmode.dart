@@ -19,9 +19,32 @@ import '../widget/progressloaded.dart';
 import 'WebViewScreen.dart';
 
 class PaymentmodeSelection extends StatefulWidget {
-  String username,mobileNum,mailId,amount,transactionId,userId,hash,merchantId,primaryColor,secondColor,btnColor1,btnColor2;
-  PaymentmodeSelection(this.username,this.mobileNum,this.mailId,this.amount,this.transactionId,
-      this.userId,this.hash,this.merchantId,this.primaryColor,this.secondColor,this.btnColor1,this.btnColor2);
+  String username,
+      mobileNum,
+      mailId,
+      amount,
+      transactionId,
+      userId,
+      hash,
+      merchantId,
+      primaryColor,
+      secondColor,
+      btnColor1,
+      btnColor2;
+
+  PaymentmodeSelection(
+      this.username,
+      this.mobileNum,
+      this.mailId,
+      this.amount,
+      this.transactionId,
+      this.userId,
+      this.hash,
+      this.merchantId,
+      this.primaryColor,
+      this.secondColor,
+      this.btnColor1,
+      this.btnColor2);
 
   @override
   State<PaymentmodeSelection> createState() => _PaymentmodeSelectionState();
@@ -44,7 +67,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
   //payment gateway
   WeiplCheckoutFlutter wlCheckoutFlutter = WeiplCheckoutFlutter();
 
-  String transactionID="";
+  String transactionID = "";
 
   @override
   void initState() {
@@ -55,6 +78,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
   }
 
   var data;
+
   paymentgatewaylink() async {
     try {
       Dio dio = Dio();
@@ -83,13 +107,13 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
       debugPrint("pavithra ${response.data}");
       // var data = jsonDecode(response.data);
       // print("dfkjsfddkjh $data");
-      Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => WebViewScreen(response.data!)));
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => WebViewScreen(response.data!)));
 
       if (response.data["status"] == 1) {
-      // await SharedPreference()
+        // await SharedPreference()
         //     .setUserId(response.data["data"]["c_ActivePlan"]);
-
+        await SharedPreference().setLogin("4");
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => const PaymentSuccessfull()));
       } else {
@@ -251,8 +275,18 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {
-                            Dialogbox(context);
+                          onTap: () async {
+                            if (await SharedPreference().getLogin() == "1") {
+                              Dialogbox(context);
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg: "Select Payment mode",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  textColor: Colors.white,
+                                  backgroundColor: buttoncolor,
+                                  timeInSecForIosWeb: 1);
+                            }
                           },
                           child: const SizedBox(
                             width: 50,
@@ -291,7 +325,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                             fontSize: 14),
                       ),
                       Text(
-                        "Order # "+widget.userId.toString(),
+                        "Order # " + widget.userId.toString(),
                         style: TextStyle(
                             color: whitecolor,
                             fontFamily: "Helvatica",
@@ -380,7 +414,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                                 fontWeight: FontWeight.w500),
                           ),
                           Text(
-                            "Rs."+widget.amount.toString(),
+                            "Rs." + widget.amount.toString(),
                             style: TextStyle(
                                 color: blackcolor,
                                 fontSize: 15.0,
@@ -394,9 +428,11 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                     onTap: () async {
                       String deviceID = ""; // initiaze varibale
                       if (Platform.isAndroid) {
-                        deviceID = "AndroidSH2"; // Android-specific deviceId, supported options are "AndroidSH1" & "AndroidSH2"
+                        deviceID =
+                            "AndroidSH2"; // Android-specific deviceId, supported options are "AndroidSH1" & "AndroidSH2"
                       } else if (Platform.isIOS) {
-                        deviceID = "iOSSH2"; // iOS-specific deviceId, supported options are "iOSSH1" & "iOSSH2"
+                        deviceID =
+                            "iOSSH2"; // iOS-specific deviceId, supported options are "iOSSH1" & "iOSSH2"
                       }
 
                       var reqJson = {
@@ -407,30 +443,36 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                           "enableMerTxnDetails": true
                         },
                         "consumerData": {
-                          "deviceId": deviceID,   //supported values "ANDROIDSH1" or "ANDROIDSH2" for Android, supported values "iOSSH1" or "iOSSH2" for iOS and supported values
-                          "token":
-                          widget.hash,
+                          "deviceId": deviceID,
+                          //supported values "ANDROIDSH1" or "ANDROIDSH2" for Android, supported values "iOSSH1" or "iOSSH2" for iOS and supported values
+                          "token": widget.hash,
                           "paymentMode": "all",
                           "merchantLogoUrl":
-                          "https://www.paynimo.com/CompanyDocs/company-logo-vertical.png", //provided merchant logo will be displayed
+                              "https://www.paynimo.com/CompanyDocs/company-logo-vertical.png",
+                          //provided merchant logo will be displayed
                           "merchantId": widget.merchantId,
                           "currency": "INR",
                           "consumerId": widget.userId,
                           "consumerMobileNo": widget.mobileNum,
                           "consumerEmailId": widget.mailId,
-                          "txnId": widget.transactionId, //Unique merchant transaction ID
+                          "txnId": widget.transactionId,
+                          //Unique merchant transaction ID
                           "items": [
-                            {"itemId": "first", "amount": widget.amount, "comAmt": "0"}
+                            {
+                              "itemId": "first",
+                              "amount": widget.amount,
+                              "comAmt": "0"
+                            }
                           ],
                           "customStyle": {
-                            "PRIMARY_COLOR_CODE":
-                            widget.primaryColor, //merchant primary color code
-                            "SECONDARY_COLOR_CODE":
-                            widget.secondColor, //provide merchant"s suitable color code
-                            "BUTTON_COLOR_CODE_1":
-                            widget.btnColor1, //merchant"s button background color code
-                            "BUTTON_COLOR_CODE_2":
-                            widget.btnColor2 //provide merchant"s suitable color code for button text
+                            "PRIMARY_COLOR_CODE": widget.primaryColor,
+                            //merchant primary color code
+                            "SECONDARY_COLOR_CODE": widget.secondColor,
+                            //provide merchant"s suitable color code
+                            "BUTTON_COLOR_CODE_1": widget.btnColor1,
+                            //merchant"s button background color code
+                            "BUTTON_COLOR_CODE_2": widget.btnColor2
+                            //provide merchant"s suitable color code for button text
                           }
                         }
                       };
@@ -459,7 +501,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                                 fontWeight: FontWeight.w500),
                           ),
                           Text(
-                            "Rs."+widget.amount.toString(),
+                            "Rs." + widget.amount.toString(),
                             style: TextStyle(
                                 color: blackcolor,
                                 fontSize: 15.0,
@@ -477,33 +519,28 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
 
   void handleResponse(Map<dynamic, dynamic> response) {
     // showAlertDialog(context, "WL SDK Response", "$response");
-    print("responsepayment "+response.toString());
+    print("responsepayment " + response.toString());
 
-    List<String> clist =  response.toString().split("|");
+    List<String> clist = response.toString().split("|");
 
-    print("splitListsplitList "+clist.toString());
+    print("splitListsplitList " + clist.toString());
 
     final dateList = clist.toString().split(",");
     // print("split " + dateList[3]);
     print("split2" + dateList[1]);
-    if(dateList[1].toString() == " success"){
-      updatePaymentDetails(dateList[3],dateList[5]);
-    }else{
+    if (dateList[1].toString() == " success") {
+      updatePaymentDetails(dateList[3], dateList[5]);
+    } else {
       Navigator.pushReplacement(
           context,
           CupertinoPageRoute(
-              builder: (BuildContext context) => PaymentSuccessScreen(
-                  "SORRY !",
-                  false,
-                  "Your Package Payment Unsuccessfully !!",
-                  "")));
+              builder: (BuildContext context) => PaymentSuccessScreen("SORRY !",
+                  false, "Your Package Payment Unsuccessfully !!", "")));
     }
-
   }
 
-
   //update payment details
-  updatePaymentDetails(String paymentID,String transactionID) async {
+  updatePaymentDetails(String paymentID, String transactionID) async {
     ProgressDialog().showLoaderDialog(context);
     // BaseOptions options = new BaseOptions(
     //   baseUrl: ApiProvider().Baseurl,
@@ -518,7 +555,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
 
     var token = await SharedPreference().gettoken();
 
-    var parameters = {"c_PaymentId": paymentID,"c_TxnId":transactionID};
+    var parameters = {"c_PaymentId": paymentID, "c_TxnId": transactionID};
     print("updatePaymentDetailsParams :" + parameters.toString());
 
     dio.options.contentType = Headers.formUrlEncodedContentType;
@@ -534,7 +571,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
     if (response.statusCode == 200) {
       Map<String, dynamic> map = jsonDecode(response.toString());
       TransactionVerifyModel transactionVerifyModel =
-      TransactionVerifyModel.fromJson(map);
+          TransactionVerifyModel.fromJson(map);
 
       if (transactionVerifyModel.status == 1) {
         ProgressDialog().dismissDialog(context);

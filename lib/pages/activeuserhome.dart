@@ -126,7 +126,8 @@ class _ActiveUserHomeState extends State<ActiveUserHome> {
                               color: blackcolor, // Button color
                               child: InkWell(
                                 splashColor: Colors.red, // Splash color
-                                onTap: () {
+                                onTap: () async{
+                                  await SharedPreference().setLogin("1");
                                   Dialogbox(context);
                                 },
                                 child: const SizedBox(
@@ -611,7 +612,7 @@ class _ActiveUserHomeState extends State<ActiveUserHome> {
       }
       if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
-        debugPrint("response ${map}");
+        debugPrint("responsedash ${map}");
         if (map["status"] == 1) {
           setState(() {
             isloading = true;
@@ -623,7 +624,46 @@ class _ActiveUserHomeState extends State<ActiveUserHome> {
             nsubscrption = map["data"]["n_SubscriptionDuration"].toString();
             nsubscrptionprice = map["data"]["n_SubscriptionPrice"].toString();
           });
-        } else {
+        }else if(map["message"]== "Invalid token."){
+          var dialog = AlertDialog(
+            title: Text('Login',
+                style: TextStyle(
+                    color: buttoncolor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16)),
+            content: Text('Session was expired kindly login again',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15)),
+            actions: [
+              ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                    ),
+                    backgroundColor: MaterialStateProperty.all(buttoncolor),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await SharedPreference().clearSharep().then((v) {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) => Signup()));
+                    });
+                  },
+                  child: Text(
+                    '  OK  ',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16),
+                  ))
+            ],
+          );
+          showDialog(context: context, builder: (BuildContext context) => dialog);
+        }
+        else {
           final snackBar = SnackBar(
             elevation: 0,
             behavior: SnackBarBehavior.floating,
@@ -680,7 +720,7 @@ class _ActiveUserHomeState extends State<ActiveUserHome> {
             context: context, builder: (BuildContext context) => dialog);
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("exceptiondashboard "+e.toString());
     }
   }
 }

@@ -96,7 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   checkLogin() async {
-    print("checklogin : " + await SharedPreference().getLogin().toString());
     if (await SharedPreference().getLogin() == "1") {
       Timer(
           Duration(seconds: 3),

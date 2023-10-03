@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/pages/mail/editmail.dart';
 
 import '../../reasuable/dialogbox.dart';
@@ -8,6 +9,7 @@ import '../../reasuable/theme.dart';
 import '../../reasuable/background_screen.dart';
 
 import '../../reasuable/bottomnavbar.dart';
+import '../../widget/sharedpreference.dart';
 
 class MaillistPage extends StatefulWidget {
   const MaillistPage({super.key});
@@ -97,8 +99,18 @@ class _MaillistPageState extends State<MaillistPage>
                     color: blackcolor, // Button color
                     child: InkWell(
                       splashColor: Colors.red, // Splash color
-                      onTap: () {
+                      onTap: () async{
+                        if (await SharedPreference().getLogin() == "1") {
                         Dialogbox(context);
+                        }else {
+                          Fluttertoast.showToast(
+                              msg: "Complete your stages to use this feature!",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              textColor: Colors.white,
+                              backgroundColor: buttoncolor,
+                              timeInSecForIosWeb: 1);
+                        }
                       },
                       child: const SizedBox(
                         width: 50,

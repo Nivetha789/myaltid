@@ -181,7 +181,7 @@ class _PlanSelectionState extends State<PlanSelection> {
         "c_ReferralCode": refferalcode,
         "c_SubscriptionId": selectedOption!.id
       };
-      print("planselectionparam : "+parameters.toString());
+      print("planselectionparam : " + parameters.toString());
       dio.options.contentType = Headers.formUrlEncodedContentType;
       final response = await dio.post(
         ApiProvider.userregister,
@@ -260,8 +260,18 @@ class _PlanSelectionState extends State<PlanSelection> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {
-                            Dialogbox(context);
+                          onTap: () async {
+                            if (await SharedPreference().getLogin() == "1") {
+                              Dialogbox(context);
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg: "Select your Plan",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  textColor: Colors.white,
+                                  backgroundColor: buttoncolor,
+                                  timeInSecForIosWeb: 1);
+                            }
                           },
                           child: const SizedBox(
                             width: 50,
@@ -450,10 +460,10 @@ class _PlanSelectionState extends State<PlanSelection> {
                       //   showAlertDialog(context, "WL SDK Response",
                       //       "Feature is not available for selected platform.");
                       // }
-                      String n_status=await SharedPreference().getNStatus();
-                      if(n_status=="1"){
+                      String n_status = await SharedPreference().getNStatus();
+                      if (n_status == "1") {
                         UserRegister();
-                      }else{
+                      } else {
                         getPaymentDetails();
                       }
                     },
@@ -523,9 +533,11 @@ class _PlanSelectionState extends State<PlanSelection> {
         });
         String deviceID = ""; // initiaze varibale
         if (Platform.isAndroid) {
-          deviceID = "AndroidSH2"; // Android-specific deviceId, supported options are "AndroidSH1" & "AndroidSH2"
+          deviceID =
+              "AndroidSH2"; // Android-specific deviceId, supported options are "AndroidSH1" & "AndroidSH2"
         } else if (Platform.isIOS) {
-          deviceID = "iOSSH2"; // iOS-specific deviceId, supported options are "iOSSH1" & "iOSSH2"
+          deviceID =
+              "iOSSH2"; // iOS-specific deviceId, supported options are "iOSSH1" & "iOSSH2"
         }
 
         var reqJson = {
@@ -536,36 +548,36 @@ class _PlanSelectionState extends State<PlanSelection> {
             "enableMerTxnDetails": true
           },
           "consumerData": {
-            "deviceId": deviceID,   //supported values "ANDROIDSH1" or "ANDROIDSH2" for Android, supported values "iOSSH1" or "iOSSH2" for iOS and supported values
-            "token":
-             hash,
+            "deviceId": deviceID,
+            //supported values "ANDROIDSH1" or "ANDROIDSH2" for Android, supported values "iOSSH1" or "iOSSH2" for iOS and supported values
+            "token": hash,
             "paymentMode": "all",
             "merchantLogoUrl":
-            "https://www.paynimo.com/CompanyDocs/company-logo-vertical.png", //provided merchant logo will be displayed
+                "https://www.paynimo.com/CompanyDocs/company-logo-vertical.png",
+            //provided merchant logo will be displayed
             "merchantId": merchantId,
             "currency": "INR",
             "consumerId": userId,
             "consumerMobileNo": mobileNum,
             "consumerEmailId": mailId,
-            "txnId": transactionId, //Unique merchant transaction ID
+            "txnId": transactionId,
+            //Unique merchant transaction ID
             "items": [
               {"itemId": "first", "amount": amount, "comAmt": "0"}
             ],
             "customStyle": {
-              "PRIMARY_COLOR_CODE":
-              primaryColor, //merchant primary color code
+              "PRIMARY_COLOR_CODE": primaryColor, //merchant primary color code
               "SECONDARY_COLOR_CODE":
-              secondColor, //provide merchant"s suitable color code
+                  secondColor, //provide merchant"s suitable color code
               "BUTTON_COLOR_CODE_1":
-              btnColor1, //merchant"s button background color code
+                  btnColor1, //merchant"s button background color code
               "BUTTON_COLOR_CODE_2":
-              btnColor2 //provide merchant"s suitable color code for button text
+                  btnColor2 //provide merchant"s suitable color code for button text
             }
           }
         };
 
-        wlCheckoutFlutter.on(
-            WeiplCheckoutFlutter.wlResponse, handleResponse);
+        wlCheckoutFlutter.on(WeiplCheckoutFlutter.wlResponse, handleResponse);
         wlCheckoutFlutter.open(reqJson);
       } else {
         ProgressDialog().dismissDialog(context);
@@ -591,33 +603,28 @@ class _PlanSelectionState extends State<PlanSelection> {
 
   void handleResponse(Map<dynamic, dynamic> response) {
     // showAlertDialog(context, "WL SDK Response", "$response");
-    print("responsepayment "+response.toString());
+    print("responsepayment " + response.toString());
 
-    List<String> clist =  response.toString().split("|");
+    List<String> clist = response.toString().split("|");
 
-    print("splitListsplitList "+clist.toString());
+    print("splitListsplitList " + clist.toString());
 
     final dateList = clist.toString().split(",");
     // print("split " + dateList[3]);
     print("split2" + dateList[1]);
-    if(dateList[1].toString() == " success"){
-      updatePaymentDetails(dateList[3],dateList[5]);
-    }else{
+    if (dateList[1].toString() == " success") {
+      updatePaymentDetails(dateList[3], dateList[5]);
+    } else {
       Navigator.pushReplacement(
           context,
           CupertinoPageRoute(
-              builder: (BuildContext context) => PaymentSuccessScreen(
-                  "SORRY !",
-                  false,
-                  "Your Package Payment Unsuccessfully !!",
-                  "")));
+              builder: (BuildContext context) => PaymentSuccessScreen("SORRY !",
+                  false, "Your Package Payment Unsuccessfully !!", "")));
     }
-
   }
 
-
   //update payment details
-  updatePaymentDetails(String paymentID,String transactionID) async {
+  updatePaymentDetails(String paymentID, String transactionID) async {
     ProgressDialog().showLoaderDialog(context);
     // BaseOptions options = new BaseOptions(
     //   baseUrl: ApiProvider().Baseurl,
@@ -632,7 +639,7 @@ class _PlanSelectionState extends State<PlanSelection> {
 
     var token = await SharedPreference().gettoken();
 
-    var parameters = {"c_PaymentId": paymentID,"c_TxnId":transactionID};
+    var parameters = {"c_PaymentId": paymentID, "c_TxnId": transactionID};
     print("updatePaymentDetailsParams :" + parameters.toString());
 
     dio.options.contentType = Headers.formUrlEncodedContentType;
@@ -648,7 +655,7 @@ class _PlanSelectionState extends State<PlanSelection> {
     if (response.statusCode == 200) {
       Map<String, dynamic> map = jsonDecode(response.toString());
       TransactionVerifyModel transactionVerifyModel =
-      TransactionVerifyModel.fromJson(map);
+          TransactionVerifyModel.fromJson(map);
 
       if (transactionVerifyModel.status == 1) {
         ProgressDialog().dismissDialog(context);

@@ -553,6 +553,9 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                   MaterialPageRoute(builder: (context) => ServiceApp()),
                       (Route<dynamic> route) => false);
             } else {
+              print("paymentttt "+response.data["data"][0]["n_Payment"].toString());
+              print("n_Kyc "+response.data["data"][0]["n_Kyc"].toString());
+              print("n_Virtual "+response.data["data"][0]["n_Virtual"].toString());
               if (response.data["data"][0]["n_Payment"] == 2 &&
                   response.data["data"][0]["n_Kyc"] == 1) {
                 //kyc incomplete
@@ -561,7 +564,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                     MaterialPageRoute(builder: (context) => KycScreen()),
                     (Route<dynamic> route) => false);
               } else if (response.data["data"][0]["n_Payment"] == 2 &&
-                  response.data["data"][0]["n_Virtual"] == 2) {
+                  response.data["data"][0]["n_Virtual"] == 2 && response.data["data"][0]["n_Kyc"]==1) {
                 //kyc incomplete
                 await SharedPreference().setLogin("3");
                 Navigator.of(context).pushAndRemoveUntil(
@@ -573,6 +576,13 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                 await SharedPreference().setLogin("2");
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => SelectPlan()),
+                    (Route<dynamic> route) => false);
+              }else if (response.data["data"][0]["n_Payment"] == 2 &&
+                  response.data["data"][0]["n_Virtual"] == 1) {
+                //Virtual incomplete
+                await SharedPreference().setLogin("4");
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => SelectAlternateID()),
                     (Route<dynamic> route) => false);
               } else if (response.data["data"][0]["n_Payment"] == 2 &&
                   response.data["data"][0]["n_Kyc"] == 2 &&

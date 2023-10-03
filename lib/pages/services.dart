@@ -228,9 +228,9 @@ class _ServiceAppState extends State<ServiceApp> {
               ),
               InkWell(
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => SelectPlan()),
-                  );
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => SelectPlan()),
+                          (Route<dynamic> route) => false);
                 },
                 child: const ButtonScreen(
                   buttontext: "I can't wait- Let's proceed",

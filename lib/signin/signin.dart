@@ -73,7 +73,7 @@ class _SignupAppState extends State<SignupApp> {
               backgroundColor: Colors.transparent,
               content: AwesomeSnackbarContent(
                 title: 'On Snap!',
-                message: 'Please Enter Valid Refferal Code',
+                message: 'Please Enter Valid Referral Code',
                 contentType: ContentType.failure,
               ),
             );

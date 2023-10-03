@@ -4,11 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/data/api.dart';
 import 'package:myaltid/module/alternateid.dart';
 import 'package:myaltid/pages/WebViewScreen.dart';
 import 'package:myaltid/pages/signup.dart';
 import 'package:myaltid/widget/sharedpreference.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../reasuable/dialogbox.dart';
 import '../reasuable/theme.dart';
 
@@ -63,14 +65,24 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                         textAlign: TextAlign.start,
                       ),
                       Container(
-                        alignment: Alignment.bottomRight,
+                        alignment: Alignment.centerRight,
                         child: ClipOval(
                           child: Material(
                             color: blackcolor, // Button color
                             child: InkWell(
                               splashColor: Colors.red, // Splash color
-                              onTap: () {
-                                Dialogbox(context);
+                              onTap: () async {
+                                if (await SharedPreference().getLogin() == "1") {
+                                  Dialogbox(context);
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Select your Alternate ID",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.CENTER,
+                                      textColor: Colors.white,
+                                      backgroundColor: buttoncolor,
+                                      timeInSecForIosWeb: 1);
+                                }
                               },
                               child: const SizedBox(
                                 width: 50,
@@ -135,7 +147,8 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
                               ),
                             ),
                             Container(
-                              margin:EdgeInsets.only(left:16.0,top:10.0,bottom:10.0),
+                              margin: EdgeInsets.only(
+                                  left: 16.0, top: 10.0, bottom: 10.0),
                               child: const Text(
                                 "Select your preferred Alternate ID",
                                 style: TextStyle(
@@ -456,9 +469,10 @@ class _SelectAlternateIDState extends State<SelectAlternateID> {
       // print("dfkjsfddkjh $data");
       if (response.data["status"] == 1) {
         // paymentgatewaylink();
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const KycScreen()),
-        );
+        await SharedPreference().setLogin("4");
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => KycScreen()),
+            (Route<dynamic> route) => false);
         // await SharedPreference().setplanid(widget.cid);
 
         // await SharedPreference().setplanid(selectedOption!.id);

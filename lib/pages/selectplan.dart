@@ -6,6 +6,7 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/pages/planselection.dart';
 import 'package:myaltid/pages/signup.dart';
 import 'package:myaltid/reasuable/background_screen.dart';
@@ -17,7 +18,6 @@ import '../module/plans.dart';
 import '../reasuable/dialogbox.dart';
 
 class SelectPlan extends StatefulWidget {
-
   @override
   State<SelectPlan> createState() => _SelectPlanState();
 }
@@ -44,6 +44,7 @@ class _SelectPlanState extends State<SelectPlan> {
       "datapermonth": "30 GB data per month"
     },
   ];
+
   @override
   void initState() {
     GetPlan();
@@ -51,6 +52,7 @@ class _SelectPlanState extends State<SelectPlan> {
   }
 
   bool isloading = false;
+
   GetPlan() async {
     try {
       Dio dio = Dio();
@@ -101,29 +103,29 @@ class _SelectPlanState extends State<SelectPlan> {
                     RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15)),
                   ),
-                  backgroundColor:
-                  MaterialStateProperty.all(buttoncolor),
+                  backgroundColor: MaterialStateProperty.all(buttoncolor),
                 ),
-                onPressed: () async{
+                onPressed: () async {
                   Navigator.pop(context);
                   await SharedPreference().clearSharep().then((v) {
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (BuildContext context) => Signup()));
                   });
                 },
-                child: Text('  OK  ',
+                child: Text(
+                  '  OK  ',
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 16),))
+                      fontSize: 16),
+                ))
           ],
         );
-        showDialog(
-            context: context, builder: (BuildContext context) => dialog);
+        showDialog(context: context, builder: (BuildContext context) => dialog);
       } else if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
         debugPrint("response ${response.data}");
-        if(map["status"]==1) {
+        if (map["status"] == 1) {
           setState(() {
             isloading = true;
           });
@@ -137,7 +139,7 @@ class _SelectPlanState extends State<SelectPlan> {
               plans.add(Plan.fromJson(map["data"][i]));
             });
           }
-        }else{
+        } else {
           final snackBar = SnackBar(
             elevation: 0,
             behavior: SnackBarBehavior.floating,
@@ -208,8 +210,18 @@ class _SelectPlanState extends State<SelectPlan> {
                         color: blackcolor, // Button color
                         child: InkWell(
                           splashColor: Colors.red, // Splash color
-                          onTap: () {
+                          onTap: () async{
+                            if (await SharedPreference().getLogin() == "1") {
                             Dialogbox(context);
+                            } else {
+                            Fluttertoast.showToast(
+                            msg: "Select your Plan",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                            textColor: Colors.white,
+                            backgroundColor: buttoncolor,
+                            timeInSecForIosWeb: 1);
+                            }
                           },
                           child: const SizedBox(
                             width: 50,
@@ -253,16 +265,17 @@ class _SelectPlanState extends State<SelectPlan> {
                       itemBuilder: (BuildContext context, int index) {
                         return InkWell(
                           onTap: () {
-                            print("plan_iddd "+plans[index].id);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => PlanSelection(
-                                  cid: plans[index].id,
-                                  Jsubscription: plans[index].jSubscription,
-                                  cname: plans[index].cPlan,
+                            print("plan_iddd " + plans[index].id);
+
+                            Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (context) => PlanSelection(
+                                    cid: plans[index].id,
+                                    Jsubscription: plans[index].jSubscription,
+                                    cname: plans[index].cPlan,
+                                  ),
                                 ),
-                              ),
-                            );
+                                (Route<dynamic> route) => false);
                           },
                           child: Column(
                             children: [

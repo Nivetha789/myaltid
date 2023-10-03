@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/pages/message/editmessage.dart';
 import '../../reasuable/bottomnavbar.dart';
 
@@ -7,6 +8,7 @@ import '../../reasuable/dialogbox.dart';
 import '../../reasuable/theme.dart';
 
 import '../../reasuable/background_screen.dart';
+import '../../widget/sharedpreference.dart';
 
 class MessagelistPage extends StatefulWidget {
   const MessagelistPage({super.key});
@@ -80,8 +82,18 @@ class _MessagelistPageState extends State<MessagelistPage>
                     color: blackcolor, // Button color
                     child: InkWell(
                       splashColor: Colors.red, // Splash color
-                      onTap: () {
-                        Dialogbox(context);
+                      onTap: () async {
+                        if (await SharedPreference().getLogin() == "1") {
+                          Dialogbox(context);
+                        } else {
+                          Fluttertoast.showToast(
+                              msg: "Complete your stages to use this feature!",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              textColor: Colors.white,
+                              backgroundColor: buttoncolor,
+                              timeInSecForIosWeb: 1);
+                        }
                       },
                       child: const SizedBox(
                         width: 50,
@@ -172,7 +184,7 @@ class _MessagelistPageState extends State<MessagelistPage>
               ),
             ),
             Container(
-              height: MediaQuery.of(context).size.height/1.4,
+              height: MediaQuery.of(context).size.height / 1.4,
               child: TabBarView(
                 controller: _tabController,
                 children: [

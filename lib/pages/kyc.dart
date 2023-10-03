@@ -287,20 +287,20 @@ class _KycScreenState extends State<KycScreen> {
       } else {
         otpField = false;
         ProgressDialog().dismissDialog(context);
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'On Snap!',
-            message: response.data["error"].toString(),
-            contentType: ContentType.failure,
-          ),
-        );
+          final snackBar = SnackBar(
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              title: 'On Snap!',
+              message: response.data["error"].toString(),
+              contentType: ContentType.failure,
+            ),
+          );
 
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
       }
     } else if (response.statusCode == 401) {
       ProgressDialog().dismissDialog(context);
@@ -362,7 +362,6 @@ class _KycScreenState extends State<KycScreen> {
     ProgressDialog().showLoaderDialog(context);
     try {
       Dio dio = Dio();
-
       var token = await SharedPreference().gettoken();
       print(token);
       var parameters = {
@@ -382,26 +381,45 @@ class _KycScreenState extends State<KycScreen> {
       if (response.statusCode == 200) {
         if (response.data["status"] == 1) {
           ProgressDialog().dismissDialog(context);
+          await SharedPreference().setLogin("1");
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => Congratulations()),
           );
         } else {
+          print("errrorrrr "+response.data["error"].toString());
           ProgressDialog().dismissDialog(context);
-          otpController=new OtpFieldController();
-          final snackBar = SnackBar(
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            content: AwesomeSnackbarContent(
-              title: 'On Snap!',
-              message: response.data["error"].toString(),
-              contentType: ContentType.failure,
-            ),
-          );
+          otpController = new OtpFieldController();
+          if(response.data["error"].toString().contains("Verification Failed")){
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'On Snap!',
+                message: "Invalid OTP!",
+                contentType: ContentType.failure,
+              ),
+            );
 
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(snackBar);
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }else{
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'On Snap!',
+                message: response.data["error"].toString(),
+                contentType: ContentType.failure,
+              ),
+            );
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }
         }
       } else if (response.statusCode == 401) {
         ProgressDialog().dismissDialog(context);
@@ -1002,8 +1020,20 @@ class _KycScreenState extends State<KycScreen> {
                         print("btnText " + btnText.toString());
                         if (btnText == "Send OTP") {
                           UserRegister();
-                        } else if (otp.length == 6 && btnText == "Submit KYC") {
-                          verifykyc();
+                        } else if (btnText == "Verify OTP") {
+                          if (otp == null) {
+                            Fluttertoast.showToast(
+                                msg: "Enter OTP!!",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.CENTER,
+                                textColor: Colors.white,
+                                backgroundColor: buttoncolor,
+                                timeInSecForIosWeb: 1);
+                          } else {
+                            if (otp.length == 6 && btnText == "Submit KYC") {
+                              verifykyc();
+                            }
+                          }
                         }
                         setState(() {
                           dateofbirth = false;
