@@ -508,12 +508,17 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
       if (response.statusCode == 401) {
       } else if (response.statusCode == 200) {
         if (response.data["status"] == 1) {
-          await SharedPreference().setphonenumber(widget.phonenumber!);
           if (response.data["data"][0]["c_Name"].toString().isNotEmpty) {
             await SharedPreference()
                 .setuserName(response.data["data"][0]["c_Name"].toString());
           } else {
             await SharedPreference().setuserName(widget.name);
+          }
+          if (response.data["data"][0]["n_VirtualNumber"].toString().isNotEmpty) {
+            await SharedPreference()
+                .setUserMobile(response.data["data"][0]["n_VirtualNumber"].toString());
+          } else {
+            await SharedPreference().setUserMobile(widget.phonenumber!);
           }
           await SharedPreference().setrefferalcode(widget.refferalcode!);
           await SharedPreference()
@@ -591,7 +596,23 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => ActiveUserHome()),
                     (Route<dynamic> route) => false);
-              } else {
+              } else if(response.data["data"][0]["n_Payment"] == 2 &&
+                  response.data["data"][0]["n_Virtual"] == 2 &&
+                  response.data["data"][0]["n_Kyc"] == null){
+                await SharedPreference().setLogin("4");
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => SelectAlternateID()),
+                        (Route<dynamic> route) => false);
+              }
+              else if(response.data["data"][0]["n_Payment"] == 1 &&
+                  response.data["data"][0]["n_Virtual"] == 1 &&
+                  response.data["data"][0]["n_Kyc"] == null){
+                await SharedPreference().setLogin("4");
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => SelectPlan()),
+                        (Route<dynamic> route) => false);
+              }
+              else {
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => CallistPage()),
                     (Route<dynamic> route) => false);

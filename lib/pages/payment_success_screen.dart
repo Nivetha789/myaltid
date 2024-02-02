@@ -122,7 +122,7 @@ class PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                             Expanded(
                               child: InkWell(
                                 onTap: () {
-                                  Navigator.of(context).pop({'path': "1"});
+                                 Navigator.pop(context);
                                   // Navigator.pushReplacement(
                                   //     context,
                                   //     CupertinoPageRoute(

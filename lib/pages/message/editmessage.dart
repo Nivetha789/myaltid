@@ -4,16 +4,19 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:myaltid/module/MessageTemplate/MessageTemplatesModel.dart';
 
 import '../../data/api.dart';
+import '../../module/Message/MessageTemplatesModel.dart';
+import '../../module/Message/SendMessageModel.dart';
 import '../../reasuable/background_screen.dart';
 import '../../reasuable/theme.dart';
 import '../../utils/check_internet.dart';
 import '../../widget/progressloaded.dart';
+import '../../widget/sharedpreference.dart';
 
 class SendMessage extends StatefulWidget {
-  const SendMessage({super.key});
+  var virNumber;
+  SendMessage(this.virNumber);
 
   @override
   State<SendMessage> createState() => _SendMessageState();
@@ -21,10 +24,16 @@ class SendMessage extends StatefulWidget {
 
 class _SendMessageState extends State<SendMessage> {
   List<MessageTemplatesData> messageTemplatesList = [];
+  String msgTemName = "";
   String msgTemId = "";
-  String msgTem = "";
+  String virtualNum = "";
+  String userName = "";
   final mobilenumberController = TextEditingController();
   int _selectedIndex = 0;
+
+  //pass api
+  String sendSmsString="";
+
 
   @override
   void initState() {
@@ -41,16 +50,49 @@ class _SendMessageState extends State<SendMessage> {
             timeInSecForIosWeb: 1);
       }
     });
+    getValue();
     super.initState();
   }
 
+  getValue() async {
+    if (await SharedPreference().getUserMobile() != null) {
+      virtualNum = await SharedPreference().getUserMobile();
+      print("virtualNum  "+virtualNum);
+    } else {
+      virtualNum = "";
+      print("virtualNum 1 "+virtualNum);
+    }
+    if (await SharedPreference().getuserName() != null) {
+      userName = await SharedPreference().getuserName();
+    } else {
+      userName = "";
+    }
+    if(widget.virNumber !="") {
+      mobilenumberController.text = widget.virNumber.toString();
+    }
+  }
+
   updatePackage(List<MessageTemplatesData> messageTemplatesList1) {
-    messageTemplatesList.clear();
-    messageTemplatesList.addAll(messageTemplatesList1);
+    setState(() {
+      messageTemplatesList.clear();
+      messageTemplatesList.addAll(messageTemplatesList1);
+    });
   }
 
   _onSelected(int index) {
-    setState(() => _selectedIndex = index);
+    setState(() {
+      _selectedIndex = index;
+      final find = '[VAR2]';
+      String msgTemName1= messageTemplatesList[index].message!.replaceAll(find, '1000');
+
+      final find1='[VAR1]';
+      String vNumChange=msgTemName1.replaceAll(find1, virtualNum);
+
+      sendSmsString=vNumChange;
+      print("sendedSms "+sendSmsString);
+      msgTemName=messageTemplatesList[index].templateName!;
+      msgTemId=messageTemplatesList[index].templateId!;
+    });
   }
 
   @override
@@ -153,6 +195,7 @@ class _SendMessageState extends State<SendMessage> {
                                               bool? isFocused}) =>
                                           null,
                                       decoration: InputDecoration(
+
                                         labelText: "Mobile Number",
                                         labelStyle: TextStyle(
                                           fontSize: 14.0,
@@ -200,18 +243,22 @@ class _SendMessageState extends State<SendMessage> {
                     shrinkWrap: true,
                     itemCount: messageTemplatesList.length,
                     itemBuilder: (BuildContext context, int index) {
+
+                      final find = '[VAR2]';
+                      String msgTemName= messageTemplatesList[index].message!.replaceAll(find, '1000');
+
+                      final find1='[VAR1]';
+                      String vNumChange=msgTemName.replaceAll(find1, virtualNum);
+                      // print("msgggggrgrgrgr "+msgTemName);
+
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            msgTemId =
-                                messageTemplatesList[index].sId.toString();
-                            print("msgtempId " + msgTemId);
                             _onSelected(index);
                           });
                         },
                         child: Container(
                           alignment: Alignment.center,
-                          height: 50,
                           decoration: BoxDecoration(
                               border:
                                   Border.all(width: 0.9, color: _selectedIndex != null &&
@@ -225,7 +272,7 @@ class _SendMessageState extends State<SendMessage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              messageTemplatesList[index].cMessage!,
+                              vNumChange,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontWeight: FontWeight.w500,
@@ -251,16 +298,7 @@ class _SendMessageState extends State<SendMessage> {
                         if (mobilenumberController.text.isNotEmpty) {
                           if (msgTemId.isNotEmpty) {
                             if (mobilenumberController.text.length == 10) {
-                              // print("moblengthhh " +
-                              //     mobilenumberController.text.toString()+", "+msgTemId+", ");
-                              Fluttertoast.showToast(
-                                  msg: "Success",
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  textColor: Colors.black,
-                                  backgroundColor: buttoncolor,
-                                  timeInSecForIosWeb: 1);
-                              Navigator.pop(context);
+                              sendSmsApi();
                             } else {
                               Fluttertoast.showToast(
                                   msg: "Mobile number length should 10",
@@ -313,12 +351,14 @@ class _SendMessageState extends State<SendMessage> {
                         ),
                       )),
                 ),
-              )
+              ),
+              SizedBox(height: 30,)
             ],
           )),
     );
   }
 
+  //temp
   getMessageTemplates() async {
     ProgressDialog().showLoaderDialog(context);
     // BaseOptions options = new BaseOptions(
@@ -330,17 +370,25 @@ class _SendMessageState extends State<SendMessage> {
     Dio dio = new Dio();
     // dio.options.connectTimeout = 5000;
     // dio.options.receiveTimeout = 3000;
-
-    final response = await dio.get(ApiProvider.messageTemplate);
-    print("paramMessageList" + response.toString());
+    var token = await SharedPreference().gettoken();
+    final response = await dio.get(ApiProvider.messageTemplate,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {
+            'Accept': "application/json",
+            "Authorization": "Bearer "+ token},
+        ));
+    print("responseMessageList" + response.toString());
 
     if (response.statusCode == 200) {
       Map<String, dynamic> map = jsonDecode(response.toString());
       MessageTemplatesModel packageModel = MessageTemplatesModel.fromJson(map);
 
-      if (packageModel.status == 1) {
+      if (packageModel.status == 0) {
+        ProgressDialog().dismissDialog(context);
         updatePackage(packageModel.data!);
       } else {
+        ProgressDialog().dismissDialog(context);
         Fluttertoast.showToast(
             msg: packageModel.message.toString(),
             toastLength: Toast.LENGTH_SHORT,
@@ -349,16 +397,81 @@ class _SendMessageState extends State<SendMessage> {
             backgroundColor: buttoncolor,
             timeInSecForIosWeb: 1);
       }
-      ProgressDialog().dismissDialog(context);
     } else {
       ProgressDialog().dismissDialog(context);
-      // Fluttertoast.showToast(
-      //     msg: "Bad Network Connection try again",
-      //     toastLength: Toast.LENGTH_SHORT,
-      //     gravity: ToastGravity.BOTTOM,
-      //     textColor: Colors.white,
-      //     backgroundColor: MyColor().pink,
-      //     timeInSecForIosWeb: 1);
+      Fluttertoast.showToast(
+          msg: "Bad Network Connection try again",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          textColor: Colors.white,
+          backgroundColor: buttoncolor,
+          timeInSecForIosWeb: 1);
+    }
+  }
+
+  //send sms
+  sendSmsApi() async {
+    ProgressDialog().showLoaderDialog(context);
+    // BaseOptions options = new BaseOptions(
+    //   baseUrl: ApiProvider().Baseurl,
+    //   connectTimeout: 5000,
+    //   receiveTimeout: 3000,
+    // );
+
+    Dio dio = new Dio();
+    // dio.options.connectTimeout = 5000;
+    // dio.options.receiveTimeout = 3000;
+    var token = await SharedPreference().gettoken();
+
+    var parameters = {
+      "n_Mobile_no": mobilenumberController.text,
+      "n_template_id":msgTemId,
+      "c_message":sendSmsString,
+      "c_template_name":msgTemName};
+    print("msgTemMessageParam "+parameters.toString());
+    final response = await dio.post(ApiProvider.sendMessage,
+        data: parameters,
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {
+            'Accept': "application/json",
+            "Authorization": "Bearer "+ token},
+        ));
+    print("paramMessageList" + response.toString());
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = jsonDecode(response.toString());
+      SendMessageModel sendMessageModel = SendMessageModel.fromJson(map);
+
+      if (sendMessageModel.status == 1) {
+        ProgressDialog().dismissDialog(context);
+        Fluttertoast.showToast(
+            msg: sendMessageModel.message.toString(),
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            textColor: Colors.black,
+            backgroundColor: buttoncolor,
+            timeInSecForIosWeb: 1);
+        Navigator.pop(context,true);
+      } else {
+        ProgressDialog().dismissDialog(context);
+        Fluttertoast.showToast(
+            msg: sendMessageModel.message.toString(),
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            textColor: Colors.black,
+            backgroundColor: buttoncolor,
+            timeInSecForIosWeb: 1);
+      }
+    } else {
+      ProgressDialog().dismissDialog(context);
+      Fluttertoast.showToast(
+          msg: "Bad Network Connection try again",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          textColor: Colors.white,
+          backgroundColor: buttoncolor,
+          timeInSecForIosWeb: 1);
     }
   }
 }

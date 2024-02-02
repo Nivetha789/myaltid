@@ -108,7 +108,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
       // var data = jsonDecode(response.data);
       // print("dfkjsfddkjh $data");
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => WebViewScreen(response.data!)));
+          builder: (context) => WebViewScreen(response.data!,"")));
 
       if (response.data["status"] == 1) {
         // await SharedPreference()
@@ -476,7 +476,7 @@ class _PaymentmodeSelectionState extends State<PaymentmodeSelection> {
                           }
                         }
                       };
-
+                      print("reqJson "+reqJson.toString());
                       wlCheckoutFlutter.on(
                           WeiplCheckoutFlutter.wlResponse, handleResponse);
                       wlCheckoutFlutter.open(reqJson);

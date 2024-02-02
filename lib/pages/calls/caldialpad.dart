@@ -1,42 +1,105 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:uuid/uuid.dart';
 import '../../data/api.dart';
-import '../../module/PhoneDialModel.dart';
 import '../../reasuable/numpad.dart';
 import '../../reasuable/theme.dart';
 import '../../utils/check_internet.dart';
 import '../../widget/progressloaded.dart';
 import '../../widget/sharedpreference.dart';
+import '../profile/profilescreen.dart';
 
 class CalldialpadScreen extends StatefulWidget {
-  const CalldialpadScreen({super.key});
+  var mobileNum;
+  CalldialpadScreen(this.mobileNum);
 
   @override
   State<CalldialpadScreen> createState() => _CalldialpadScreenState();
 }
 
-class _CalldialpadScreenState extends State<CalldialpadScreen> {
+class _CalldialpadScreenState extends State<CalldialpadScreen> with WidgetsBindingObserver{
   final TextEditingController _myController = TextEditingController();
   late String oldvalue;
   bool isvalue = false;
+
+
+  late final Uuid _uuid;
+  String? _currentUuid;
+
+
+  @override
+  void initState() {
+    if (widget.mobileNum != "") {
+      _myController.text = widget.mobileNum;
+    } else {
+      _myController.text = "";
+    }
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  Future<dynamic> getCurrentCall() async {
+    //check current call from pushkit if possible
+    var calls = await FlutterCallkitIncoming.activeCalls();
+    if (calls is List) {
+      if (calls.isNotEmpty) {
+        print('DATA: $calls');
+        _currentUuid = calls[0]['id'];
+        return calls[0];
+      } else {
+        _currentUuid = "";
+        return null;
+      }
+    }
+  }
+
+  Future<void> checkAndNavigationCallingPage() async {
+    var currentCall = await getCurrentCall();
+    if (currentCall != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ProfileScreen(),
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    print(state);
+    if (state == AppLifecycleState.resumed) {
+      //Check call when open app from background
+      checkAndNavigationCallingPage();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: MediaQuery.of(context).size.width,
+        width: MediaQuery
+            .of(context)
+            .size
+            .width,
         decoration: const BoxDecoration(
             gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xff065F0A),
-            Color(0xff000000),
-          ],
-        )),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xff065F0A),
+                Color(0xff000000),
+              ],
+            )),
         child: Column(
           children: [
             const SizedBox(
@@ -48,47 +111,58 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
                 height: 70,
                 child: Center(
                     child: TextFormField(
-                  controller: _myController,
-                  textAlign: TextAlign.center,
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(10)
-                  ], // Limit input to 10 characters
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    suffixIcon: _myController.text.isNotEmpty
-                        ?const SizedBox(): IconButton(
-                      onPressed: () {
-                        _myController.text = _myController.text
-                            .substring(0, _myController.text.length - 1);
-                      },
-                      icon: const Icon(
-                        Icons.backspace,
-                        color: Colors.white,
+                      controller: _myController,
+                      textAlign: TextAlign.center,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(10)
+                      ],
+                      // Limit input to 10 characters
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              if (_myController.text.isNotEmpty) {
+                                _myController.text = _myController.text
+                                    .substring(
+                                    0, _myController.text.length - 1);
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg: "Mobile number should not empty.",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    textColor: Colors.white,
+                                    backgroundColor: Colors.lightGreen,
+                                    timeInSecForIosWeb: 1);
+                              }
+                            },
+                            icon: const Icon(
+                              Icons.backspace,
+                              color: Colors.white,
+                            ),
+                          )
+                        // filled: true,
                       ),
-                    )
-                    // filled: true,
-                  ),
-                  onChanged: (value) {
-                    if (value.length > 10) {
-                      setState(() {
-                        _myController.text = value.substring(0, 10);
-                        _myController.selection =
-                            TextSelection.collapsed(offset: 10);
-                      });
-                    }
-                  },
+                      onChanged: (value) {
+                        if (value.length > 10) {
+                          setState(() {
+                            _myController.text = value.substring(0, 10);
+                            _myController.selection =
+                                TextSelection.collapsed(offset: 10);
+                          });
+                        }
+                      },
 
-                  style: const TextStyle(
-                      fontSize: 30,
-                      fontFamily: "Helvatica",
-                      fontWeight: FontWeight.w600,
-                      color: whitecolor),
+                      style: const TextStyle(
+                          fontSize: 30,
+                          fontFamily: "Helvatica",
+                          fontWeight: FontWeight.w600,
+                          color: whitecolor),
 
-                  // Disable the default soft keybaord
-                  keyboardType: TextInputType.none,
+                      // Disable the default soft keybaord
+                      keyboardType: TextInputType.none,
                       maxLines: 1,
                       // maxLength: 10,
-                )),
+                    )),
               ),
             ),
             // implement the custom NumPad
@@ -107,7 +181,8 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
                 debugPrint('Your code: ${_myController.text}');
                 showDialog(
                     context: context,
-                    builder: (_) => AlertDialog(
+                    builder: (_) =>
+                        AlertDialog(
                           content: Text(
                             "You code is ${_myController.text}",
                             style: const TextStyle(fontSize: 30),
@@ -146,12 +221,12 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
               child: InkWell(
                 splashColor: buttoncolor, // Splash color
                 onTap: () {
-                  print("numberrrr "+_myController.text);
+                  print("numberrrr " + _myController.text);
                   check().then((intenet) {
                     if (intenet != null && intenet) {
-                      if(_myController.text.length==10){
+                      if (_myController.text.length == 10) {
                         dialPadApi(_myController.text);
-                      }else{
+                      } else {
                         Fluttertoast.showToast(
                             msg: "Your mobile number should contain 10 digits.",
                             toastLength: Toast.LENGTH_SHORT,
@@ -173,10 +248,10 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
                 },
                 child: const SizedBox(
                     child: Icon(
-                  Icons.wifi_calling_3_sharp,
-                  color: whitecolor,
-                  size: 40,
-                )),
+                      Icons.wifi_calling_3_sharp,
+                      color: whitecolor,
+                      size: 40,
+                    )),
               ),
             ),
           ],
@@ -204,7 +279,7 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
     var parameters = {
       "n_Callee": _myController.text,
     };
-    print("paymentDetailsParams :" + parameters.toString());
+    print("callDetailsParams :" + parameters.toString()+token);
 
     dio.options.contentType = Headers.formUrlEncodedContentType;
     final response = await dio.post(
@@ -216,25 +291,52 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
           "Content-Type": "application/x-www-form-urlencoded"},
       ),
     );
-    print("paymentDetailsRes :" + response.toString());
+    print("callDetailsRes :" + response.toString());
     if (response.statusCode == 200) {
-      Map<String, dynamic> map = jsonDecode(response.toString());
-      PhoneDialerModel phoneDialModel =
-      PhoneDialerModel.fromJson(map);
-
-      if (phoneDialModel.status == 1) {
+      if (response.data["status"] == 1) {
         ProgressDialog().dismissDialog(context);
         _callNumber(number);
       } else {
         ProgressDialog().dismissDialog(context);
         Fluttertoast.showToast(
-            msg: phoneDialModel.message.toString(),
+            msg: response.data["message"],
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             textColor: Colors.white,
             backgroundColor: Colors.lightGreen,
             timeInSecForIosWeb: 1);
+        // final snackBar = SnackBar(
+        //   elevation: 0,
+        //   behavior: SnackBarBehavior.floating,
+        //   backgroundColor: Colors.transparent,
+        //   content: AwesomeSnackbarContent(
+        //     title: 'On Snap!',
+        //     message: response.data["message"],
+        //     contentType: ContentType.failure,
+        //   ),
+        // );
+        //
+        // ScaffoldMessenger.of(context)
+        //   ..hideCurrentSnackBar()
+        //   ..showSnackBar(snackBar);
       }
+      // Map<String, dynamic> map = jsonDecode(response.toString());
+      // PhoneDialerModel phoneDialModel =
+      // PhoneDialerModel.fromJson(map);
+      //
+      // if (phoneDialModel.status == 1) {
+      //   ProgressDialog().dismissDialog(context);
+      //   _callNumber(number);
+      // } else {
+      //   ProgressDialog().dismissDialog(context);
+      //   Fluttertoast.showToast(
+      //       msg: phoneDialModel.message.toString(),
+      //       toastLength: Toast.LENGTH_SHORT,
+      //       gravity: ToastGravity.CENTER,
+      //       textColor: Colors.white,
+      //       backgroundColor: Colors.lightGreen,
+      //       timeInSecForIosWeb: 1);
+      // }
     } else {
       ProgressDialog().dismissDialog(context);
       Fluttertoast.showToast(
@@ -247,7 +349,11 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> {
     }
   }
 
-  _callNumber(String number) async{
+  _callNumber(String number) async {
     bool? res = await FlutterPhoneDirectCaller.callNumber(number);
+    // _uuid = const Uuid();
+    // //Check call when open app from terminated
+    // checkAndNavigationCallingPage();
+    // print("obdbdbbdb");
   }
 }

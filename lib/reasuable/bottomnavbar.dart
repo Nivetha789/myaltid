@@ -56,9 +56,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
               setState(() {
                 currentIndex = 0;
               });
-              // Navigator.of(context).push(
-              //   MaterialPageRoute(builder: (context) => const PaymentmodeSelection()),
-              // );
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => MaillistPage()),
+              );
             },
             child: Container(
               color: currentIndex == 0 ? tabbgcolor : blackcolor,

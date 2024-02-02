@@ -1,13 +1,19 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously, non_constant_identifier_names, prefer_interpolation_to_compose_strings
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:dio/dio.dart';
+import 'package:face_camera/face_camera.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myaltid/data/api.dart';
+import 'package:myaltid/module/PhotoUploadModel.dart';
 import 'package:myaltid/pages/congratulation.dart';
+import 'package:myaltid/pages/faceReg/FaceRegScreen.dart';
 import 'package:myaltid/pages/signup.dart';
 import 'package:myaltid/widget/mobilenumberformator.dart';
 import 'package:myaltid/widget/progressloaded.dart';
@@ -15,9 +21,12 @@ import 'package:myaltid/widget/sharedpreference.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
-
+import '../module/AadhaarVerifyModule/FaceRegVerifyModel.dart';
+import '../module/AadhaarVerifyModule/GetSignzyUrlModel.dart';
 import '../reasuable/background_screen.dart';
 import '../reasuable/theme.dart';
+import 'WebViewScreen.dart';
+import 'package:path/path.dart' as path;
 
 class KycScreen extends StatefulWidget {
   const KycScreen({super.key});
@@ -27,6 +36,7 @@ class KycScreen extends StatefulWidget {
 }
 
 class _KycScreenState extends State<KycScreen> {
+  TextEditingController mobileNumber = TextEditingController();
   TextEditingController username = TextEditingController();
 
   TextEditingController pannumber = TextEditingController();
@@ -180,10 +190,22 @@ class _KycScreenState extends State<KycScreen> {
     }
   }*/
 
+  String signzyUrl="";
+  bool kycFileVis=false;
+
+  String requestId = "";
+  String status = "";
+
+  File? filePath;
+  String fileName="";
+  bool fileSuccess = false;
+  bool verifiedSuccess = false;
+
   @override
   void initState() {
     super.initState();
   }
+
 
   var selectedMonth;
   var selectedDate;
@@ -542,8 +564,11 @@ class _KycScreenState extends State<KycScreen> {
                 const SizedBox(
                   height: 0,
                 ),
-                const Text(
-                  "Email ID (Aadhaar linked email)",
+                requestId==""?Column(
+                  children: [
+                Text(
+                  "Enter your Mobile Number(As per your Aadhaar)",
+                  textAlign: TextAlign.start,
                   style: TextStyle(
                     fontFamily: "Helvatica",
                     color: whitecolor,
@@ -556,156 +581,247 @@ class _KycScreenState extends State<KycScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                TextFormField(
-                  controller: username,
-                  keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: whitecolor, fontSize: 16),
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  // inputFormatters: [
-                  //   FilteringTextInputFormatter.allow(
-                  //     RegExp(r'^[^.][a-z0-9._]+@[a-z0-9]+\.[a-z]+$',
-                  //         caseSensitive: false),
-                  //   ),
-                  // ],
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please a Enter Your Email';
-                    }
-                    if (!RegExp(r'^[^.][a-z0-9._]+@[a-z0-9]+\.[a-z]+$',
-                            caseSensitive: false)
-                        .hasMatch(value)) {
-                      return 'Please a valid Email';
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    hintText: "Email id",
-                    hintStyle: TextStyle(color: whitecolor, fontSize: 14),
-                    fillColor: Color(0xff1C1C1E),
-                    filled: true,
-                    border: OutlineInputBorder(
-                      //Outline border type for TextFeild
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      //Outline border type for TextFeild
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                Container(
+                  margin: EdgeInsets.only(left: 15),
+                  child: TextFormField(
+                    controller: mobileNumber,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(
+                          RegExp("[0-9]")),
+                    ],
+                    style: const TextStyle(color: whitecolor, fontSize: 16),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please a Enter Your Mobile Number';
+                      }
+                      if (!RegExp(r'^[0-9]',
+                          caseSensitive: false)
+                          .hasMatch(value)) {
+                        return 'Please a valid Mobile';
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      hintText: "Mobile Number",
+                      hintStyle: TextStyle(color: whitecolor, fontSize: 14),
+                      fillColor: Color(0xff1C1C1E),
+                      filled: true,
+                      border: OutlineInputBorder(
+                        //Outline border type for TextFeild
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        //Outline border type for TextFeild
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-                const Text(
-                  "Enter PAN Number",
-                  style: TextStyle(
-                    fontFamily: "Helvatica",
-                    color: whitecolor,
-                    fontWeight: FontWeight.w400,
-                    fontStyle: FontStyle.normal,
-                    // fontStyle: FontStyle.italic,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  controller: pannumber,
-                  textCapitalization: TextCapitalization.characters,
-                  maxLength: 10,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
-                    UpperCaseTextFormatter(),
                   ],
-                  // inputFormatters: [UpperCaseTextFormatter()],
-                  style: const TextStyle(color: whitecolor, fontSize: 16),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please a Enter Your PAN Number';
-                    }
-                    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$')
-                        .hasMatch(value)) {
-                      return 'Please a valid PAN Number (Eg:ABCDE1234H)';
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    hintText: "PAN Number",
-                    hintStyle: TextStyle(color: whitecolor, fontSize: 14),
-                    fillColor: Color(0xff1C1C1E),
-                    filled: true,
-                    border: OutlineInputBorder(
-                      //Outline border type for TextFeild
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      //Outline border type for TextFeild
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                  ),
-                ),
-                const Text(
-                  "Date of Birth (as per KYC)",
-                  style: TextStyle(
-                    fontFamily: "Helvatica",
-                    color: whitecolor,
-                    fontWeight: FontWeight.w400,
-                    fontStyle: FontStyle.normal,
-                    // fontStyle: FontStyle.italic,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ):Container(),
+                Visibility(
+                  visible: kycFileVis,
+                  child: Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 90,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: const Color(0xff1C1C1E),
+                      const Text(
+                        "Email ID (Aadhaar linked email)",
+                        style: TextStyle(
+                          fontFamily: "Helvatica",
+                          color: whitecolor,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.normal,
+                          // fontStyle: FontStyle.italic,
+                          fontSize: 14,
                         ),
-                        child: DropdownButton<int>(
-                            padding: const EdgeInsets.only(left: 10),
-                            isExpanded: true,
-                            value: selectedDate,
-                            hint: const Text(
-                              'Date',
-                              style: TextStyle(
-                                fontFamily: "Helvatica",
-                                color: whitecolor,
-                                fontWeight: FontWeight.w400,
-                                fontStyle: FontStyle.normal,
-                                // fontStyle: FontStyle.italic,
-                                fontSize: 14,
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: username,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(color: whitecolor, fontSize: 16),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        // inputFormatters: [
+                        //   FilteringTextInputFormatter.allow(
+                        //     RegExp(r'^[^.][a-z0-9._]+@[a-z0-9]+\.[a-z]+$',
+                        //         caseSensitive: false),
+                        //   ),
+                        // ],
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please a Enter Your Email';
+                          }
+                          if (!RegExp(r'^[^.][a-z0-9._]+@[a-z0-9]+\.[a-z]+$',
+                              caseSensitive: false)
+                              .hasMatch(value)) {
+                            return 'Please a valid Email';
+                          }
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          hintText: "Email id",
+                          hintStyle: TextStyle(color: whitecolor, fontSize: 14),
+                          fillColor: Color(0xff1C1C1E),
+                          filled: true,
+                          border: OutlineInputBorder(
+                            //Outline border type for TextFeild
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            //Outline border type for TextFeild
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Text(
+                        "Enter PAN Number",
+                        style: TextStyle(
+                          fontFamily: "Helvatica",
+                          color: whitecolor,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.normal,
+                          // fontStyle: FontStyle.italic,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: pannumber,
+                        textCapitalization: TextCapitalization.characters,
+                        maxLength: 10,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                          UpperCaseTextFormatter(),
+                        ],
+                        // inputFormatters: [UpperCaseTextFormatter()],
+                        style: const TextStyle(color: whitecolor, fontSize: 16),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please a Enter Your PAN Number';
+                          }
+                          if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$')
+                              .hasMatch(value)) {
+                            return 'Please a valid PAN Number (Eg:ABCDE1234H)';
+                          }
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          hintText: "PAN Number",
+                          hintStyle: TextStyle(color: whitecolor, fontSize: 14),
+                          fillColor: Color(0xff1C1C1E),
+                          filled: true,
+                          border: OutlineInputBorder(
+                            //Outline border type for TextFeild
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            //Outline border type for TextFeild
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        "Date of Birth (as per KYC)",
+                        style: TextStyle(
+                          fontFamily: "Helvatica",
+                          color: whitecolor,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.normal,
+                          // fontStyle: FontStyle.italic,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: 90,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: const Color(0xff1C1C1E),
                               ),
+                              child: DropdownButton<int>(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  isExpanded: true,
+                                  value: selectedDate,
+                                  hint: const Text(
+                                    'Date',
+                                    style: TextStyle(
+                                      fontFamily: "Helvatica",
+                                      color: whitecolor,
+                                      fontWeight: FontWeight.w400,
+                                      fontStyle: FontStyle.normal,
+                                      // fontStyle: FontStyle.italic,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedDate = newValue;
+                                    });
+                                  },
+                                  dropdownColor: const Color(0xff1C1C1E),
+                                  underline: const SizedBox(),
+                                  items: getDaysInMonth(0, 0 ?? DateTime.now().year)
+                                      .map((int value) {
+                                    return DropdownMenuItem<int>(
+                                      value: value,
+                                      child: Text(
+                                        value.toString(),
+                                        style: const TextStyle(
+                                          fontFamily: "Helvatica",
+                                          color: whitecolor,
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          // fontStyle: FontStyle.italic,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList()),
                             ),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedDate = newValue;
-                              });
-                            },
-                            dropdownColor: const Color(0xff1C1C1E),
-                            underline: const SizedBox(),
-                            items: getDaysInMonth(0, 0 ?? DateTime.now().year)
-                                .map((int value) {
-                              return DropdownMenuItem<int>(
-                                value: value,
-                                child: Text(
-                                  value.toString(),
-                                  style: const TextStyle(
+                            Container(
+                              width: 130,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: const Color(0xff1C1C1E),
+                              ),
+                              child: DropdownButton<int>(
+                                padding: const EdgeInsets.only(left: 10),
+                                isExpanded: true,
+                                value: selectedMonth,
+                                hint: const Text(
+                                  'Month',
+                                  style: TextStyle(
                                     fontFamily: "Helvatica",
                                     color: whitecolor,
                                     fontWeight: FontWeight.w400,
@@ -714,365 +830,477 @@ class _KycScreenState extends State<KycScreen> {
                                     fontSize: 14,
                                   ),
                                 ),
-                              );
-                            }).toList()),
-                      ),
-                      Container(
-                        width: 130,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: const Color(0xff1C1C1E),
-                        ),
-                        child: DropdownButton<int>(
-                          padding: const EdgeInsets.only(left: 10),
-                          isExpanded: true,
-                          value: selectedMonth,
-                          hint: const Text(
-                            'Month',
-                            style: TextStyle(
-                              fontFamily: "Helvatica",
-                              color: whitecolor,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              // fontStyle: FontStyle.italic,
-                              fontSize: 14,
-                            ),
-                          ),
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedMonth = newValue;
-                              print("monthhhhhh " +
-                                  selectedMonth.toString() +
-                                  ", " +
-                                  selectedDate.toString());
-                              if (selectedDate == 29 && selectedMonth == 2 ||
-                                  selectedDate == 30 && selectedMonth == 2 ||
-                                  selectedDate == 31 && selectedMonth == 2) {
-                                Fluttertoast.showToast(
-                                    msg: "Please change date...",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    textColor: Colors.white,
-                                    backgroundColor: buttoncolor,
-                                    timeInSecForIosWeb: 1);
-                                selectedDate = null;
-                              } else if (selectedDate == 31 &&
-                                  selectedMonth == 6) {
-                                Fluttertoast.showToast(
-                                    msg: "Please change date...",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    textColor: Colors.white,
-                                    backgroundColor: buttoncolor,
-                                    timeInSecForIosWeb: 1);
-                                selectedDate = null;
-                              } else if (selectedDate == 31 &&
-                                  selectedMonth == 4) {
-                                Fluttertoast.showToast(
-                                    msg: "Please change date...",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    textColor: Colors.white,
-                                    backgroundColor: buttoncolor,
-                                    timeInSecForIosWeb: 1);
-                                selectedDate = null;
-                              } else if (selectedDate == 31 &&
-                                  selectedMonth == 9) {
-                                Fluttertoast.showToast(
-                                    msg: "Please change date...",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    textColor: Colors.white,
-                                    backgroundColor: buttoncolor,
-                                    timeInSecForIosWeb: 1);
-                                selectedDate = null;
-                              } else if (selectedDate == 31 &&
-                                  selectedMonth == 11) {
-                                Fluttertoast.showToast(
-                                    msg: "Please change date...",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    textColor: Colors.white,
-                                    backgroundColor: buttoncolor,
-                                    timeInSecForIosWeb: 1);
-                                selectedDate = null;
-                              } else {
-                                selectedDate = selectedDate;
-                              }
-                            });
-                          },
-                          dropdownColor: const Color(0xff1C1C1E),
-                          underline: const SizedBox(),
-                          items: getMonths().map((int value) {
-                            return DropdownMenuItem<int>(
-                              value: value,
-                              child: Text(
-                                value.toString(),
-                                style: const TextStyle(
-                                  fontFamily: "Helvatica",
-                                  color: whitecolor,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  // fontStyle: FontStyle.italic,
-                                  fontSize: 14,
-                                ),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedMonth = newValue;
+                                    print("monthhhhhh " +
+                                        selectedMonth.toString() +
+                                        ", " +
+                                        selectedDate.toString());
+                                    if (selectedDate == 29 && selectedMonth == 2 ||
+                                        selectedDate == 30 && selectedMonth == 2 ||
+                                        selectedDate == 31 && selectedMonth == 2) {
+                                      Fluttertoast.showToast(
+                                          msg: "Please change date...",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          textColor: Colors.white,
+                                          backgroundColor: buttoncolor,
+                                          timeInSecForIosWeb: 1);
+                                      selectedDate = null;
+                                    } else if (selectedDate == 31 &&
+                                        selectedMonth == 6) {
+                                      Fluttertoast.showToast(
+                                          msg: "Please change date...",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          textColor: Colors.white,
+                                          backgroundColor: buttoncolor,
+                                          timeInSecForIosWeb: 1);
+                                      selectedDate = null;
+                                    } else if (selectedDate == 31 &&
+                                        selectedMonth == 4) {
+                                      Fluttertoast.showToast(
+                                          msg: "Please change date...",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          textColor: Colors.white,
+                                          backgroundColor: buttoncolor,
+                                          timeInSecForIosWeb: 1);
+                                      selectedDate = null;
+                                    } else if (selectedDate == 31 &&
+                                        selectedMonth == 9) {
+                                      Fluttertoast.showToast(
+                                          msg: "Please change date...",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          textColor: Colors.white,
+                                          backgroundColor: buttoncolor,
+                                          timeInSecForIosWeb: 1);
+                                      selectedDate = null;
+                                    } else if (selectedDate == 31 &&
+                                        selectedMonth == 11) {
+                                      Fluttertoast.showToast(
+                                          msg: "Please change date...",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          textColor: Colors.white,
+                                          backgroundColor: buttoncolor,
+                                          timeInSecForIosWeb: 1);
+                                      selectedDate = null;
+                                    } else {
+                                      selectedDate = selectedDate;
+                                    }
+                                  });
+                                },
+                                dropdownColor: const Color(0xff1C1C1E),
+                                underline: const SizedBox(),
+                                items: getMonths().map((int value) {
+                                  return DropdownMenuItem<int>(
+                                    value: value,
+                                    child: Text(
+                                      value.toString(),
+                                      style: const TextStyle(
+                                        fontFamily: "Helvatica",
+                                        color: whitecolor,
+                                        fontWeight: FontWeight.w400,
+                                        fontStyle: FontStyle.normal,
+                                        // fontStyle: FontStyle.italic,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      Container(
-                        width: 90,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: const Color(0xff1C1C1E),
-                        ),
-                        child: DropdownButton<int>(
-                          padding: const EdgeInsets.only(left: 10),
-                          isExpanded: true,
-                          value: selectedYear,
-                          hint: const Text(
-                            'Year',
-                            style: TextStyle(
-                              fontFamily: "Helvatica",
-                              color: whitecolor,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              // fontStyle: FontStyle.italic,
-                              fontSize: 14,
                             ),
-                          ),
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedYear = newValue;
-                            });
-                          },
-                          dropdownColor: const Color(0xff1C1C1E),
+                            Container(
+                              width: 90,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: const Color(0xff1C1C1E),
+                              ),
+                              child: DropdownButton<int>(
+                                padding: const EdgeInsets.only(left: 10),
+                                isExpanded: true,
+                                value: selectedYear,
+                                hint: const Text(
+                                  'Year',
+                                  style: TextStyle(
+                                    fontFamily: "Helvatica",
+                                    color: whitecolor,
+                                    fontWeight: FontWeight.w400,
+                                    fontStyle: FontStyle.normal,
+                                    // fontStyle: FontStyle.italic,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedYear = newValue;
+                                  });
+                                },
+                                dropdownColor: const Color(0xff1C1C1E),
 
-                          underline: const SizedBox(),
-                          // decoration: InputDecoration(
-                          //   enabledBorder: InputBorder.none, // Remove the border
-                          //   focusedBorder:
-                          //       InputBorder.none, // Remove the border when focused
-                          //   hintText: "Seleted year",
-                          // ),
-                          items: getYears().map((int value) {
-                            return DropdownMenuItem<int>(
-                              value: value,
-                              child: Text(
-                                value.toString(),
-                                style: const TextStyle(
-                                  fontFamily: "Helvatica",
-                                  color: whitecolor,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  // fontStyle: FontStyle.italic,
-                                  fontSize: 14,
+                                underline: const SizedBox(),
+                                // decoration: InputDecoration(
+                                //   enabledBorder: InputBorder.none, // Remove the border
+                                //   focusedBorder:
+                                //       InputBorder.none, // Remove the border when focused
+                                //   hintText: "Seleted year",
+                                // ),
+                                items: getYears().map((int value) {
+                                  return DropdownMenuItem<int>(
+                                    value: value,
+                                    child: Text(
+                                      value.toString(),
+                                      style: const TextStyle(
+                                        fontFamily: "Helvatica",
+                                        color: whitecolor,
+                                        fontWeight: FontWeight.w400,
+                                        fontStyle: FontStyle.normal,
+                                        // fontStyle: FontStyle.italic,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      dateofbirth == true || isage == true
+                          ? const Text(
+                        "Select valid date of birth & age should be above 18 years",
+                        style: TextStyle(color: Colors.red),
+                      )
+                          : const Text("testttt"),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Text(
+                        "Enter Aadhaar Number",
+                        style: TextStyle(
+                          fontFamily: "Helvatica",
+                          color: whitecolor,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.normal,
+                          // fontStyle: FontStyle.italic,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: aadharnumber,
+                        style: const TextStyle(color: whitecolor, fontSize: 16),
+                        inputFormatters: [MobileNumberInputFormatter()],
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please a Enter your Aadhaar number';
+                          }
+                          if (!RegExp(r'^[0-9]{12}$').hasMatch(value)) {
+                            return 'Please a valid Number';
+                          }
+                          return null;
+                        },
+                        onFieldSubmitted: (value) {
+                          print("valueeeee " + value);
+                          if (value.length == 12) {
+                            btnText = "Submit";
+                          } else {
+                            btnText = "Submit KYC";
+                            otpField = false;
+                          }
+                        },
+                        onChanged: (value) {
+                          'Minimum character length is 12';
+                          if (aadharnumber.text.length == 12) {
+                            btnText = "Send OTP";
+                          } else {
+                            btnText = "Submit KYC";
+                            otpField = false;
+                          }
+                        },
+                        keyboardType: TextInputType.number,
+                        maxLength: 12,
+                        decoration: const InputDecoration(
+                          hintText: "Aadhaar Number",
+                          hintStyle: TextStyle(color: whitecolor, fontSize: 14),
+                          fillColor: Color(0xff1C1C1E),
+                          filled: true,
+                          border: OutlineInputBorder(
+                            //Outline border type for TextFeild
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            //Outline border type for TextFeild
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Visibility(
+                        visible: otpField,
+                        child: Text(
+                          "Enter OTP",
+                          style: TextStyle(
+                            fontFamily: "Helvatica",
+                            color: whitecolor,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.normal,
+                            // fontStyle: FontStyle.italic,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible: otpField,
+                        child: const SizedBox(
+                          height: 10,
+                        ),
+                      ),
+                      Visibility(
+                        visible: otpField,
+                        child: OTPTextField(
+                          controller: otpController,
+                          length: 6,
+                          width: MediaQuery.of(context).size.width,
+                          fieldWidth: 50,
+                          fieldStyle: FieldStyle.box,
+                          style: const TextStyle(
+                              color: whitecolor,
+                              fontSize: 15,
+                              fontFamily: "Helvatica",
+                              fontWeight: FontWeight.w500),
+                          textFieldAlignment: MainAxisAlignment.spaceAround,
+                          onCompleted: (pin) {
+                            otp = pin;
+                            btnText = "Submit KYC";
+                            debugPrint("Completed: $pin" + otp);
+                            if (btnText == "Submit KYC") {
+                              verifykyc();
+                            }
+                          },
+                          otpFieldStyle: OtpFieldStyle(
+                            borderColor: const Color(0xff1C1C1E),
+                            backgroundColor: const Color(0xff1C1C1E),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                    ],
+                  ),),
+                ),
+                requestId !="" ? Card(
+                  margin: EdgeInsets.only(left: 30.0,right: 30.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(
+                        10.0),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                      child:Column(
+                        children: [
+                          Visibility(
+                           visible : verifiedSuccess ? true : false,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_)=>new FaceRegScreen(requestId)),)
+                                    .then((val)=>val?setEnabled(val):null);
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                margin: const EdgeInsets.only(
+                                    right: 5.0, top: 8.0, bottom: 2.0),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                      alignment: Alignment.center,
+                                      child: const Icon(
+                                        Icons.camera_alt,
+                                        color: buttoncolor,
+                                        size: 30.0,
+                                      )),
                                 ),
                               ),
-                            );
-                          }).toList(),
+                            ),
+                          ),
+                          Visibility(
+                            visible: fileSuccess != "" ? true : false,
+                            child: Container(
+                                alignment: Alignment.center,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 10.0, left: 12.0, bottom: 10.0),
+                                  child: fileSuccess != false
+                                      ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Text(
+                                        'Your photo verified successfully',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w500,
+                                          fontFamily: 'OpenSans',
+                                          color: Colors.black
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(left: 8.0),
+                                        child: Icon(
+                                          Icons.done,
+                                          color: Colors.green,
+                                        ),
+                                      )
+                                    ],
+                                  )
+                                      : const Text(""),
+                                )),
+                          ),
+                        ],
+                      ),
+                      ),
+                      Visibility(
+                        visible: verifiedSuccess ? true : false,
+                        child: InkWell(
+                          onTap: (){
+                            Navigator.of(context).push(new MaterialPageRoute(builder: (_)=>new FaceRegScreen(requestId)),)
+                                .then((val)=>val?setEnabled(val):null);
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            margin: const EdgeInsets.only(bottom: 15.0),
+                            child: Column(
+                              children: [
+                                Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.only(top: 15.0,bottom: 15.0),
+                                  margin: const EdgeInsets.only(bottom: 15.0),
+                                  child: Text(
+                                    "*Capture your photo for face verification*",
+                                    style: TextStyle(
+                                        color: Colors.black54,
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'OpenSans'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                dateofbirth == true || isage == true
-                    ? const Text(
-                        "Select valid date of birth & age should be above 18 years",
-                        style: TextStyle(color: Colors.red),
-                      )
-                    : const Text("testttt"),
-                const SizedBox(
-                  height: 10,
-                ),
-                const Text(
-                  "Enter Aadhaar Number",
-                  style: TextStyle(
-                    fontFamily: "Helvatica",
-                    color: whitecolor,
-                    fontWeight: FontWeight.w400,
-                    fontStyle: FontStyle.normal,
-                    // fontStyle: FontStyle.italic,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  controller: aadharnumber,
-                  style: const TextStyle(color: whitecolor, fontSize: 16),
-                  inputFormatters: [MobileNumberInputFormatter()],
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please a Enter your Aadhaar number';
-                    }
-                    if (!RegExp(r'^[0-9]{12}$').hasMatch(value)) {
-                      return 'Please a valid Number';
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (value) {
-                    print("valueeeee " + value);
-                    if (value.length == 12) {
-                      btnText = "Send OTP";
-                    } else {
-                      btnText = "Submit KYC";
-                      otpField = false;
-                    }
-                  },
-                  onChanged: (value) {
-                    'Minimum character length is 12';
-                    if (aadharnumber.text.length == 12) {
-                      btnText = "Send OTP";
-                    } else {
-                      btnText = "Submit KYC";
-                      otpField = false;
-                    }
-                  },
-                  keyboardType: TextInputType.number,
-                  maxLength: 12,
-                  decoration: const InputDecoration(
-                    hintText: "Aadhaar Number",
-                    hintStyle: TextStyle(color: whitecolor, fontSize: 14),
-                    fillColor: Color(0xff1C1C1E),
-                    filled: true,
-                    border: OutlineInputBorder(
-                      //Outline border type for TextFeild
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      //Outline border type for TextFeild
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
+                ):Container(),
                 Visibility(
-                  visible: otpField,
-                  child: Text(
-                    "Enter OTP",
-                    style: TextStyle(
-                      fontFamily: "Helvatica",
-                      color: whitecolor,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.normal,
-                      // fontStyle: FontStyle.italic,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                Visibility(
-                  visible: otpField,
-                  child: const SizedBox(
-                    height: 10,
-                  ),
-                ),
-                Visibility(
-                  visible: otpField,
-                  child: OTPTextField(
-                    controller: otpController,
-                    length: 6,
-                    width: MediaQuery.of(context).size.width,
-                    fieldWidth: 50,
-                    fieldStyle: FieldStyle.box,
-                    style: const TextStyle(
-                        color: whitecolor,
-                        fontSize: 15,
-                        fontFamily: "Helvatica",
-                        fontWeight: FontWeight.w500),
-                    textFieldAlignment: MainAxisAlignment.spaceAround,
-                    onCompleted: (pin) {
-                      otp = pin;
-                      btnText = "Submit KYC";
-                      debugPrint("Completed: $pin" + otp);
-                      if (btnText == "Submit KYC") {
-                        verifykyc();
-                      }
-                    },
-                    otpFieldStyle: OtpFieldStyle(
-                      borderColor: const Color(0xff1C1C1E),
-                      backgroundColor: const Color(0xff1C1C1E),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                InkWell(
-                    onTap: () {
-                      // if (isloading == false) {
-                      if (formKey.currentState!.validate() &&
-                          selectedDate != null &&
-                          selectedMonth != null &&
-                          selectedYear != null &&
-                          isAbove18Years(
-                              selectedYear, selectedMonth, selectedDate)) {
-                        print("btnText " + btnText.toString());
-                        if (btnText == "Send OTP") {
-                          UserRegister();
-                        } else if (btnText == "Verify OTP") {
-                          if (otp == null) {
-                            Fluttertoast.showToast(
-                                msg: "Enter OTP!!",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.CENTER,
-                                textColor: Colors.white,
-                                backgroundColor: buttoncolor,
-                                timeInSecForIosWeb: 1);
-                          } else {
-                            if (otp.length == 6 && btnText == "Submit KYC") {
-                              verifykyc();
-                            }
-                          }
+                  visible: !verifiedSuccess,
+                  child: InkWell(
+                      onTap: () {
+                        if(mobileNumber.text.length==10){
+                          getSignzyUrlApi();
+                        }else{
+                          Fluttertoast.showToast(
+                              msg: "Enter valid Mobile Number!!",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              textColor: Colors.white,
+                              backgroundColor: buttoncolor,
+                              timeInSecForIosWeb: 1);
                         }
-                        setState(() {
-                          dateofbirth = false;
-                        });
-                      } else {
-                        setState(() {
-                          dateofbirth = true;
-                        });
-                      }
-                      // } else {}
-                    },
-                    child: Container(
-                      width: 140,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: buttoncolor,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            btnText,
-                            style: TextStyle(
-                                color: blackcolor,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w500),
-                          )
-                        ],
-                      ),
-                    )),
+
+                        // if (isloading == false) {
+                        // if (formKey.currentState!.validate() &&
+                        //     selectedDate != null &&
+                        //     selectedMonth != null &&
+                        //     selectedYear != null &&
+                        //     isAbove18Years(
+                        //         selectedYear, selectedMonth, selectedDate)) {
+                        //   print("btnText " + btnText.toString());
+                        //   if (btnText == "Send OTP") {
+                        //     UserRegister();
+                        //   } else if (btnText == "Verify OTP") {
+                        //     if (otp == null) {
+                        //       Fluttertoast.showToast(
+                        //           msg: "Enter OTP!!",
+                        //           toastLength: Toast.LENGTH_SHORT,
+                        //           gravity: ToastGravity.CENTER,
+                        //           textColor: Colors.white,
+                        //           backgroundColor: buttoncolor,
+                        //           timeInSecForIosWeb: 1);
+                        //     } else {
+                        //       if (otp.length == 6 && btnText == "Submit KYC") {
+                        //         verifykyc();
+                        //       }
+                        //     }
+                        //   }
+                        //   setState(() {
+                        //     dateofbirth = false;
+                        //   });
+                        // } else {
+                        //   setState(() {
+                        //     dateofbirth = true;
+                        //   });
+                        // }
+                        // // } else {}
+                      },
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: buttoncolor,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        margin: EdgeInsets.only(top:30,left: 70.0,right: 70.0),
+                        padding: const EdgeInsets.all(10),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              btnText,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: blackcolor,
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.w500),
+                            )
+                          ],
+                        ),
+                      )),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  setEnabled(bool value)async{
+   if(await SharedPreference().getKycStatus()=="1"){
+     setState(() {
+       verifiedSuccess=false;
+     });
+   }else{
+     setState(() {
+       verifiedSuccess=true;
+     });
+   }
   }
 
   var _selectedDate;
@@ -1126,6 +1354,83 @@ class _KycScreenState extends State<KycScreen> {
         }),
       ],
     );
+  }
+
+  //get request id
+  getSignzyUrlApi() async {
+    ProgressDialog().showLoaderDialog(context);
+    Dio dio = new Dio();
+
+    var token = await SharedPreference().gettoken();
+    print("tokeneeee "+token);
+    // var parameters = {"mobile": mobile};
+    dio.options.contentType = Headers.formUrlEncodedContentType;
+    final response =
+    await dio.get(ApiProvider.getSignzyUrl,
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+        headers: {"Authorization": "Bearer "+ token},
+      ),);
+
+    print("getSignzyUrl "+response.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = jsonDecode(response.toString());
+      GetSignzyUrlModel getSignzyUrlModel =
+      GetSignzyUrlModel.fromJson(map);
+
+      if (getSignzyUrlModel.status == 1) {
+        ProgressDialog().dismissDialog(context);
+        setState(() {
+          signzyUrl=getSignzyUrlModel.data![0].redirectUrl!;
+        });
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => WebViewScreen(signzyUrl,"Kyc")),
+        ).then((results){
+          if (results != null) {
+            setState(() {
+              if(results.containsKey('status')){
+                status = results['status']!;
+                if(status == "success"){
+                  if(results.containsKey('requestId')){
+                    requestId = results['requestId']!;
+                      verifiedSuccess=true;
+                  }
+                }
+                print("requestId1111 - " + requestId);
+                print("status11111 - " + status);
+              }else{
+                verifiedSuccess=false;
+                Fluttertoast.showToast(
+                    msg: "Verification Failed!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    textColor: Colors.white,
+                    backgroundColor:buttoncolor,
+                    timeInSecForIosWeb: 1);
+              }
+            });
+          }
+        });
+      } else {
+        ProgressDialog().dismissDialog(context);
+        Fluttertoast.showToast(
+            msg: getSignzyUrlModel.message!,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            textColor: Colors.white,
+            backgroundColor:buttoncolor,
+            timeInSecForIosWeb: 1);
+      }
+    } else {
+      ProgressDialog().dismissDialog(context);
+      Fluttertoast.showToast(
+          msg: "Bad Network Connection try again..",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          textColor: Colors.white,
+          backgroundColor: buttoncolor,
+          timeInSecForIosWeb: 1);
+    }
   }
 }
 

@@ -2,6 +2,7 @@
 
 class ApiProvider {
   static const String BASE_URL = "http://13.59.194.102:3003/api/v1/";
+  static const String BASE_URL_MAIL = "https://api.mailslurp.com/";
 
   static const String checkuser = "${BASE_URL}users/checkUser";
 
@@ -39,8 +40,26 @@ class ApiProvider {
 
   static const String updateDND = "${BASE_URL}users/updatePreference";
 
-  static const String messageTemplate = "${BASE_URL}message/Templates";
+  //static const String messageTemplate = "${BASE_URL}message/Templates";
+
+  static const String messageTemplate = "${BASE_URL}sms/tempalte";
+
+  static const String sendMessage = "${BASE_URL}sms/sendSms";
+
+  static const String incomeSms = "${BASE_URL}sms/incomSms";
 
   static const String addsubscrptiondetils =
       "${BASE_URL}subcription/subscriptionbuy";
+
+  static const String getSignzyUrl =
+      "${BASE_URL}signzy/getDigiUrl";
+
+  static const String faceRegApi =
+      "${BASE_URL}signzy/faceReconization";
+
+  static const String uploadPhoto =
+      "${BASE_URL}signzy/newUpload";
+
+  static const String sendMail =
+      "${BASE_URL_MAIL}sendEmail";
 }

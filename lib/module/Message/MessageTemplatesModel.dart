@@ -1,19 +1,21 @@
 class MessageTemplatesModel {
   int? status;
-  List<String>? message;
+  String? message;
   List<MessageTemplatesData>? data;
+  String? error;
 
-  MessageTemplatesModel({this.status, this.message, this.data});
+  MessageTemplatesModel({this.status, this.message, this.data, this.error});
 
   MessageTemplatesModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    message = json['message'].cast<String>();
+    message = json['message'];
     if (json['data'] != null) {
       data = <MessageTemplatesData>[];
       json['data'].forEach((v) {
         data!.add(new MessageTemplatesData.fromJson(v));
       });
     }
+    error = json['error'];
   }
 
   Map<String, dynamic> toJson() {
@@ -23,25 +25,29 @@ class MessageTemplatesModel {
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
+    data['error'] = this.error;
     return data;
   }
 }
 
 class MessageTemplatesData {
-  String? sId;
-  String? cMessage;
+  String? templateId;
+  String? templateName;
+  String? message;
 
-  MessageTemplatesData({this.sId, this.cMessage});
+  MessageTemplatesData({this.templateId, this.templateName, this.message});
 
   MessageTemplatesData.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    cMessage = json['c_Message'];
+    templateId = json['Template_id'];
+    templateName = json['templateName'];
+    message = json['message'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['c_Message'] = this.cMessage;
+    data['Template_id'] = this.templateId;
+    data['templateName'] = this.templateName;
+    data['message'] = this.message;
     return data;
   }
 }

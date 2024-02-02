@@ -576,7 +576,7 @@ class _PlanSelectionState extends State<PlanSelection> {
             }
           }
         };
-
+        print('reqJsonreqJson '+reqJson.toString());
         wlCheckoutFlutter.on(WeiplCheckoutFlutter.wlResponse, handleResponse);
         wlCheckoutFlutter.open(reqJson);
       } else {
@@ -615,6 +615,7 @@ class _PlanSelectionState extends State<PlanSelection> {
     if (dateList[1].toString() == " success") {
       updatePaymentDetails(dateList[3], dateList[5]);
     } else {
+      wlCheckoutFlutter.clear();
       Navigator.pushReplacement(
           context,
           CupertinoPageRoute(

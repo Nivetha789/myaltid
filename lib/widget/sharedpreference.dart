@@ -170,6 +170,19 @@ class SharedPreference {
     return stringValue;
   }
 
+  setKycStatus(String stringValue) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('kyc_status', stringValue);
+    return true;
+  }
+
+  getKycStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //Return String
+    String? stringValue = prefs.getString('kyc_status');
+    return stringValue;
+  }
+
   clearSharep() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.clear();

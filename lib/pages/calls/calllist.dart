@@ -315,7 +315,7 @@ class _CallistPageState extends State<CallistPage>
 
             Navigator.of(context).push(
               MaterialPageRoute(
-                  builder: (context) => const CalldialpadScreen()),
+                  builder: (context) => CalldialpadScreen("")),
             );
           },
           child: const Icon(
@@ -379,7 +379,8 @@ class _CallistPageState extends State<CallistPage>
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) => const CallingPage()),
+                            builder: (context) => CalldialpadScreen(allCallHistoryDataList[index]
+                                .regNumber!)),
                       );
                     },
                     child: Container(
@@ -450,7 +451,7 @@ class _CallistPageState extends State<CallistPage>
                 children: [
                   Container(
                     child: Image.asset('assets/images/calls_empty.png',
-                        width: 90, height: 90),
+                        width: 80, height: 80),
                   ),
                   Container(
                     alignment: Alignment.center,
@@ -528,57 +529,66 @@ class _CallistPageState extends State<CallistPage>
                   // }
                   // print("datyyyyyyy"+date);
 
-                  return Container(
-                    margin: EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.account_circle,
-                                  color: whitecolor,
-                                  size: 40,
-                                ),
-                                SizedBox(
-                                  // width: MediaQuery.of(context).size.width * 0.4,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(left: 10.0),
-                                    child: Text(
-                                      allCallHistoryDataList[index].regNumber!,
-                                      style: TextStyle(
-                                          color: whitecolor, fontSize: 16),
+                  return InkWell(
+                    onTap: (){
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => CalldialpadScreen(allCallHistoryDataList[index]
+                                .regNumber!)),
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(left: 10.0, right: 10.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.account_circle,
+                                    color: whitecolor,
+                                    size: 40,
+                                  ),
+                                  SizedBox(
+                                    // width: MediaQuery.of(context).size.width * 0.4,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 10.0),
+                                      child: Text(
+                                        allCallHistoryDataList[index].regNumber!,
+                                        style: TextStyle(
+                                            color: whitecolor, fontSize: 16),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  totalDuration,
-                                  style: TextStyle(
-                                      color: whitecolor, fontSize: 13),
-                                ),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                Text(
-                                  currentDate,
-                                  style: TextStyle(
-                                      color: whitecolor, fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Divider(
-                          color: buttoncolor,
-                        )
-                      ],
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    totalDuration,
+                                    style: TextStyle(
+                                        color: whitecolor, fontSize: 13),
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  Text(
+                                    currentDate,
+                                    style: TextStyle(
+                                        color: whitecolor, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Divider(
+                            color: buttoncolor,
+                          )
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -655,57 +665,66 @@ class _CallistPageState extends State<CallistPage>
                   // var day=DateFormat('EEEE').format(dateTime);
                   //
                   // print("dayyyyyy "+day);
-                  return Container(
-                    margin: EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.account_circle,
-                                  color: whitecolor,
-                                  size: 40,
-                                ),
-                                SizedBox(
-                                  // width: MediaQuery.of(context).size.width * 0.4,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(left: 10.0),
-                                    child: Text(
-                                      allCallHistoryDataList[index].regNumber!,
-                                      style: TextStyle(
-                                          color: whitecolor, fontSize: 16),
+                  return InkWell(
+                    onTap: (){
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => CalldialpadScreen(allCallHistoryDataList[index]
+                                .regNumber!)),
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(left: 10.0, right: 10.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.account_circle,
+                                    color: whitecolor,
+                                    size: 40,
+                                  ),
+                                  SizedBox(
+                                    // width: MediaQuery.of(context).size.width * 0.4,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 10.0),
+                                      child: Text(
+                                        allCallHistoryDataList[index].regNumber!,
+                                        style: TextStyle(
+                                            color: whitecolor, fontSize: 16),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  totalDuration,
-                                  style: TextStyle(
-                                      color: whitecolor, fontSize: 13),
-                                ),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                Text(
-                                  currentDate,
-                                  style: TextStyle(
-                                      color: whitecolor, fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Divider(
-                          color: buttoncolor,
-                        )
-                      ],
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    totalDuration,
+                                    style: TextStyle(
+                                        color: whitecolor, fontSize: 13),
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  Text(
+                                    currentDate,
+                                    style: TextStyle(
+                                        color: whitecolor, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Divider(
+                            color: buttoncolor,
+                          )
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -754,7 +773,7 @@ class _CallistPageState extends State<CallistPage>
 
     var token = await SharedPreference().gettoken();
     var parameters = {"n_Offset": offset, "n_Limit": limit, "c_Type": type};
-    // print("dashParam: " + parameters.toString());
+    print("dashParam: " + parameters.toString());
     dio.options.contentType = Headers.formUrlEncodedContentType;
     final response = await dio.post(ApiProvider.allCalls,
         options:

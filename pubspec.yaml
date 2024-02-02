@@ -40,7 +40,6 @@ dependencies:
   cool_nav: ^0.1.0
   percent_indicator: ^4.2.3
   flutter_dialpad: ^1.0.5
-  http: ^1.0.0
   dio: ^5.1.2
   awesome_snackbar_content:
   get_storage: ^2.1.1
@@ -51,12 +50,19 @@ dependencies:
   connectivity: ^3.0.6
   fluttertoast: ^8.0.8
   webview_flutter: ^2.3.0
-  weipl_checkout_flutter: ^1.0.0
+  weipl_checkout_flutter: ^1.0.2
   eventify: ^1.0.1
   flutter_phone_direct_caller: ^2.1.1
   lottie: ^1.2.2
   intl: ^0.17.0
   local_auth: ^1.1.10
+  mailslurp: ^15.17.22
+  uuid: ^4.2.1
+  flutter_callkit_incoming: ^2.0.0+2
+  face_camera: ^0.0.8
+  image_picker: ^1.0.5
+  permission_handler:
+  path:
 
 
 dev_dependencies:

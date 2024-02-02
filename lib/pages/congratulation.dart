@@ -524,6 +524,43 @@ class CongratulationsState extends State<Congratulations> {
       debugPrint("pavithra123 ${response1.data}");
 
       if (response.statusCode == 401) {
+        var dialog = AlertDialog(
+          title: Text('Login',
+              style: TextStyle(
+                  color: buttoncolor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16)),
+          content: Text('Session was expired kindly login again',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15)),
+          actions: [
+            ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                  ),
+                  backgroundColor: MaterialStateProperty.all(buttoncolor),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await SharedPreference().clearSharep().then((v) {
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (BuildContext context) => Signup()));
+                  });
+                },
+                child: Text(
+                  '  OK  ',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16),
+                ))
+          ],
+        );
+        showDialog(context: context, builder: (BuildContext context) => dialog);
       } else if (response.statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.toString());
         debugPrint("response ${map}");

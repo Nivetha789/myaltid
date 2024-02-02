@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mailslurp/api.dart';
 import 'package:myaltid/pages/mail/editmail.dart';
 
 import '../../reasuable/dialogbox.dart';
@@ -44,10 +47,31 @@ class _MaillistPageState extends State<MaillistPage>
   late TabController _tabController =
       TabController(vsync: this, length: myTabs.length);
 
+  var waitForController = WaitForControllerApi();
+  var inboxController = InboxControllerApi();
+
+  String userEmail="";
+
   @override
   void initState() {
-    super.initState();
+    defaultApiClient.addDefaultHeader("x-api-key", "860844a88b9eef42a61eb7aeaa1a90b210cf42927a9ca1e37b47d6860c798204");
     _tabController = TabController(vsync: this, length: myTabs.length);
+    setValue();
+
+    super.initState();
+  }
+
+  setValue() async{
+    var inbox = await inboxController.createInboxWithOptions(CreateInboxDto());
+    if(await SharedPreference().getUserEmail()!=null) {
+      userEmail = await SharedPreference().getUserEmail();
+    }else{
+      userEmail="";
+    }
+    for(int i=0; i<inbox!.id.length; i++) {
+      var email = await waitForController.waitForLatestEmail(inboxId: inbox.id, timeout: 30000, unreadOnly: true);
+      print("receivedmsg " +email!.subject!+"Test email");
+    }
   }
 
   @override
@@ -55,6 +79,8 @@ class _MaillistPageState extends State<MaillistPage>
     _tabController.dispose();
     super.dispose();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +91,7 @@ class _MaillistPageState extends State<MaillistPage>
           backgroundColor: Colors.transparent,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-            const  Column(
+            children: [Column(
                 children:  [
                   Text(
                     "MyAltId Emails",
@@ -80,7 +105,7 @@ class _MaillistPageState extends State<MaillistPage>
                     textAlign: TextAlign.start,
                   ),
                   Text(
-                    "jhon.doe@myaltid.com",
+                    userEmail,
                     style: TextStyle(
                         fontFamily: "Helvatica",
                         color: whitecolor,
@@ -235,7 +260,35 @@ class _MaillistPageState extends State<MaillistPage>
   }
 
   Widget allCallList() {
-    return ListView.builder(
+    return Container(
+      margin: EdgeInsets.only(bottom: 50.0),
+      child: Container(
+          height: MediaQuery.of(context).size.height / 1.5,
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  child: Icon(Icons.mail_outlined, size: 50,color: buttoncolor,),
+                ),
+
+                Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(top: 15.0),
+                  child: Text(
+                    "Your Inbox tab is empty..",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: "Helvetica",
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white),
+                  ),
+                ),
+              ])),
+    );
+
+      /*ListView.builder(
       itemCount: 10,
       shrinkWrap: true,
       itemBuilder: (BuildContext context, int index) {
@@ -315,11 +368,38 @@ class _MaillistPageState extends State<MaillistPage>
           ),
         );
       },
-    );
+    );*/
   }
 
   Widget incomingCallList() {
-    return ListView.builder(
+    return Container(
+      margin: EdgeInsets.only(bottom: 50.0),
+      child: Container(
+          height: MediaQuery.of(context).size.height / 1.5,
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  child: Icon(Icons.mail_outlined, size: 50,color: buttoncolor,),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(top: 15.0),
+                  child: Text(
+                    "No Drafts Found!!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: "Helvetica",
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white),
+                  ),
+                ),
+              ])),
+    );
+
+      /*ListView.builder(
       itemCount: 10,
       shrinkWrap: true,
       itemBuilder: (BuildContext context, int index) {
@@ -400,138 +480,36 @@ class _MaillistPageState extends State<MaillistPage>
           ),
         );
       },
-    );
-  }
-
-  Widget outgoingCallList() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 80,
-              height: 30,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                color: const Color(0xffFFF4E0),
-              ),
-              child: const Center(child: Text('To')),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Container(
-              width: 80,
-              height: 30,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                color: const Color(0xffFFF4E0),
-              ),
-              child: const Center(child: Text('Attachment')),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Container(
-              width: 50,
-              height: 30,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                color: const Color(0xffFFF4E0),
-              ),
-              child: const Center(child: Text('Date')),
-            ),
-          ],
-        ),
-        ListView.builder(
-          itemCount: 10,
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) {
-            return InkWell(
-              onTap: () {
-                // Navigator.of(context).push(
-                //   MaterialPageRoute(builder: (context) => const CallingPage()),
-                // );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xffFFF4E0),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const SizedBox(
-                            height: 40,
-                            width: 40,
-                            child: Center(
-                              child: Text(
-                                "A",
-                                style: TextStyle(
-                                    color: blackcolor,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Airtel",
-                                style:
-                                    TextStyle(color: whitecolor, fontSize: 16),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                "Airtel Packing your bags for inter....",
-                                overflow: TextOverflow.ellipsis,
-                                style:
-                                    TextStyle(color: whitecolor, fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              "32 Min",
-                              style: TextStyle(color: whitecolor, fontSize: 13),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const Divider(
-                      color: buttoncolor,
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
+    );*/
   }
 
   Widget trashList() {
-    return Column(
+    return Container(
+        height: MediaQuery.of(context).size.height / 1.5,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                child: Icon(Icons.mail_outlined, size: 50,color: buttoncolor,),
+              ),
+              Container(
+                alignment: Alignment.center,
+                margin: EdgeInsets.only(top: 15.0),
+                child: Text(
+                  "No Trashes Found!!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: "Helvetica",
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white),
+                ),
+              ),
+            ])
+    );
+
+      /*Column(
       children: [
         const Text(
           'This bin will be cleared every 45 days. ',
@@ -624,6 +602,159 @@ class _MaillistPageState extends State<MaillistPage>
           },
         ),
       ],
+    );*/
+  }
+  Widget outgoingCallList() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 50.0),
+      child: Container(
+          height: MediaQuery.of(context).size.height / 1.5,
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  child: Icon(Icons.mail_outlined, size: 50,color: buttoncolor,),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(top: 15.0),
+                  child: Text(
+                    "Sent items not Found!!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: "Helvetica",
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white),
+                  ),
+                ),
+              ])),
     );
+
+    /*Column(
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 80,
+              height: 30,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: const Color(0xffFFF4E0),
+              ),
+              child: const Center(child: Text('To')),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Container(
+              width: 80,
+              height: 30,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: const Color(0xffFFF4E0),
+              ),
+              child: const Center(child: Text('Attachment')),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Container(
+              width: 50,
+              height: 30,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: const Color(0xffFFF4E0),
+              ),
+              child: const Center(child: Text('Date')),
+            ),
+          ],
+        ),
+        ListView.builder(
+          itemCount: 10,
+          shrinkWrap: true,
+          itemBuilder: (BuildContext context, int index) {
+            return InkWell(
+              onTap: () {
+                // Navigator.of(context).push(
+                //   MaterialPageRoute(builder: (context) => const CallingPage()),
+                // );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 40,
+                          decoration: const BoxDecoration(
+                            color: Color(0xffFFF4E0),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const SizedBox(
+                            height: 40,
+                            width: 40,
+                            child: Center(
+                              child: Text(
+                                "A",
+                                style: TextStyle(
+                                    color: blackcolor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child: const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Airtel",
+                                style:
+                                TextStyle(color: whitecolor, fontSize: 16),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                "Airtel Packing your bags for inter....",
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                TextStyle(color: whitecolor, fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              "32 Min",
+                              style: TextStyle(color: whitecolor, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const Divider(
+                      color: buttoncolor,
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );*/
   }
 }
