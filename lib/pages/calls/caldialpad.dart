@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:myaltid/pages/calls/calling.dart';
+import 'package:myaltid/pages/calls/calllist.dart';
+import 'package:myaltid/utils/ProgressDialogCall.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/api.dart';
 import '../../reasuable/numpad.dart';
@@ -30,6 +35,8 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> with WidgetsBindi
   late final Uuid _uuid;
   String? _currentUuid;
 
+  String virtualNum="";
+
 
   @override
   void initState() {
@@ -38,8 +45,13 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> with WidgetsBindi
     } else {
       _myController.text = "";
     }
+    getValue();
     WidgetsBinding.instance.addObserver(this);
     super.initState();
+  }
+
+  getValue() async{
+   virtualNum= await SharedPreference().getUserMobile();
   }
 
   Future<dynamic> getCurrentCall() async {
@@ -295,7 +307,17 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> with WidgetsBindi
     if (response.statusCode == 200) {
       if (response.data["status"] == 1) {
         ProgressDialog().dismissDialog(context);
-        _callNumber(number);
+        showLoaderDialog(context);
+        Future.delayed(Duration(seconds: 30), () async {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CallistPage(),
+            ),
+          );
+
+          // Navigator.pop(context);
+          // Navigator.pop(context);
+        });
       } else {
         ProgressDialog().dismissDialog(context);
         Fluttertoast.showToast(
@@ -355,5 +377,46 @@ class _CalldialpadScreenState extends State<CalldialpadScreen> with WidgetsBindi
     // //Check call when open app from terminated
     // checkAndNavigationCallingPage();
     // print("obdbdbbdb");
+  }
+
+  showLoaderDialog(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      titlePadding: EdgeInsets.only(left: 50.0, right: 20.0),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20.0))),
+      content: Container(
+        decoration: new BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
+        ),
+        height: MediaQuery.of(context).size.height / 5,
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              color: buttoncolor,
+            ),
+            Container(
+                margin: EdgeInsets.only(top: 20.0, left: 5),
+                child: Text(
+                  "You will get a call from your VMN $virtualNum. Please pick the call to continue your conversation with the dialled number. Receiver will see your VMN in CLI. Charges will apply on your VMN and RMN as per your plan",
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black,
+                      fontFamily: "Helvetica",
+                      fontWeight: FontWeight.w500),
+                )),
+          ],
+        ),
+      ),
+    );
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }

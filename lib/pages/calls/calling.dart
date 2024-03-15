@@ -69,7 +69,7 @@ class _CallingPageState extends State<CallingPage>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children:  [
                   Text(
-                    "John",
+                    "Nivetha",
                     style: TextStyle(
                       fontSize: 32.0,
                       fontWeight: FontWeight.w400,
@@ -132,7 +132,7 @@ class _CallingPageState extends State<CallingPage>
                     ],
                   ),
                   const SizedBox(
-                    height: 30,
+                    height: 200,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,

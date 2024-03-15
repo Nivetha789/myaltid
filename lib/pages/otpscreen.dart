@@ -508,6 +508,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
       if (response.statusCode == 401) {
       } else if (response.statusCode == 200) {
         if (response.data["status"] == 1) {
+          await SharedPreference().setphonenumber(widget.phonenumber!);
           if (response.data["data"][0]["c_Name"].toString().isNotEmpty) {
             await SharedPreference()
                 .setuserName(response.data["data"][0]["c_Name"].toString());
@@ -771,6 +772,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
         startTimeout();
         currentSeconds = 0;
         textEditingController.text = response.data["data"][0].toString();
+        await SharedPreference().setphonenumber(widget.phonenumber!);
         final snackBar = SnackBar(
           elevation: 0,
           behavior: SnackBarBehavior.floating,

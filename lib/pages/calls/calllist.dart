@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:myaltid/pages/activeuserhome.dart';
 import 'package:myaltid/pages/calls/caldialpad.dart';
 import 'package:myaltid/pages/calls/calling.dart';
 
@@ -175,156 +177,175 @@ class _CallistPageState extends State<CallistPage>
     });
   }
 
+  Future<bool> _onWillPop() async {
+    print("on will pop");
+    if (_tabController.index == 0) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (context) => const ActiveUserHome()),
+      );
+    }
+    Future.delayed(Duration(milliseconds: 200), () {
+      print("set index");
+      _tabController.index = 0;
+    });
+    print("return");
+    return _tabController.index == 0;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Backgroundscreen(
-      ccontainerchild: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Backgroundscreen(
+        ccontainerchild: Scaffold(
           backgroundColor: Colors.transparent,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Calls",
-                style: TextStyle(
-                    fontFamily: "Helvatica",
-                    color: whitecolor,
-                    fontWeight: FontWeight.w600,
-                    fontStyle: FontStyle.normal,
-                    // fontStyle: FontStyle.italic,
-                    fontSize: 20),
-                textAlign: TextAlign.start,
-              ),
-              Container(
-                alignment: Alignment.bottomRight,
-                child: ClipOval(
-                  child: Material(
-                    color: blackcolor, // Button color
-                    child: InkWell(
-                      splashColor: Colors.red, // Splash color
-                      onTap: () async{
-                        if (await SharedPreference().getLogin()!=null || await SharedPreference().getLogin() == "1") {
-                        Dialogbox(context);
-                        } else {
-                        Fluttertoast.showToast(
-                        msg: "Complete your stages to use this feature!",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.CENTER,
-                        textColor: Colors.white,
-                        backgroundColor: buttoncolor,
-                        timeInSecForIosWeb: 1);
-                        }
-                      },
-                      child: const SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: Icon(
-                          Icons.person,
-                          color: buttoncolor,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Calls",
+                  style: TextStyle(
+                      fontFamily: "Helvatica",
+                      color: whitecolor,
+                      fontWeight: FontWeight.w600,
+                      fontStyle: FontStyle.normal,
+                      // fontStyle: FontStyle.italic,
+                      fontSize: 20),
+                  textAlign: TextAlign.start,
+                ),
+                Container(
+                  alignment: Alignment.bottomRight,
+                  child: ClipOval(
+                    child: Material(
+                      color: blackcolor, // Button color
+                      child: InkWell(
+                        splashColor: Colors.red, // Splash color
+                        onTap: () async{
+                          if (await SharedPreference().getLogin()!=null || await SharedPreference().getLogin() == "1") {
+                          Dialogbox(context);
+                          } else {
+                          Fluttertoast.showToast(
+                          msg: "Complete your stages to use this feature!",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.CENTER,
+                          textColor: Colors.white,
+                          backgroundColor: buttoncolor,
+                          timeInSecForIosWeb: 1);
+                          }
+                        },
+                        child: const SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: Icon(
+                            Icons.person,
+                            color: buttoncolor,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            bottom: TabBar(
+              controller: _tabController,
+              tabs: myTabs,
+              unselectedLabelColor: whitecolor,
+              indicatorColor: goldcolor,
+              labelColor: goldcolor,
+              isScrollable: true,
+            ),
+            leading: const Icon(Icons.call, color: Colors.transparent),
           ),
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: myTabs,
-            unselectedLabelColor: whitecolor,
-            indicatorColor: goldcolor,
-            labelColor: goldcolor,
-            isScrollable: true,
-          ),
-          leading: const Icon(Icons.call, color: Colors.transparent),
-        ),
-        body: Container(
-          child: ListView(
-            children: [
-              Container(
-                alignment: Alignment.centerRight,
-                height: 40,
-                width: MediaQuery.of(context).size.width,
-                color: const Color(0xff1D2C1D),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    CupertinoSwitch(
-                        activeColor: buttoncolor,
-                        thumbColor: whitecolor,
-                        trackColor: goldcolor,
-                        value: forIos,
-                        onChanged: (value) {
-                          setState(() {
-                            forIos = value;
-                            print("foridd " + forIos.toString());
-                            if (forIos) {
-                              dndEnabled = 1;
-                            } else {
-                              dndEnabled = 0;
-                            }
-                          });
-                          check().then((intenet) {
-                            if (intenet != null && intenet) {
-                              dndUpdateApi(dndEnabled);
-                            } else {
-                              Fluttertoast.showToast(
-                                  msg: "Please check your internet connection",
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  textColor: Colors.white,
-                                  backgroundColor: buttoncolor,
-                                  timeInSecForIosWeb: 1);
-                            }
-                          });
-                        }),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 10.0),
-                      child: Text(
-                        forIos ? "DND Enabled":"Enable DND",
-                        style: TextStyle(
-                            color: whitecolor,
-                            fontFamily: "Helvatica",
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.w500),
+          body: Container(
+            child: ListView(
+              children: [
+                Container(
+                  alignment: Alignment.centerRight,
+                  height: 40,
+                  width: MediaQuery.of(context).size.width,
+                  color: const Color(0xff1D2C1D),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CupertinoSwitch(
+                          activeColor: buttoncolor,
+                          thumbColor: whitecolor,
+                          trackColor: goldcolor,
+                          value: forIos,
+                          onChanged: (value) {
+                            setState(() {
+                              forIos = value;
+                              print("foridd " + forIos.toString());
+                              if (forIos) {
+                                dndEnabled = 1;
+                              } else {
+                                dndEnabled = 0;
+                              }
+                            });
+                            check().then((intenet) {
+                              if (intenet != null && intenet) {
+                                dndUpdateApi(dndEnabled);
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg: "Please check your internet connection",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    textColor: Colors.white,
+                                    backgroundColor: buttoncolor,
+                                    timeInSecForIosWeb: 1);
+                              }
+                            });
+                          }),
+                      const SizedBox(
+                        width: 5,
                       ),
-                    )
-                  ],
+                      Container(
+                        margin: EdgeInsets.only(right: 10.0),
+                        child: Text(
+                          forIos ? "DND Enabled":"Enable DND",
+                          style: TextStyle(
+                              color: whitecolor,
+                              fontFamily: "Helvatica",
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Container(
-                child: callWidgets(selectedTabPosition),
-              ),
-            ],
+                const SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  child: callWidgets(selectedTabPosition),
+                ),
+              ],
+            ),
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: buttoncolor,
-          onPressed: () {
-            setState(() {
-              // i++;
-            });
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: buttoncolor,
+            onPressed: () {
+              setState(() {
+                // i++;
+              });
 
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (context) => CalldialpadScreen("")),
-            );
-          },
-          child: const Icon(
-            Icons.wifi_calling_sharp,
-            color: blackcolor,
-            size: 30,
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context) => CalldialpadScreen("")),
+              );
+            },
+            child: const Icon(
+              Icons.wifi_calling_sharp,
+              color: blackcolor,
+              size: 30,
+            ),
           ),
+          bottomNavigationBar: const MyStatefulWidget(currentindex: 2),
         ),
-        bottomNavigationBar: const MyStatefulWidget(currentindex: 2),
       ),
     );
   }

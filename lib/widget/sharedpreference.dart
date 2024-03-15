@@ -183,6 +183,19 @@ class SharedPreference {
     return stringValue;
   }
 
+  setSenderId(String stringValue) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('sender_id', stringValue);
+    return true;
+  }
+
+  getSenderId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //Return String
+    String? stringValue = prefs.getString('sender_id');
+    return stringValue;
+  }
+
   clearSharep() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.clear();

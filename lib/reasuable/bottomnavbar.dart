@@ -90,7 +90,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
               setState(() {
                 currentIndex = 1;
               });
-              Navigator.of(context).push(
+              Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                     builder: (context) => const MessagelistPage()),
               );
@@ -126,7 +126,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
                 currentIndex = 2;
                 _updateIndex(currentIndex);
               });
-              Navigator.of(context).push(
+              Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => const CallistPage()),
               );
             },

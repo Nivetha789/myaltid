@@ -46,6 +46,9 @@ class ApiProvider {
 
   static const String sendMessage = "${BASE_URL}sms/sendSms";
 
+  static const String updateReadStatus =
+      "${BASE_URL}sms/smsRead";
+
   static const String incomeSms = "${BASE_URL}sms/incomSms";
 
   static const String addsubscrptiondetils =
@@ -60,6 +63,19 @@ class ApiProvider {
   static const String uploadPhoto =
       "${BASE_URL}signzy/newUpload";
 
+  static const String createMail =
+      "${BASE_URL_MAIL}inboxes";
+
   static const String sendMail =
       "${BASE_URL_MAIL}sendEmail";
+
+  static const String getInboxMail =
+      "${BASE_URL_MAIL}emails";
+
+  static const String getSentMail =
+      "${BASE_URL_MAIL}sent";
+
+  //get sent msg content
+  static const String getSentContentMail =
+      "${BASE_URL_MAIL}/sent";
 }

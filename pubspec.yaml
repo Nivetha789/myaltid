@@ -63,6 +63,7 @@ dependencies:
   image_picker: ^1.0.5
   permission_handler:
   path:
+  flutter_widget_from_html_core: ^0.9.0+2
 
 
 dev_dependencies:
